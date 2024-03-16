@@ -21,18 +21,18 @@ public class Introduction {
     private String email;
 
     @Column(nullable = false)
-    private String introduction;
+    private String selfIntroduction;
 
     public static Introduction fromDTO(IntroductionDTO introductionDTO) {
         return Introduction.builder()
                 .name(introductionDTO.getName())
                 .email(introductionDTO.getEmail())
-                .introduction(introductionDTO.getIntroduction())
+                .selfIntroduction(introductionDTO.getSelfIntroduction())
                 .build();
     }
 
     public void updateFromDTO(IntroductionDTO introductionDTO) {
         this.name = introductionDTO.getName();
-        this.introduction = introductionDTO.getIntroduction();
+        this.selfIntroduction = introductionDTO.getSelfIntroduction();
     }
 }

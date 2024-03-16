@@ -15,5 +15,5 @@ public class IntroductionDTO {
     private String email;
 
     @Schema(description = "자기소개", example = "안녕하세요. 저는 최민우입니다.")
-    private String introduction;
+    private String selfIntroduction;
 }
