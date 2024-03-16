@@ -6,4 +6,5 @@ import skhu.jijijig.domain.model.Introduction;
 
 @Repository
 public interface IntroductionRepository extends JpaRepository<Introduction, Long> {
+    boolean existsByEmail(String email);
 }

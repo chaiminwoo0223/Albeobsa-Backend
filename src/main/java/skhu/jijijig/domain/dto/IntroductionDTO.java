@@ -5,7 +5,6 @@ import lombok.*;
 
 @Builder
 @Getter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class IntroductionDTO {
