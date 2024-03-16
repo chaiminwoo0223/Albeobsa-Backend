@@ -15,11 +15,13 @@ public class IntroductionService {
     }
 
     @Transactional
-    public Introduction saveIntroduction(IntroductionDTO introductionDTO) {
-        if (introductionRepository.existsByEmail(introductionDTO.getEmail())) {
-            throw new IllegalArgumentException("이메일이 이미 존재합니다: " + introductionDTO.getEmail());
-        }
-        Introduction introduction = Introduction.fromDTO(introductionDTO);
+    public Introduction createOrUpdateIntroduction(IntroductionDTO introductionDTO) {
+        Introduction introduction = introductionRepository.findByEmail(introductionDTO.getEmail())
+                .map(existingIntroduction -> {
+                    existingIntroduction.updateFromDTO(introductionDTO);
+                    return existingIntroduction;
+                })
+                .orElseGet(() -> Introduction.fromDTO(introductionDTO));
         return introductionRepository.save(introduction);
     }
 }
