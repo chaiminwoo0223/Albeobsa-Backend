@@ -27,7 +27,7 @@ import skhu.jijijig.service.IntroductionService;
 public class IntroductionController {
     private final IntroductionService introductionService;
 
-    @Operation(summary = "자기소개서 등록/수정", description = "사용자가 제출하기를 클릭하면 이 메소드가 호출됩니다.")
+    @Operation(summary = "자기소개서 등록/수정", description = "사용자가 제출하기를 클릭하면 이 메소드가 호출된다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "자기소개서 등록/수정 성공", content = @Content(schema = @Schema(implementation = Introduction.class))),
             @ApiResponse(responseCode = "409", description = "이메일이 이미 사용 중", content = @Content),
