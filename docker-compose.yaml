@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: chaiminwoo0223/jijijig:latest
+    container_name: spring-boot-app
+    environment:
+      DB_JDBC_URL: ${DB_JDBC_URL}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8080:8080"
+    restart: on-failure
+    networks:
+      - jijijig-network
+
+networks:
+  jijijig-network:
+    driver: bridge
