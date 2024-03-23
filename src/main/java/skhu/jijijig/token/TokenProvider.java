@@ -1,9 +1,9 @@
 package skhu.jijijig.token;
 
-import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletRequest;
+import skhu.jijijig.domain.dto.TokenDTO;
+import skhu.jijijig.domain.model.Member;
+import skhu.jijijig.service.TokenBlackListService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -11,9 +11,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import skhu.jijijig.domain.dto.TokenDTO;
-import skhu.jijijig.domain.model.Member;
-import skhu.jijijig.service.TokenBlackListService;
+import jakarta.servlet.http.HttpServletRequest;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 
 import java.security.Key;
 import java.util.Arrays;
@@ -40,26 +40,17 @@ public class TokenProvider {
     }
 
     public TokenDTO createToken(Member member) {
-        long nowTime = (new Date()).getTime();
-        Date accessTokenExpiredTime = new Date(nowTime + accessTokenValidityTime);
-        Date refreshTokenExpiredTime = new Date(nowTime + refreshTokenValidityTime);
-        String accessToken = buildToken(member.getId().toString(), member.getRole().name(), accessTokenExpiredTime);
-        String refreshToken = buildToken(member.getId().toString(), member.getRole().name(), refreshTokenExpiredTime);
+        Date now = new Date();
+        Date accessTokenExpiration = new Date(now.getTime() + accessTokenValidityTime);
+        Date refreshTokenExpiration = new Date(now.getTime() + refreshTokenValidityTime);
+        String accessToken = createJwtToken(member.getId().toString(), member.getRole().name(), accessTokenExpiration);
+        String refreshToken = createJwtToken(member.getId().toString(), member.getRole().name(), refreshTokenExpiration);
         return TokenDTO.of(accessToken, refreshToken);
-    }
-
-    private String buildToken(String subject, String authClaim, Date expiration) {
-        return Jwts.builder()
-                .setSubject(subject)
-                .claim("auth", authClaim)
-                .setExpiration(expiration)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
     }
 
     public String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
         return null;
@@ -75,15 +66,12 @@ public class TokenProvider {
                     .build()
                     .parseClaimsJws(token);
             return true;
-        } catch (UnsupportedJwtException | ExpiredJwtException | IllegalArgumentException | SecurityException e) {
+        } catch (JwtException e) {
             return false;
         }
     }
 
     public TokenDTO renewToken(String expiredToken) {
-        if (!validateToken(expiredToken)) {
-            throw new RuntimeException("유효하지 않거나 만료된 리프레시 토큰입니다.");
-        }
         Claims claims = parseClaims(expiredToken);
         String subject = claims.getSubject();
         return createTokenForSubject(subject);
@@ -91,21 +79,28 @@ public class TokenProvider {
 
     public Authentication getAuthentication(String accessToken) {
         Claims claims = parseClaims(accessToken);
-        if (claims.get("auth") == null) {
-            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
-        }
-        Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("auth").toString().split(","))
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        Collection<? extends GrantedAuthority> authorities =
+                Arrays.stream(claims.get("auth").toString().split(","))
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
         return new UsernamePasswordAuthenticationToken(claims.getSubject(), "", authorities);
     }
 
-    private Claims parseClaims(String accessToken) {
+    private String createJwtToken(String subject, String authClaim, Date expiration) {
+        return Jwts.builder()
+                .setSubject(subject)
+                .claim("auth", authClaim)
+                .setExpiration(expiration)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    private Claims parseClaims(String token) {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
-                    .parseClaimsJws(accessToken)
+                    .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
             return e.getClaims();
@@ -113,16 +108,10 @@ public class TokenProvider {
     }
 
     private TokenDTO createTokenForSubject(String subject) {
-        long now = (new Date()).getTime();
-        Date expiryDate = new Date(now + this.accessTokenValidityTime);
-        String accessToken = Jwts.builder()
-                .setSubject(subject)
-                .setIssuedAt(new Date())
-                .setExpiration(expiryDate)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-        return TokenDTO.builder()
-                .accessToken(accessToken)
-                .build();
+        Date now = new Date();
+        Date accessTokenExpiration = new Date(now.getTime() + accessTokenValidityTime);
+        String accessToken = createJwtToken(subject, "ACCESS", accessTokenExpiration);
+        return TokenDTO.of(accessToken, null);
     }
+
 }
