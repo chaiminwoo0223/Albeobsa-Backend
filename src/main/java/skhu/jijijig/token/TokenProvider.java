@@ -1,6 +1,7 @@
 package skhu.jijijig.token;
 
 import io.jsonwebtoken.io.Decoders;
+import lombok.extern.slf4j.Slf4j;
 import skhu.jijijig.domain.dto.TokenDTO;
 import skhu.jijijig.domain.model.Member;
 import skhu.jijijig.service.TokenBlackListService;
@@ -22,6 +23,7 @@ import java.util.Date;
 import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 public class TokenProvider {
     private final Key key;
     private final long accessTokenValidityTime;
@@ -39,13 +41,23 @@ public class TokenProvider {
         this.tokenBlackListService = tokenBlackListService;
     }
 
-    public TokenDTO createToken(Member member) {
+    public TokenDTO createTokens(Member member) {
         Date now = new Date();
         Date accessTokenExpiration = new Date(now.getTime() + accessTokenValidityTime);
         Date refreshTokenExpiration = new Date(now.getTime() + refreshTokenValidityTime);
         String accessToken = createJwtToken(member.getId().toString(), member.getRole().name(), accessTokenExpiration);
         String refreshToken = createJwtToken(member.getId().toString(), member.getRole().name(), refreshTokenExpiration);
         return TokenDTO.of(accessToken, refreshToken);
+    }
+
+    public TokenDTO renewToken(String refreshToken) {
+        if (!validateToken(refreshToken)) {
+            log.error("리프레시 토큰 검증 실패");
+            throw new SecurityException("리프레시 토큰이 유효하지 않습니다.");
+        }
+        Claims claims = parseJwtToken(refreshToken);
+        String subject = claims.getSubject();
+        return createTokenForSubject(subject);
     }
 
     public String resolveToken(HttpServletRequest request) {
@@ -59,31 +71,28 @@ public class TokenProvider {
     public boolean validateToken(String token) {
         try {
             if (tokenBlackListService.isBlackListed(token)) {
-                throw new SecurityException("블랙리스트에 포함된 토큰입니다.");
+                throw new SecurityException("토큰이 블랙리스트에 포함되었습니다.");
             }
-            Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);
+            parseJwtToken(token);
             return true;
         } catch (JwtException e) {
+            log.error("토큰 검증 실패: {}", e.getMessage());
             return false;
         }
     }
 
-    public TokenDTO renewToken(String expiredToken) {
-        Claims claims = parseClaims(expiredToken);
-        String subject = claims.getSubject();
-        return createTokenForSubject(subject);
-    }
-
     public Authentication getAuthentication(String accessToken) {
-        Claims claims = parseClaims(accessToken);
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get("auth").toString().split(","))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
-        return new UsernamePasswordAuthenticationToken(claims.getSubject(), "", authorities);
+        try {
+            Claims claims = parseJwtToken(accessToken);
+            Collection<? extends GrantedAuthority> authorities =
+                    Arrays.stream(claims.get("auth").toString().split(","))
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList());
+            return new UsernamePasswordAuthenticationToken(claims.getSubject(), "", authorities);
+        } catch (Exception e) {
+            log.error("인증 정보 가져오기 실패: {}", e.getMessage());
+            return null;
+        }
     }
 
     private String createJwtToken(String subject, String authClaim, Date expiration) {
@@ -95,7 +104,7 @@ public class TokenProvider {
                 .compact();
     }
 
-    private Claims parseClaims(String token) {
+    private Claims parseJwtToken(String token) {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(key)
@@ -103,7 +112,11 @@ public class TokenProvider {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
-            return e.getClaims();
+            log.error("토큰 만료: {}", e.getMessage());
+            throw e;
+        } catch (JwtException e) {
+            log.error("토큰 파싱 실패: {}", e.getMessage());
+            throw e;
         }
     }
 
@@ -111,6 +124,6 @@ public class TokenProvider {
         Date now = new Date();
         Date accessTokenExpiration = new Date(now.getTime() + accessTokenValidityTime);
         String accessToken = createJwtToken(subject, "ACCESS", accessTokenExpiration);
-        return TokenDTO.of(accessToken, null);
+        return TokenDTO.of(accessToken, "");
     }
 }

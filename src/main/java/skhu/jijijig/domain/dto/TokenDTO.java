@@ -9,7 +9,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 public class TokenDTO {
-    @Schema(description = "토큰 발급 방식")
+    @Schema(description = "토큰 타입")
     private String grantType;
 
     @Schema(description = "액세스 토큰")
