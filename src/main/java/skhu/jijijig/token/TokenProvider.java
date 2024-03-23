@@ -113,5 +113,4 @@ public class TokenProvider {
         String accessToken = createJwtToken(subject, "ACCESS", accessTokenExpiration);
         return TokenDTO.of(accessToken, null);
     }
-
 }
