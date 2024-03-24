@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import skhu.jijijig.domain.dto.MemberDTO;
 import skhu.jijijig.domain.dto.TokenDTO;
 import skhu.jijijig.domain.model.Member;
-import skhu.jijijig.domain.model.Role;
 import skhu.jijijig.domain.repository.MemberRepository;
 import skhu.jijijig.token.TokenProvider;
 
@@ -23,7 +22,7 @@ public class MemberService {
         if (memberRepository.existsByEmail(memberDTO.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
-        Member member = createMember(memberDTO);
+        Member member = Member.fromDTO(memberDTO);
         memberRepository.save(member);
         return new MemberDTO(member.getName(), member.getEmail(), member.getPicture());
     }
@@ -33,7 +32,7 @@ public class MemberService {
             FirebaseToken decodedToken = firebaseAuth.verifyIdToken(firebaseToken);
             String email = decodedToken.getEmail();
             Member member = memberRepository.findByEmail(email)
-                    .orElseGet(() -> registerNewMember(decodedToken));
+                    .orElseGet(() -> Member.fromToken(decodedToken));
             return tokenProvider.createTokens(member);
         } catch (FirebaseAuthException e) {
             throw new RuntimeException("Firebase 인증 실패: " + e.getMessage());
@@ -45,25 +44,5 @@ public class MemberService {
             throw new RuntimeException("리프레시 토큰이 유효하지 않습니다.");
         }
         return tokenProvider.renewToken(refreshToken);
-    }
-
-    private Member createMember(MemberDTO memberDTO) {
-        return Member.builder()
-                .name(memberDTO.getName())
-                .email(memberDTO.getEmail())
-                .picture(memberDTO.getPicture())
-                .role(Role.USER)
-                .firebaseAuth(true)
-                .build();
-    }
-
-    private Member registerNewMember(FirebaseToken firebaseToken) {
-        return Member.builder()
-                .name(firebaseToken.getName())
-                .email(firebaseToken.getEmail())
-                .picture(firebaseToken.getPicture())
-                .role(Role.USER)
-                .firebaseAuth(true)
-                .build();
     }
 }

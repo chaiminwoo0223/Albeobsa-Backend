@@ -5,3 +5,4 @@ public class EmailAlreadyExistsException extends RuntimeException {
         super("이메일이 이미 사용 중입니다: " + email);
     }
 }
+

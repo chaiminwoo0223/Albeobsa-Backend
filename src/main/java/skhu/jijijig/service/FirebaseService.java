@@ -14,7 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import skhu.jijijig.domain.dto.TokenDTO;
 import skhu.jijijig.domain.model.Member;
-import skhu.jijijig.domain.model.Role;
 import skhu.jijijig.domain.repository.MemberRepository;
 import skhu.jijijig.exception.FirebaseAuthenticationException;
 import skhu.jijijig.token.TokenProvider;
@@ -41,16 +40,10 @@ public class FirebaseService {
 
     private Member getOrCreateMember(FirebaseToken decodedToken) {
         return memberRepository.findByEmail(decodedToken.getEmail())
-                .orElseGet(() -> registerNewMember(decodedToken));
-    }
-
-    private Member registerNewMember(FirebaseToken firebaseToken) {
-        return memberRepository.save(Member.builder()
-                .name(firebaseToken.getName())
-                .email(firebaseToken.getEmail())
-                .role(Role.USER)
-                .firebaseAuth(true)
-                .build());
+                .orElseGet(() -> {
+                    Member newMember = Member.fromToken(decodedToken);
+                    return memberRepository.save(newMember);
+                });
     }
 
     private void authenticateMember(Member member, HttpServletResponse response) {
