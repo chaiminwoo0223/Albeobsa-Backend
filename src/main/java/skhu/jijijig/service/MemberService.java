@@ -19,13 +19,13 @@ public class MemberService {
     private final TokenProvider tokenProvider;
     private final FirebaseAuth firebaseAuth;
 
-    public MemberDTO signup(MemberDTO memberDTO) {
+    public MemberDTO join(MemberDTO memberDTO) {
         if (memberRepository.existsByEmail(memberDTO.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
         Member member = createMember(memberDTO);
         memberRepository.save(member);
-        return new MemberDTO(member.getName(), member.getEmail(), null, member.getPicture());
+        return new MemberDTO(member.getName(), member.getEmail(), member.getPicture());
     }
 
     public TokenDTO login(String firebaseToken) {
@@ -51,6 +51,7 @@ public class MemberService {
         return Member.builder()
                 .name(memberDTO.getName())
                 .email(memberDTO.getEmail())
+                .picture(memberDTO.getPicture())
                 .role(Role.USER)
                 .firebaseAuth(true)
                 .build();
@@ -58,8 +59,9 @@ public class MemberService {
 
     private Member registerNewMember(FirebaseToken firebaseToken) {
         return Member.builder()
-                .email(firebaseToken.getEmail())
                 .name(firebaseToken.getName())
+                .email(firebaseToken.getEmail())
+                .picture(firebaseToken.getPicture())
                 .role(Role.USER)
                 .firebaseAuth(true)
                 .build();

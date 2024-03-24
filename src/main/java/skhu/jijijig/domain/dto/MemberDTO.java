@@ -17,9 +17,6 @@ public class MemberDTO {
     @Schema(description = "이메일")
     private String email;
 
-    @Schema(description = "비밀번호")
-    private String password;
-
     @Schema(description = "사진")
     private String picture;
 }

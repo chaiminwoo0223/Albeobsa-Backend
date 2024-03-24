@@ -32,37 +32,60 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FirebaseTokenFilter extends OncePerRequestFilter {
     private final MemberRepository memberRepository;
-    private final FirebaseAuth firebaseAuth;
     private final TokenProvider tokenProvider;
+    private final FirebaseAuth firebaseAuth;
+
+    private static final String AUTH_HEADER = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final String JOIN_REQUEST_PATH = "/api/member/join";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String header = request.getHeader("Authorization");
+        if (isJoinRequest(request.getRequestURI())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String header = request.getHeader(AUTH_HEADER);
         if (isInvalidHeader(header)) {
             throw new FirebaseAuthenticationException("유효하지 않은 Authorization 헤더입니다.", HttpStatus.UNAUTHORIZED);
         }
+
         try {
-            String firebaseToken = header.substring(7);
+            String firebaseToken = extractToken(header);
             FirebaseToken decodedToken = firebaseAuth.verifyIdToken(firebaseToken);
             Member member = getOrCreateMember(decodedToken);
             authenticateUser(member, response);
         } catch (FirebaseAuthException e) {
-            HttpStatus status = e.getAuthErrorCode() == AuthErrorCode.EXPIRED_ID_TOKEN ?
-                    HttpStatus.UNAUTHORIZED : HttpStatus.BAD_REQUEST;
-            throw new FirebaseAuthenticationException("Firebase 인증 오류: " + e.getMessage(), status);
+            handleAuthException(e);
         }
         filterChain.doFilter(request, response);
     }
 
+    private boolean isJoinRequest(String requestUri) {
+        return requestUri.startsWith(JOIN_REQUEST_PATH);
+    }
+
     private boolean isInvalidHeader(String header) {
-        return header == null || !header.startsWith("Bearer ");
+        return header == null || !header.startsWith(BEARER_PREFIX);
+    }
+
+    private String extractToken(String header) {
+        return header.substring(BEARER_PREFIX.length());
+    }
+
+    private void handleAuthException(FirebaseAuthException e) {
+        HttpStatus status = e.getAuthErrorCode() == AuthErrorCode.EXPIRED_ID_TOKEN ?
+                HttpStatus.UNAUTHORIZED : HttpStatus.BAD_REQUEST;
+        throw new FirebaseAuthenticationException("Firebase 인증 오류: " + e.getMessage(), status);
     }
 
     private Member getOrCreateMember(FirebaseToken decodedToken) {
         String email = decodedToken.getEmail();
-        return memberRepository.findByEmail(email).orElseGet(() -> registerNewMember(decodedToken));
+        return memberRepository.findByEmail(email)
+                .orElseGet(() -> registerNewMember(decodedToken));
     }
 
     private Member registerNewMember(FirebaseToken firebaseToken) {
@@ -79,7 +102,7 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(member.getRole().name()));
         Authentication authentication = new UsernamePasswordAuthenticationToken(member.getEmail(), null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        TokenDTO tokens = tokenProvider.createTokens(member);
-        response.addHeader("Authorization", "Bearer " + tokens.getAccessToken());
+        TokenDTO tokenDTO = tokenProvider.createTokens(member);
+        response.addHeader("Authorization", "Bearer " + tokenDTO.getAccessToken());
     }
 }
