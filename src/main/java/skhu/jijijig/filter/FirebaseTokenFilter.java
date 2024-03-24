@@ -1,6 +1,5 @@
 package skhu.jijijig.filter;
 
-import com.google.firebase.auth.AuthErrorCode;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
@@ -27,6 +26,7 @@ import skhu.jijijig.token.TokenProvider;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -35,70 +35,62 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;
     private final FirebaseAuth firebaseAuth;
 
-    private static final String AUTH_HEADER = "Authorization";
-    private static final String BEARER_PREFIX = "Bearer ";
-    private static final String JOIN_REQUEST_PATH = "/api/member/join";
+    // 인증이 필요하지 않은 URL 목록
+    private static final List<String> EXCLUDE_URLS = Arrays.asList(
+            "/api/introduction",
+            "/api/member/join",
+            "/api/member/login",
+            "/api/member/logout",
+            "/api/member/refresh",
+            "/v3/api-docs/**",
+            "/swagger-ui/**"
+    );
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        if (isJoinRequest(request.getRequestURI())) {
+        String path = request.getRequestURI();
+        if (EXCLUDE_URLS.stream().anyMatch(excludePath -> path.matches(excludePath.replace("/**", ".*")))) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String header = request.getHeader(AUTH_HEADER);
+        String header = request.getHeader("Authorization");
         if (isInvalidHeader(header)) {
-            throw new FirebaseAuthenticationException("유효하지 않은 Authorization 헤더입니다.", HttpStatus.UNAUTHORIZED);
+            throw new FirebaseAuthenticationException("Authorization 헤더가 없거나 Bearer 토큰이 포함되지 않았습니다.", HttpStatus.UNAUTHORIZED);
         }
 
         try {
-            String firebaseToken = extractToken(header);
+            String firebaseToken = header.substring(7);
             FirebaseToken decodedToken = firebaseAuth.verifyIdToken(firebaseToken);
             Member member = getOrCreateMember(decodedToken);
-            authenticateUser(member, response);
+            authenticateMember(member, response);
         } catch (FirebaseAuthException e) {
-            handleAuthException(e);
+            throw new FirebaseAuthenticationException("Firebase 인증 오류: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
         filterChain.doFilter(request, response);
     }
 
-    private boolean isJoinRequest(String requestUri) {
-        return requestUri.startsWith(JOIN_REQUEST_PATH);
-    }
-
     private boolean isInvalidHeader(String header) {
-        return header == null || !header.startsWith(BEARER_PREFIX);
-    }
-
-    private String extractToken(String header) {
-        return header.substring(BEARER_PREFIX.length());
-    }
-
-    private void handleAuthException(FirebaseAuthException e) {
-        HttpStatus status = e.getAuthErrorCode() == AuthErrorCode.EXPIRED_ID_TOKEN ?
-                HttpStatus.UNAUTHORIZED : HttpStatus.BAD_REQUEST;
-        throw new FirebaseAuthenticationException("Firebase 인증 오류: " + e.getMessage(), status);
+        return header == null || !header.startsWith("Bearer ");
     }
 
     private Member getOrCreateMember(FirebaseToken decodedToken) {
-        String email = decodedToken.getEmail();
-        return memberRepository.findByEmail(email)
+        return memberRepository.findByEmail(decodedToken.getEmail())
                 .orElseGet(() -> registerNewMember(decodedToken));
     }
 
     private Member registerNewMember(FirebaseToken firebaseToken) {
-        Member newMember = Member.builder()
+        return memberRepository.save(Member.builder()
                 .email(firebaseToken.getEmail())
                 .name(firebaseToken.getName())
                 .role(Role.USER)
                 .firebaseAuth(true)
-                .build();
-        return memberRepository.save(newMember);
+                .build());
     }
 
-    private void authenticateUser(Member member, HttpServletResponse response) {
+    private void authenticateMember(Member member, HttpServletResponse response) {
         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(member.getRole().name()));
         Authentication authentication = new UsernamePasswordAuthenticationToken(member.getEmail(), null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);

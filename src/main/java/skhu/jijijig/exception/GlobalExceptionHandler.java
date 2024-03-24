@@ -3,22 +3,16 @@ package skhu.jijijig.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import skhu.jijijig.domain.dto.ErrorResponseDTO;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler({AuthenticationException.class, FirebaseAuthenticationException.class})
-    public ResponseEntity<ErrorResponseDTO> handleAuthenticationErrors(Exception e) {
-        HttpStatus status = HttpStatus.UNAUTHORIZED;
-        String message = "인증 실패: " + e.getMessage();
-        if (e instanceof FirebaseAuthenticationException) {
-            status = ((FirebaseAuthenticationException) e).getStatus();
-        }
-        ErrorResponseDTO errorResponse = new ErrorResponseDTO(message, status.value());
-        return new ResponseEntity<>(errorResponse, status);
+    @ExceptionHandler(FirebaseAuthenticationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleFirebaseAuthenticationException(FirebaseAuthenticationException e) {
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage(), e.getStatus().value());
+        return new ResponseEntity<>(errorResponse, e.getStatus());
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
