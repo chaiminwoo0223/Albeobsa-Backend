@@ -21,9 +21,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidTokenException(InvalidTokenException e) {
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage(), HttpStatus.UNAUTHORIZED.value());
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponseDTO> handleAccessDeniedException(AccessDeniedException e) {
-        ErrorResponseDTO errorResponse = new ErrorResponseDTO("접근 권한이 없습니다: " + e.getMessage(), HttpStatus.FORBIDDEN.value());
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO("접근 권한 없음: " + e.getMessage(), HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 

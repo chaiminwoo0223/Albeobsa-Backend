@@ -24,9 +24,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FirebaseService {
-    private final FirebaseAuth firebaseAuth;
     private final MemberRepository memberRepository;
     private final TokenProvider tokenProvider;
+    private final FirebaseAuth firebaseAuth;
 
     public void authenticateWithFirebaseToken(String firebaseToken, HttpServletResponse response) {
         try {
@@ -41,8 +41,8 @@ public class FirebaseService {
     private Member getOrCreateMember(FirebaseToken decodedToken) {
         return memberRepository.findByEmail(decodedToken.getEmail())
                 .orElseGet(() -> {
-                    Member newMember = Member.fromToken(decodedToken);
-                    return memberRepository.save(newMember);
+                    Member member = Member.fromToken(decodedToken);
+                    return memberRepository.save(member);
                 });
     }
 
@@ -50,7 +50,7 @@ public class FirebaseService {
         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(member.getRole().name()));
         Authentication authentication = new UsernamePasswordAuthenticationToken(member.getEmail(), null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        TokenDTO tokenDTO = tokenProvider.createTokens(member);
-        response.addHeader("Authorization", "Bearer " + tokenDTO.getAccessToken());
+        TokenDTO tokens = tokenProvider.createTokens(member);
+        response.addHeader("Authorization", "Bearer " + tokens.getAccessToken());
     }
 }

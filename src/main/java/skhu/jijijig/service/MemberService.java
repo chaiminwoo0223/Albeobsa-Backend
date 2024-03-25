@@ -15,6 +15,7 @@ import skhu.jijijig.token.TokenProvider;
 @Service
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final TokenBlackListService tokenBlackListService;
     private final TokenProvider tokenProvider;
     private final FirebaseAuth firebaseAuth;
 
@@ -44,5 +45,10 @@ public class MemberService {
             throw new RuntimeException("리프레시 토큰이 유효하지 않습니다.");
         }
         return tokenProvider.renewToken(refreshToken);
+    }
+
+    public void logout(String accessToken, String refreshToken) {
+        tokenBlackListService.addToBlackList(accessToken);
+        tokenBlackListService.addToBlackList(refreshToken);
     }
 }

@@ -45,11 +45,11 @@ public class TokenProvider {
         return TokenDTO.of(accessToken, refreshToken);
     }
 
-    public TokenDTO renewToken(String oldRefreshToken) {
-        if (!validateToken(oldRefreshToken)) {
+    public TokenDTO renewToken(String refreshToken) {
+        if (!validateToken(refreshToken)) {
             throw new SecurityException("리프레시 토큰이 유효하지 않습니다.");
         }
-        Claims claims = parseJwtToken(oldRefreshToken);
+        Claims claims = parseJwtToken(refreshToken);
         String newAccessToken = createToken(claims.getSubject(), "ACCESS", accessTokenValidityTime);
         String newRefreshToken = createToken(claims.getSubject(), "REFRESH", refreshTokenValidityTime);
         return TokenDTO.of(newAccessToken, newRefreshToken);
@@ -64,19 +64,22 @@ public class TokenProvider {
     }
 
     public boolean validateToken(String token) {
-        if (tokenBlackListService.isBlackListed(token)) {
-            throw new SecurityException("토큰이 블랙리스트에 포함되었습니다.");
+        try {
+            if (tokenBlackListService.isBlackListed(token)) {
+                throw new SecurityException("토큰이 블랙리스트에 포함되었습니다.");
+            }
+            parseJwtToken(token);
+            return true;
+        } catch (SecurityException | JwtException | IllegalArgumentException e) {
+            return false;
         }
-        parseJwtToken(token);
-        return true;
     }
 
     public Authentication getAuthentication(String accessToken) {
         Claims claims = parseJwtToken(accessToken);
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get("auth").toString().split(","))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
+        Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("auth").toString().split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
         return new UsernamePasswordAuthenticationToken(claims.getSubject(), "", authorities);
     }
 
