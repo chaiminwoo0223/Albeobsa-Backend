@@ -9,9 +9,15 @@ services:
       DB_JDBC_URL: ${DB_JDBC_URL}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      FIREBASE_KEY: ${FIREBASE_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      ACCESS_SECOND: ${ACCESS_SECOND}
+      REFRESH_SECOND: ${REFRESH_SECOND}
     ports:
       - "8080:8080"
     restart: on-failure
+    volumes:
+      - ./firebase:/app/firebase  # 볼륨 마운트 추가
     networks:
       - jijijig-network
 
