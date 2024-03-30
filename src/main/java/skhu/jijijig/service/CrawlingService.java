@@ -16,6 +16,7 @@ import skhu.jijijig.domain.repository.CrawlingRepository;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -67,7 +68,7 @@ public class CrawlingService {
                     wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
                     String category = driver.findElement(By.cssSelector(".view_cate")).getText();
                     String likeCnt = driver.findElement(By.cssSelector(".top_vote_item")).getText();
-                    CrawlingDTO crawlingDTO = CrawlingDTO.of(title, category, name, createdDate, link, image, view, commentCnt, likeCnt, soldOut);
+                    CrawlingDTO crawlingDTO = CrawlingDTO.of(title, category, name, createdDate, link, image, view, commentCnt, likeCnt, null, soldOut);
                     saveCrawlingData(crawlingDTO);
                     driver.navigate().back();
                     wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
@@ -107,7 +108,7 @@ public class CrawlingService {
                     wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
                     String category = driver.findElement(By.cssSelector(".view_cate")).getText();
                     String likeCnt = driver.findElement(By.cssSelector(".top_vote_item")).getText();
-                    CrawlingDTO crawlingDTO = CrawlingDTO.of(title, category, name, createdDate, link, image, view, commentCnt, likeCnt, soldOut);
+                    CrawlingDTO crawlingDTO = CrawlingDTO.of(title, category, name, createdDate, link, image, view, commentCnt, likeCnt, null, soldOut);
                     saveCrawlingData(crawlingDTO);
                     driver.navigate().back();
                     wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
@@ -123,5 +124,12 @@ public class CrawlingService {
     private void saveCrawlingData(CrawlingDTO crawlingDTO) {
         Crawling crawling = Crawling.fromDTO(crawlingDTO);
         crawlingRepository.save(crawling);
+    }
+
+    public List<CrawlingDTO> getAllCrawledData() {
+        List<Crawling> crawledData = crawlingRepository.findAll();
+        return crawledData.stream()
+                .map(CrawlingDTO::of)
+                .collect(Collectors.toList());
     }
 }

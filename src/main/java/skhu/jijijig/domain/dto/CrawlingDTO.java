@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import skhu.jijijig.domain.model.Crawling;
 
 @Builder
 @Getter
@@ -44,7 +45,7 @@ public class CrawlingDTO {
     @Schema(description = "딜 종료 여부", example = "종료")
     private String soldOut;
 
-    public static CrawlingDTO of(String title, String category, String name, String createdDate, String link, String image, String view, String commentCnt, String likeCnt, String soldOut) {
+    public static CrawlingDTO of(String title, String category, String name, String createdDate, String link, String image, String view, String commentCnt, String likeCnt, String dislikeCnt, String soldOut) {
         return CrawlingDTO.builder()
                 .title(title)
                 .category(category)
@@ -55,7 +56,24 @@ public class CrawlingDTO {
                 .view(view)
                 .commentCnt(commentCnt)
                 .likeCnt(likeCnt)
+                .dislikeCnt(dislikeCnt)
                 .soldOut(soldOut)
+                .build();
+    }
+
+    public static CrawlingDTO of(Crawling crawling) {
+        return CrawlingDTO.builder()
+                .title(crawling.getTitle())
+                .category(crawling.getCategory())
+                .name(crawling.getName())
+                .createdDate(crawling.getCreatedDate())
+                .link(crawling.getLink())
+                .image(crawling.getImage())
+                .view(crawling.getView())
+                .commentCnt(crawling.getCommentCnt())
+                .likeCnt(crawling.getLikeCnt())
+                .dislikeCnt(crawling.getDislikeCnt())
+                .soldOut(crawling.getSoldOut())
                 .build();
     }
 }
