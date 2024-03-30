@@ -30,17 +30,32 @@ public class CrawlingDTO {
     private String image;
 
     @Schema(description = "조회수", example = "10")
-    private Integer view;
+    private String view;
 
     @Schema(description = "댓글수", example = "10")
-    private Integer commentCnt;
+    private String commentCnt;
 
     @Schema(description = "추천수", example = "10")
-    private Integer likeCnt;
+    private String likeCnt;
 
     @Schema(description = "비추천수", example = "0")
-    private Integer dislikeCnt;
+    private String dislikeCnt;
 
     @Schema(description = "딜 종료 여부", example = "종료")
     private String soldOut;
+
+    public static CrawlingDTO of(String title, String category, String name, String createdDate, String link, String image, String view, String commentCnt, String likeCnt, String soldOut) {
+        return CrawlingDTO.builder()
+                .title(title)
+                .category(category)
+                .name(name)
+                .createdDate(createdDate)
+                .link(link)
+                .image(image)
+                .view(view)
+                .commentCnt(commentCnt)
+                .likeCnt(likeCnt)
+                .soldOut(soldOut)
+                .build();
+    }
 }

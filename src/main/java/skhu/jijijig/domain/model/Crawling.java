@@ -2,6 +2,7 @@ package skhu.jijijig.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import skhu.jijijig.domain.dto.CrawlingDTO;
 
 @Entity
 @Builder
@@ -32,17 +33,33 @@ public class Crawling {
     private String image;
 
     @Column(nullable = false)
-    private Integer view;
+    private String view;
 
     @Column(nullable = false)
-    private Integer commentCnt;
+    private String commentCnt;
 
     @Column(nullable = true)
-    private Integer likeCnt;
+    private String likeCnt;
 
     @Column(nullable = true)
-    private Integer dislikeCnt;
+    private String dislikeCnt;
 
     @Column(nullable = true)
     private String soldOut;
+
+    public static Crawling fromDTO(CrawlingDTO dto) {
+        return Crawling.builder()
+                .title(dto.getTitle())
+                .category(dto.getCategory())
+                .name(dto.getName())
+                .createdDate(dto.getCreatedDate())
+                .link(dto.getLink())
+                .image(dto.getImage())
+                .view(dto.getView())
+                .commentCnt(dto.getCommentCnt())
+                .likeCnt(dto.getLikeCnt())
+                .dislikeCnt(dto.getDislikeCnt())
+                .soldOut(dto.getSoldOut())
+                .build();
+    }
 }
