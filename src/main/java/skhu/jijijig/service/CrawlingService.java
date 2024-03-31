@@ -35,9 +35,20 @@ public class CrawlingService {
         try {
             crawlPpomppuDomestic(driver, wait);
             crawlPpomppuOverseas(driver, wait);
+            crawlClien(driver, wait);
+            crawlRuliweb(driver, wait);
+            crawlCoolenjoy(driver, wait);
+            crawlQuasarzone(driver, wait);
         } finally {
             driver.quit();
         }
+    }
+
+    public List<CrawlingDTO> getAllCrawledData() {
+        List<Crawling> crawledData = crawlingRepository.findAll();
+        return crawledData.stream()
+                .map(CrawlingDTO::of)
+                .collect(Collectors.toList());
     }
 
     // 뽐뿌(국내게시판)
@@ -120,16 +131,49 @@ public class CrawlingService {
         }
     }
 
+    // 클리앙(알뜰구매 게시판)
+    private void crawlClien(WebDriver driver, WebDriverWait wait) {
+        driver.get("https://www.clien.net/service/board/jirum");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".board-list")));
+        List<WebElement> posts = driver.findElements(By.cssSelector(".board-list .qb-list__title"));
+        for (WebElement post : posts) {
+
+        }
+    }
+
+    // 루리웹(예판 핫딜 뽐뿌 게시판)
+    private void crawlRuliweb(WebDriver driver, WebDriverWait wait) {
+        driver.get("https://bbs.ruliweb.com/news/board/1020");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".board-list")));
+        List<WebElement> posts = driver.findElements(By.cssSelector(".board-list .qb-list__title"));
+        for (WebElement post : posts) {
+
+        }
+    }
+
+    // 쿨엔조이(지름/알뜰정보 페이지)
+    private void crawlCoolenjoy(WebDriver driver, WebDriverWait wait) {
+        driver.get("https://coolenjoy.net/bbs/jirum");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".board-list")));
+        List<WebElement> posts = driver.findElements(By.cssSelector(".board-list .qb-list__title"));
+        for (WebElement post : posts) {
+
+        }
+    }
+
+    // 퀘사이존(핫딜게시판)
+    private void crawlQuasarzone(WebDriver driver, WebDriverWait wait) {
+        driver.get("https://quasarzone.com/bbs/qb_saleinfo");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".board-list")));
+        List<WebElement> posts = driver.findElements(By.cssSelector(".board-list .qb-list__title"));
+        for (WebElement post : posts) {
+
+        }
+    }
+
     // 크롤링 데이터 저장
     private void saveCrawlingData(CrawlingDTO crawlingDTO) {
         Crawling crawling = Crawling.fromDTO(crawlingDTO);
         crawlingRepository.save(crawling);
-    }
-
-    public List<CrawlingDTO> getAllCrawledData() {
-        List<Crawling> crawledData = crawlingRepository.findAll();
-        return crawledData.stream()
-                .map(CrawlingDTO::of)
-                .collect(Collectors.toList());
     }
 }
