@@ -23,25 +23,24 @@ public class CrawlingService {
     @Value("${CHROME_DRIVER}")
     private String chromedriver;
 
-    public String crawlNaverBodyContent() {
+    private WebDriver createWebDriver() {
         System.setProperty("webdriver.chrome.driver", chromedriver);
         ChromeOptions options = new ChromeOptions().addArguments("--headless", "--disable-gpu", "user-agent=Mozilla/5.0...");
-        WebDriver driver = new ChromeDriver(options);
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        try {
-            driver.get("https://www.naver.com");
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
-            WebElement body = driver.findElement(By.tagName("body"));
-            return body.getText();
-        } finally {
-            driver.quit();
-        }
+        return new ChromeDriver(options);
     }
 
+    public String crawlNaverBodyContent() {
+        WebDriver driver = createWebDriver();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        driver.get("https://www.naver.com");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+        WebElement body = driver.findElement(By.tagName("body"));
+        return body.getText();
+    }
+    
     public void saveNaverBodyContent() {
-        Crawling crawling = Crawling.builder()
-                .text(crawlNaverBodyContent())
-                .build();
+        String bodyContent = crawlNaverBodyContent();
+        Crawling crawling = Crawling.builder().text(bodyContent).build();
         crawlingRepository.save(crawling);
     }
 }
