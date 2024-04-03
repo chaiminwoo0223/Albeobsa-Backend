@@ -8,172 +8,40 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import skhu.jijijig.domain.dto.CrawlingDTO;
 import skhu.jijijig.domain.model.Crawling;
 import skhu.jijijig.domain.repository.CrawlingRepository;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class CrawlingService {
     private final CrawlingRepository crawlingRepository;
 
-    @Scheduled(fixedRate = 3600000)
-    public void crawlSites() {
-        System.setProperty("webdriver.chrome.driver", "./driver/chromedriver");
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless");
-        options.addArguments("--disable-gpu");
-        options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3");
+    @Value("${CHROME_DRIVER}")
+    private String chromedriver;
+
+    public String crawlNaverBodyContent() {
+        System.setProperty("webdriver.chrome.driver", chromedriver);
+        ChromeOptions options = new ChromeOptions().addArguments("--headless", "--disable-gpu", "user-agent=Mozilla/5.0...");
         WebDriver driver = new ChromeDriver(options);
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10)); // 최대 10초까지 대기
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         try {
-            crawlPpomppuDomestic(driver, wait);
-            crawlPpomppuOverseas(driver, wait);
-            crawlClien(driver, wait);
-            crawlRuliweb(driver, wait);
-            crawlCoolenjoy(driver, wait);
-            crawlQuasarzone(driver, wait);
+            driver.get("https://www.naver.com");
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+            WebElement body = driver.findElement(By.tagName("body"));
+            return body.getText();
         } finally {
             driver.quit();
         }
     }
 
-    public List<CrawlingDTO> getAllCrawledData() {
-        List<Crawling> crawledData = crawlingRepository.findAll();
-        return crawledData.stream()
-                .map(CrawlingDTO::of)
-                .collect(Collectors.toList());
-    }
-
-    // 뽐뿌(국내게시판)
-    private void crawlPpomppuDomestic(WebDriver driver, WebDriverWait wait) {
-        driver.get("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
-        String[] classNames = {"common-list0", "common-list1", "list0", "list1"};
-        for (String className : classNames) {
-            List<WebElement> posts = driver.findElements(By.className(className));
-            for (WebElement post : posts) {
-                String name = post.findElement(By.cssSelector(".list_name")).getText();
-                String title = post.findElement(By.cssSelector(".list_title")).getText();
-                String commentCnt = post.findElement(By.cssSelector(".list_comment2")).getText();
-                String createdDate = post.findElement(By.cssSelector(".eng.list_vspace")).getAttribute("title");
-                List<WebElement> views = driver.findElements(By.cssSelector(".eng.list_vspace"));
-                WebElement lastViewElement = views.get(views.size() - 1);
-                String view = lastViewElement.getText();
-                String image = post.findElement(By.cssSelector(".thumb_border")).getAttribute("src");
-                String soldOut = "진행중";
-                List<WebElement> endIcons = driver.findElements(By.cssSelector("img[src='https://www.ppomppu.co.kr/zboard/skin/DQ_Revolution_BBS_New1/end_icon.PNG']"));
-                if (!endIcons.isEmpty()) {
-                    soldOut = "종료";
-                }
-                try {
-                    WebElement linkElement = post.findElement(By.tagName("a"));
-                    String link = linkElement.getAttribute("href");
-                    driver.get(link); // 상세 페이지로 이동
-                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
-                    String category = driver.findElement(By.cssSelector(".view_cate")).getText();
-                    String likeCnt = driver.findElement(By.cssSelector(".top_vote_item")).getText();
-                    CrawlingDTO crawlingDTO = CrawlingDTO.of(title, category, name, createdDate, link, image, view, commentCnt, likeCnt, null, soldOut);
-                    saveCrawlingData(crawlingDTO);
-                    driver.navigate().back();
-                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
-                } catch (Exception e) {
-                    System.out.println("상세 페이지에서 정보 추출 중 오류 발생: " + e.getMessage());
-                    driver.navigate().back();
-                }
-            }
-        }
-    }
-
-    // 뽐뿌(해외게시판)
-    private void crawlPpomppuOverseas(WebDriver driver, WebDriverWait wait) {
-        driver.get("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
-        String[] classNames = {"common-list0", "common-list1", "list0", "list1"};
-        for (String className : classNames) {
-            List<WebElement> posts = driver.findElements(By.className(className));
-            for (WebElement post : posts) {
-                String name = post.findElement(By.cssSelector(".list_name")).getText();
-                String title = post.findElement(By.cssSelector(".list_title")).getText();
-                String commentCnt = post.findElement(By.cssSelector(".list_comment2")).getText();
-                String createdDate = post.findElement(By.cssSelector(".eng.list_vspace")).getAttribute("title");
-                List<WebElement> views = driver.findElements(By.cssSelector(".eng.list_vspace"));
-                WebElement lastViewElement = views.get(views.size() - 1);
-                String view = lastViewElement.getText();
-                String image = post.findElement(By.cssSelector(".thumb_border")).getAttribute("src");
-                String soldOut = "진행중";
-                List<WebElement> endIcons = driver.findElements(By.cssSelector("img[src='https://www.ppomppu.co.kr/zboard/skin/DQ_Revolution_BBS_New1/end_icon.PNG']"));
-                if (!endIcons.isEmpty()) {
-                    soldOut = "종료";
-                }
-                try {
-                    WebElement linkElement = post.findElement(By.tagName("a"));
-                    String link = linkElement.getAttribute("href");
-                    driver.get(link); // 상세 페이지로 이동
-                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
-                    String category = driver.findElement(By.cssSelector(".view_cate")).getText();
-                    String likeCnt = driver.findElement(By.cssSelector(".top_vote_item")).getText();
-                    CrawlingDTO crawlingDTO = CrawlingDTO.of(title, category, name, createdDate, link, image, view, commentCnt, likeCnt, null, soldOut);
-                    saveCrawlingData(crawlingDTO);
-                    driver.navigate().back();
-                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
-                } catch (Exception e) {
-                    System.out.println("상세 페이지에서 정보 추출 중 오류 발생: " + e.getMessage());
-                    driver.navigate().back();
-                }
-            }
-        }
-    }
-
-    // 클리앙(알뜰구매 게시판)
-    private void crawlClien(WebDriver driver, WebDriverWait wait) {
-        driver.get("https://www.clien.net/service/board/jirum");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".board-list")));
-        List<WebElement> posts = driver.findElements(By.cssSelector(".board-list .qb-list__title"));
-        for (WebElement post : posts) {
-
-        }
-    }
-
-    // 루리웹(예판 핫딜 뽐뿌 게시판)
-    private void crawlRuliweb(WebDriver driver, WebDriverWait wait) {
-        driver.get("https://bbs.ruliweb.com/news/board/1020");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".board-list")));
-        List<WebElement> posts = driver.findElements(By.cssSelector(".board-list .qb-list__title"));
-        for (WebElement post : posts) {
-
-        }
-    }
-
-    // 쿨엔조이(지름/알뜰정보 페이지)
-    private void crawlCoolenjoy(WebDriver driver, WebDriverWait wait) {
-        driver.get("https://coolenjoy.net/bbs/jirum");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".board-list")));
-        List<WebElement> posts = driver.findElements(By.cssSelector(".board-list .qb-list__title"));
-        for (WebElement post : posts) {
-
-        }
-    }
-
-    // 퀘사이존(핫딜게시판)
-    private void crawlQuasarzone(WebDriver driver, WebDriverWait wait) {
-        driver.get("https://quasarzone.com/bbs/qb_saleinfo");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".board-list")));
-        List<WebElement> posts = driver.findElements(By.cssSelector(".board-list .qb-list__title"));
-        for (WebElement post : posts) {
-
-        }
-    }
-
-    // 크롤링 데이터 저장
-    private void saveCrawlingData(CrawlingDTO crawlingDTO) {
-        Crawling crawling = Crawling.fromDTO(crawlingDTO);
+    public void saveNaverBodyContent() {
+        Crawling crawling = Crawling.builder()
+                .text(crawlNaverBodyContent())
+                .build();
         crawlingRepository.save(crawling);
     }
 }
