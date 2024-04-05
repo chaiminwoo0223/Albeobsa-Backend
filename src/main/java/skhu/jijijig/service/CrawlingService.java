@@ -52,4 +52,52 @@ public class CrawlingService {
         Crawling crawling = Crawling.builder().text(bodyContent).build(); // 크롤링된 내용을 데이터베이스에 저장
         crawlingRepository.save(crawling);
     }
+
+    // 클리앙(알뜰구매 게시판)
+    public void crawlClien() {
+        WebDriver driver = createWebDriver();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        driver.get("https://www.clien.net/service/board/jirum");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+        WebElement body = driver.findElement(By.tagName("body"));
+        String bodyContent = body.getText();
+        Crawling crawling = Crawling.builder().text(bodyContent).build(); // 크롤링된 내용을 데이터베이스에 저장
+        crawlingRepository.save(crawling);
+    }
+
+    // 루리웹(예판 핫딜 뽐뿌 게시판)
+    public void crawlRuliweb() {
+        WebDriver driver = createWebDriver();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        driver.get("https://bbs.ruliweb.com/news/board/1020");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+        WebElement body = driver.findElement(By.tagName("body"));
+        String bodyContent = body.getText();
+        Crawling crawling = Crawling.builder().text(bodyContent).build(); // 크롤링된 내용을 데이터베이스에 저장
+        crawlingRepository.save(crawling);
+    }
+
+    // 쿨엔조이(지름/알뜰정보 페이지)
+    public void crawlCoolenjoy() {
+        WebDriver driver = createWebDriver();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        driver.get("https://coolenjoy.net/bbs/jirum");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+        WebElement body = driver.findElement(By.tagName("body"));
+        String bodyContent = body.getText();
+        Crawling crawling = Crawling.builder().text(bodyContent).build(); // 크롤링된 내용을 데이터베이스에 저장
+        crawlingRepository.save(crawling);
+    }
+
+    // 퀘사이존(핫딜게시판)
+    public void crawlQuasarzone() {
+        WebDriver driver = createWebDriver();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        driver.get("https://quasarzone.com/bbs/qb_saleinfo");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+        WebElement body = driver.findElement(By.tagName("body"));
+        String bodyContent = body.getText();
+        Crawling crawling = Crawling.builder().text(bodyContent).build(); // 크롤링된 내용을 데이터베이스에 저장
+        crawlingRepository.save(crawling);
+    }
 }

@@ -26,4 +26,28 @@ public class CrawlingController {
         crawlingService.crawlPpomppuOverseas();
         return ResponseEntity.ok("뿜뿌 해외게시판 body 내용이 성공적으로 저장되었습니다.");
     }
+
+    @GetMapping("/crawling/clien")
+    public ResponseEntity<String> crawledClien() {
+        crawlingService.crawlClien();
+        return ResponseEntity.ok("클리앙 body 내용이 성공적으로 저장되었습니다.");
+    }
+
+    @GetMapping("/crawling/ruliweb")
+    public ResponseEntity<String> crawledRuliweb() {
+        crawlingService.crawlRuliweb();
+        return ResponseEntity.ok("루리웹 body 내용이 성공적으로 저장되었습니다.");
+    }
+
+    @GetMapping("/crawling/coolenjoy")
+    public ResponseEntity<String> crawledCoolenjoy() {
+        crawlingService.crawlCoolenjoy();
+        return ResponseEntity.ok("쿨엔조이 body 내용이 성공적으로 저장되었습니다.");
+    }
+
+    @GetMapping("/crawling/quasarzone")
+    public ResponseEntity<String> crawledQuasarzone() {
+        crawlingService.crawlQuasarzone();
+        return ResponseEntity.ok("퀘사이존 body 내용이 성공적으로 저장되었습니다.");
+    }
 }
