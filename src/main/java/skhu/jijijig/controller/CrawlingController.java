@@ -15,6 +15,17 @@ import skhu.jijijig.service.CrawlingService;
 public class CrawlingController {
     private final CrawlingService crawlingService;
 
+    @GetMapping("/crawling")
+    public ResponseEntity<String> crawledWebSites() {
+        crawlingService.crawlPpomppuDomestic();
+        crawlingService.crawlPpomppuOverseas();
+        crawlingService.crawlClien();
+        crawlingService.crawlRuliweb();
+        crawlingService.crawlCoolenjoy();
+        crawlingService.crawlQuasarzone();
+        return ResponseEntity.ok("Body 내용이 모두 성공적으로 저장되었습니다.");
+    }
+
     @GetMapping("/crawling/ppomppu")
     public ResponseEntity<String> crawledPpomppu() {
         crawlingService.crawlPpomppuDomestic();
