@@ -23,77 +23,43 @@ public class CrawlingService {
     @Value("${CHROME_DRIVER}")
     private String chromedriver;
 
-    private WebDriver createWebDriver() {
-        System.setProperty("webdriver.chrome.driver", chromedriver);
-        ChromeOptions options = new ChromeOptions().addArguments("--headless", "--disable-gpu", "user-agent=Mozilla/5.0...");
-        return new ChromeDriver(options);
-    }
-
     // 뽐뿌(국내게시판)
     public void crawlPpomppuDomestic() {
-        WebDriver driver = createWebDriver();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        driver.get("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
-        WebElement body = driver.findElement(By.tagName("body"));
-        String bodyContent = body.getText();
-        Crawling crawling = Crawling.builder().text(bodyContent).build(); // 크롤링된 내용을 데이터베이스에 저장
-        crawlingRepository.save(crawling);
+        crawlWebSite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu");
     }
 
     // 뽐뿌(해외게시판)
     public void crawlPpomppuOverseas() {
-        WebDriver driver = createWebDriver();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        driver.get("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
-        WebElement body = driver.findElement(By.tagName("body"));
-        String bodyContent = body.getText();
-        Crawling crawling = Crawling.builder().text(bodyContent).build(); // 크롤링된 내용을 데이터베이스에 저장
-        crawlingRepository.save(crawling);
+        crawlWebSite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4");
     }
 
     // 클리앙(알뜰구매 게시판)
     public void crawlClien() {
-        WebDriver driver = createWebDriver();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        driver.get("https://www.clien.net/service/board/jirum");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
-        WebElement body = driver.findElement(By.tagName("body"));
-        String bodyContent = body.getText();
-        Crawling crawling = Crawling.builder().text(bodyContent).build(); // 크롤링된 내용을 데이터베이스에 저장
-        crawlingRepository.save(crawling);
+        crawlWebSite("https://www.clien.net/service/board/jirum");
     }
 
     // 루리웹(예판 핫딜 뽐뿌 게시판)
     public void crawlRuliweb() {
-        WebDriver driver = createWebDriver();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        driver.get("https://bbs.ruliweb.com/news/board/1020");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
-        WebElement body = driver.findElement(By.tagName("body"));
-        String bodyContent = body.getText();
-        Crawling crawling = Crawling.builder().text(bodyContent).build(); // 크롤링된 내용을 데이터베이스에 저장
-        crawlingRepository.save(crawling);
+        crawlWebSite("https://bbs.ruliweb.com/news/board/1020");
     }
 
     // 쿨엔조이(지름/알뜰정보 페이지)
     public void crawlCoolenjoy() {
-        WebDriver driver = createWebDriver();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        driver.get("https://coolenjoy.net/bbs/jirum");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
-        WebElement body = driver.findElement(By.tagName("body"));
-        String bodyContent = body.getText();
-        Crawling crawling = Crawling.builder().text(bodyContent).build(); // 크롤링된 내용을 데이터베이스에 저장
-        crawlingRepository.save(crawling);
+        crawlWebSite("https://coolenjoy.net/bbs/jirum");
     }
 
     // 퀘사이존(핫딜게시판)
     public void crawlQuasarzone() {
-        WebDriver driver = createWebDriver();
+        crawlWebSite("https://quasarzone.com/bbs/qb_saleinfo");
+    }
+
+    // 범용 크롤링 메소드
+    private void crawlWebSite(String url) {
+        System.setProperty("webdriver.chrome.driver", chromedriver);
+        ChromeOptions options = new ChromeOptions().addArguments("--headless", "--disable-gpu", "user-agent=Mozilla/5.0...");
+        WebDriver driver = new ChromeDriver(options);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        driver.get("https://quasarzone.com/bbs/qb_saleinfo");
+        driver.get(url);
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
         WebElement body = driver.findElement(By.tagName("body"));
         String bodyContent = body.getText();
