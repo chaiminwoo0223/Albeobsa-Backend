@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CrawlingDTO {
-    @Schema(description = "텍스트 데이터", example = "Naver 검색")
+    @Schema(description = "텍스트 데이터", example = "지지직")
     private String text;
 }

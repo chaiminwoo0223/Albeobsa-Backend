@@ -15,15 +15,15 @@ import skhu.jijijig.service.CrawlingService;
 public class CrawlingController {
     private final CrawlingService crawlingService;
 
-    @GetMapping("/crawling/naver")
-    public ResponseEntity<String> crawlNaverBody() {
-        String bodyContent = crawlingService.crawlNaverBodyContent();
-        return ResponseEntity.ok(bodyContent);
+    @GetMapping("/crawling/ppomppu")
+    public ResponseEntity<String> crawledPpomppu() {
+        crawlingService.crawlPpomppuDomestic();
+        return ResponseEntity.ok("뿜뿌 국내게시판 body 내용이 성공적으로 저장되었습니다.");
     }
 
-    @GetMapping("/crawling/naver/save")
-    public ResponseEntity<String> saveCrawledNaverBody() {
-        crawlingService.saveNaverBodyContent();
-        return ResponseEntity.ok("네이버 body 내용이 성공적으로 저장되었습니다.");
+    @GetMapping("/crawling/ppomppu4")
+    public ResponseEntity<String> crawledPpomppu4() {
+        crawlingService.crawlPpomppuOverseas();
+        return ResponseEntity.ok("뿜뿌 해외게시판 body 내용이 성공적으로 저장되었습니다.");
     }
 }

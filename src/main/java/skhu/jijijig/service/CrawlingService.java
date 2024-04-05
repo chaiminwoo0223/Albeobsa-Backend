@@ -29,18 +29,27 @@ public class CrawlingService {
         return new ChromeDriver(options);
     }
 
-    public String crawlNaverBodyContent() {
+    // 뽐뿌(국내게시판)
+    public void crawlPpomppuDomestic() {
         WebDriver driver = createWebDriver();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        driver.get("https://www.naver.com");
+        driver.get("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu");
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
         WebElement body = driver.findElement(By.tagName("body"));
-        return body.getText();
+        String bodyContent = body.getText();
+        Crawling crawling = Crawling.builder().text(bodyContent).build(); // 크롤링된 내용을 데이터베이스에 저장
+        crawlingRepository.save(crawling);
     }
-    
-    public void saveNaverBodyContent() {
-        String bodyContent = crawlNaverBodyContent();
-        Crawling crawling = Crawling.builder().text(bodyContent).build();
+
+    // 뽐뿌(해외게시판)
+    public void crawlPpomppuOverseas() {
+        WebDriver driver = createWebDriver();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        driver.get("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+        WebElement body = driver.findElement(By.tagName("body"));
+        String bodyContent = body.getText();
+        Crawling crawling = Crawling.builder().text(bodyContent).build(); // 크롤링된 내용을 데이터베이스에 저장
         crawlingRepository.save(crawling);
     }
 }
