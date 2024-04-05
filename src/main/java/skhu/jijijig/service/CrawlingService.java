@@ -56,8 +56,7 @@ public class CrawlingService {
     // 범용 크롤링 메소드
     private void crawlWebSite(String url) {
         System.setProperty("webdriver.chrome.driver", chromedriver);
-        ChromeOptions options = new ChromeOptions().addArguments("--headless", "--disable-gpu", "user-agent=Mozilla/5.0...");
-        WebDriver driver = new ChromeDriver(options);
+        WebDriver driver = new ChromeDriver(getChromeOptions());
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         driver.get(url);
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
@@ -65,5 +64,18 @@ public class CrawlingService {
         String bodyContent = body.getText();
         Crawling crawling = Crawling.builder().text(bodyContent).build(); // 크롤링된 내용을 데이터베이스에 저장
         crawlingRepository.save(crawling);
+    }
+
+    // ChromeOptions 설정 메소드
+    private ChromeOptions getChromeOptions() {
+        return new ChromeOptions()
+                .addArguments("--headless") // GUI 없는 환경에서 실행
+                .addArguments("--disable-gpu") // GPU 가속 비활성화
+                .addArguments("--no-sandbox") // 샌드박스 모드 비활성화, Docker에서 필수
+                .addArguments("--disable-dev-shm-usage") // 컨테이너 환경에서 공유 메모리 사용량 최적화
+                .addArguments("--disable-extensions") // 확장 프로그램 비활성화
+                .addArguments("--disable-popup-blocking") // 팝업 차단 해제
+                .addArguments("--start-maximized") // 브라우저 최대 크기로 시작
+                .addArguments("user-agent=Mozilla/5.0..."); // 사용자 에이전트 설정
     }
 }
