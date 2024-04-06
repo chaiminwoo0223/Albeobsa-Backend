@@ -1,9 +1,12 @@
 package skhu.jijijig.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.google.firebase.auth.FirebaseToken;
 import jakarta.persistence.*;
 import lombok.*;
 import skhu.jijijig.domain.dto.MemberDTO;
+
+import java.util.List;
 
 @Entity
 @Builder
@@ -30,6 +33,18 @@ public class Member {
 
     @Column(nullable = false)
     private boolean firebaseAuth;
+
+    @OneToMany(mappedBy = "member", orphanRemoval = true)
+    @JsonManagedReference
+    private List<Board> boards; // 작성글
+
+    @OneToMany(mappedBy = "member", orphanRemoval = true)
+    @JsonManagedReference
+    private List<Comment> comments; // 댓글
+
+    @OneToMany(mappedBy = "member", orphanRemoval = true)
+    @JsonManagedReference
+    private List<Heart> hearts; // 유저가 누른 좋아요
 
     public static Member fromDTO(MemberDTO memberDTO) {
         return Member.builder()
