@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import skhu.jijijig.domain.repository.HeartRepository;
 
 import java.util.List;
 
@@ -36,13 +37,24 @@ public class Board extends BaseEntity {
 
     @OneToMany(mappedBy = "board", orphanRemoval = true)
     @JsonManagedReference
-    private List<Comment> comments; // 댓글
+    private List<Comment> comments;
 
-    public void incrementHeartCount() {
-        this.heartCnt += 1;
+    @OneToMany(mappedBy = "board", orphanRemoval = true)
+    @JsonManagedReference
+    private List<Heart> hearts;
+
+    public void addHeart(Member member, HeartRepository heartRepository) {
+        if (!heartRepository.existsByBoardAndMember(this, member)) {
+            Heart heart = new Heart(this, member);
+            heartRepository.save(heart);
+            this.heartCnt += 1;
+        }
     }
 
-    public void decrementHeartCount() {
-        this.heartCnt = Math.max(0, this.heartCnt - 1); // 음수 방지
+    public void removeHeart(Member member, HeartRepository heartRepository) {
+        heartRepository.findByBoardAndMember(this, member).ifPresent(heart -> {
+            heartRepository.delete(heart);
+            this.heartCnt = Math.max(0, this.heartCnt - 1); // 음수 방지
+        });
     }
 }
