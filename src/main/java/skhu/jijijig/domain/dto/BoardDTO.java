@@ -39,7 +39,7 @@ public class BoardDTO {
     @Schema(description = "댓글 목록", example = "화이팅, 응원합니다.")
     private List<CommentDTO> comments; // 게시글에 달린 댓글 목록 추가
 
-    public static BoardDTO from(Board board, List<CommentDTO> commentDTOs) {
+    public static BoardDTO fromEntity(Board board, List<CommentDTO> commentDTOs) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
         return BoardDTO.builder()
                 .id(board.getId())

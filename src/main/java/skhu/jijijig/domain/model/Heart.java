@@ -1,5 +1,6 @@
 package skhu.jijijig.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,14 +16,16 @@ public class Heart extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
+    @JsonBackReference
     private Member member; // 좋아요를 누른 유저
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id", nullable = false)
+    @JsonBackReference
     private Board board; // 좋아요가 추가된 게시글
 
     public Heart(Board board, Member member) {
-        this.board = board;
         this.member = member;
+        this.board = board;
     }
 }

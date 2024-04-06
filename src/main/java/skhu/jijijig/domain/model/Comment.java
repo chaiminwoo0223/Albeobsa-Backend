@@ -3,6 +3,12 @@ package skhu.jijijig.domain.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.access.AccessDeniedException;
+import skhu.jijijig.domain.dto.CommentDTO;
+import skhu.jijijig.domain.repository.CommentRepository;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Builder
@@ -31,5 +37,20 @@ public class Comment extends BaseEntity {
         this.board = board;
         this.member = member;
         this.content = content;
+    }
+
+    public static List<CommentDTO> toDTOsForBoard(Board board, CommentRepository commentRepository) {
+        List<Comment> comments = commentRepository.findByBoardId(board.getId());
+        return comments.stream()
+                .map(CommentDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    public void deleteCommentIfAuthorized(Member member, CommentRepository commentRepository) {
+        if (this.member.isAuthorizedToDelete(member)) {
+            commentRepository.delete(this);
+        } else {
+            throw new AccessDeniedException("댓글 삭제 권한이 없습니다.");
+        }
     }
 }

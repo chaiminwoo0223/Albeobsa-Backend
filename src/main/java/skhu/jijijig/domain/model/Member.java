@@ -65,4 +65,8 @@ public class Member {
                 .firebaseAuth(true)
                 .build();
     }
+
+    public boolean isAuthorizedToDelete(Member member) {
+        return this.equals(member) || member.getRole().equals(Role.ADMIN);
+    }
 }

@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.access.AccessDeniedException;
+import skhu.jijijig.domain.dto.BoardDTO;
+import skhu.jijijig.domain.repository.BoardRepository;
+import skhu.jijijig.domain.repository.CommentRepository;
 import skhu.jijijig.domain.repository.HeartRepository;
 
 import java.util.List;
@@ -28,7 +32,7 @@ public class Board extends BaseEntity {
     private int heartCnt;
 
     @Column(nullable = false)
-    private int CommentCnt;
+    private int commentCnt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -43,7 +47,32 @@ public class Board extends BaseEntity {
     @JsonManagedReference
     private List<Heart> hearts;
 
-    public void addHeart(Member member, HeartRepository heartRepository) {
+    public static Board createNewBoard(BoardDTO boardDTO, Member member) {
+        return Board.builder()
+                .title(boardDTO.getTitle())
+                .content(boardDTO.getContent())
+                .member(member)
+                .heartCnt(0)
+                .commentCnt(0)
+                .build();
+    }
+
+    public void deleteBoardIfAuthorized(Member member, BoardRepository boardRepository, CommentRepository commentRepository, HeartRepository heartRepository) {
+        if (this.member.isAuthorizedToDelete(member)) {
+            commentRepository.deleteByBoardId(this.id); // 이 게시글에 대한 모든 댓글 삭제
+            heartRepository.deleteAll(hearts); // 이 게시글에 대한 모든 좋아요 삭제
+            boardRepository.delete(this); // 게시글 삭제
+        } else {
+            throw new AccessDeniedException("게시글 삭제 권한이 없습니다.");
+        }
+    }
+
+    public void attachComment(Member member, String content, CommentRepository commentRepository) {
+        Comment comment = new Comment(this, member, content);
+        commentRepository.save(comment);
+    }
+
+    public void attachHeart(Member member, HeartRepository heartRepository) {
         if (!heartRepository.existsByBoardAndMember(this, member)) {
             Heart heart = new Heart(this, member);
             heartRepository.save(heart);
@@ -51,7 +80,7 @@ public class Board extends BaseEntity {
         }
     }
 
-    public void removeHeart(Member member, HeartRepository heartRepository) {
+    public void detachHeart(Member member, HeartRepository heartRepository) {
         heartRepository.findByBoardAndMember(this, member).ifPresent(heart -> {
             heartRepository.delete(heart);
             this.heartCnt = Math.max(0, this.heartCnt - 1); // 음수 방지

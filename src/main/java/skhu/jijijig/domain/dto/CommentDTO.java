@@ -18,7 +18,7 @@ public class CommentDTO {
     @Schema(description = "작성자", example = "사용자명")
     private String memberName; // 댓글 작성자 이름 추가
 
-    public static CommentDTO from(Comment comment) {
+    public static CommentDTO fromEntity(Comment comment) {
         return CommentDTO.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
