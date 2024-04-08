@@ -14,6 +14,8 @@ import skhu.jijijig.domain.model.Crawling;
 import skhu.jijijig.domain.repository.CrawlingRepository;
 
 import java.time.Duration;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -46,6 +48,23 @@ public class CrawlingService {
     // 퀘사이존(핫딜게시판)
     public void crawlingQuasarzone() {
         crawlingWebSite("https://quasarzone.com/bbs/qb_saleinfo");
+    }
+
+    // 뽐뿌(국내게시판)와 뽐뿌(해외게시판) 크롤링 메소드
+    public void crawlingPpomppu(String url) {
+        System.setProperty("webdriver.chrome.driver", chromedriver);
+        WebDriver driver = new ChromeDriver(getChromeOptions());
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        try {
+            driver.get(url);
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("tr.baseList.bbs_new1")));
+            List<WebElement> elements = driver.findElements(By.cssSelector("tr.baseList.bbs_new1"));
+            String elementsText = elements.stream().map(WebElement::getText).collect(Collectors.joining("\n"));
+            Crawling crawling = Crawling.builder().text(elementsText).build();
+            crawlingRepository.save(crawling);
+        } finally {
+            driver.quit();
+        }
     }
 
     // 범용 크롤링 메소드

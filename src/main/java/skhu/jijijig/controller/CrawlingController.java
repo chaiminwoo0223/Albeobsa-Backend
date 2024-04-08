@@ -16,7 +16,7 @@ import skhu.jijijig.service.CrawlingService;
 @Tag(name = "Crawling API", description = "크롤링 관련 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/crawling")
 public class CrawlingController {
     private final CrawlingService crawlingService;
 
@@ -25,7 +25,7 @@ public class CrawlingController {
             @ApiResponse(responseCode = "200", description = "모든 사이트 크롤링 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
-    @GetMapping("/crawling")
+    @GetMapping("/")
     public ResponseEntity<String> crawledWebSites() {
         try {
             crawlingService.crawlingPpomppuDomestic();
@@ -45,11 +45,11 @@ public class CrawlingController {
             @ApiResponse(responseCode = "200", description = "뽐뿌(국내게시판) 크롤링 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
-    @GetMapping("/crawling/ppomppu")
+    @GetMapping("/ppomppu")
     public ResponseEntity<String> crawledPpomppu() {
         try {
-            crawlingService.crawlingPpomppuDomestic();
-            return ResponseEntity.ok("뽐뿌(국내게시판)의 Body 내용이 성공적으로 저장되었습니다.");
+            crawlingService.crawlingPpomppu("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu");
+            return ResponseEntity.ok("뽐뿌(국내게시판)의 내용이 성공적으로 저장되었습니다.");
         } catch (Exception e) {
             log.error("뽐뿌(국내게시판) 크롤링 과정에서 오류 발생", e);
             return ResponseEntity.internalServerError().body("뽐뿌(국내게시판) 크롤링 과정에서 서버 에러가 발생했습니다.");
@@ -61,11 +61,11 @@ public class CrawlingController {
             @ApiResponse(responseCode = "200", description = "뽐뿌(해외게시판) 크롤링 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
-    @GetMapping("/crawling/ppomppu4")
+    @GetMapping("/ppomppu4")
     public ResponseEntity<String> crawledPpomppu4() {
         try {
-            crawlingService.crawinglPpomppuOverseas();
-            return ResponseEntity.ok("뿜뿌(해외게시판)의 body 내용이 성공적으로 저장되었습니다.");
+            crawlingService.crawlingPpomppu("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4");
+            return ResponseEntity.ok("뿜뿌(해외게시판)의 내용이 성공적으로 저장되었습니다.");
         } catch (Exception e) {
             log.error("뽐뿌(해외게시판) 크롤링 과정에서 오류 발생", e);
             return ResponseEntity.internalServerError().body("뽐뿌(해외게시판) 크롤링 과정에서 서버 에러가 발생했습니다.");
@@ -77,7 +77,7 @@ public class CrawlingController {
             @ApiResponse(responseCode = "200", description = "루리웹 크롤링 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
-    @GetMapping("/crawling/ruliweb")
+    @GetMapping("/ruliweb")
     public ResponseEntity<String> crawledRuliweb() {
         try {
             crawlingService.crawlingRuliweb();
@@ -93,7 +93,7 @@ public class CrawlingController {
             @ApiResponse(responseCode = "200", description = "쿨엔조이 크롤링 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
-    @GetMapping("/crawling/coolenjoy")
+    @GetMapping("/coolenjoy")
     public ResponseEntity<String> crawledCoolenjoy() {
         try {
             crawlingService.crawlingCoolenjoy();
@@ -109,7 +109,7 @@ public class CrawlingController {
             @ApiResponse(responseCode = "200", description = "퀘사이존 크롤링 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
-    @GetMapping("/crawling/quasarzone")
+    @GetMapping("/quasarzone")
     public ResponseEntity<String> crawledQuasarzone() {
         try {
             crawlingService.crawlingQuasarzone();
