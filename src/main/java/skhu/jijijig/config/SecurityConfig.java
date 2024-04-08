@@ -35,7 +35,7 @@ public class SecurityConfig {
             "/api/introduction",
             "/api/member/join",
             "/api/crawling/**",
-            "/api/board/**",
+            "/api/boards/**",
             "/v3/api-docs/**",
             "/swagger-ui/**"
     };
