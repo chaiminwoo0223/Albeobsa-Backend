@@ -34,10 +34,8 @@ public class SecurityConfig {
     private static final String[] PERMITTED_URLS = {
             "/api/introduction",
             "/api/member/join",
-            "/api/member/login",
-            "/api/member/logout",
-            "/api/member/refresh",
             "/api/crawling/**",
+            "/api/board/**",
             "/v3/api-docs/**",
             "/swagger-ui/**"
     };

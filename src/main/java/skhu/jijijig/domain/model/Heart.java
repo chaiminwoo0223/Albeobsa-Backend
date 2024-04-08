@@ -25,7 +25,7 @@ public class Heart extends BaseEntity {
     private Board board; // 좋아요가 추가된 게시글
 
     public Heart(Board board, Member member) {
-        this.member = member;
         this.board = board;
+        this.member = member;
     }
 }
