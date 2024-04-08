@@ -28,8 +28,8 @@ public class CrawlingController {
     @GetMapping("/")
     public ResponseEntity<String> crawledWebSites() {
         try {
-            crawlingService.crawlingPpomppuDomestic();
-            crawlingService.crawinglPpomppuOverseas();
+            crawledPpomppu();
+            crawledPpomppu4();
             crawlingService.crawlingRuliweb();
             crawlingService.crawlingCoolenjoy();
             crawlingService.crawlingQuasarzone();
@@ -81,7 +81,7 @@ public class CrawlingController {
     public ResponseEntity<String> crawledRuliweb() {
         try {
             crawlingService.crawlingRuliweb();
-            return ResponseEntity.ok("루리웹의 body 내용이 성공적으로 저장되었습니다.");
+            return ResponseEntity.ok("루리웹의 내용이 성공적으로 저장되었습니다.");
         } catch (Exception e) {
             log.error("루리웹 크롤링 과정에서 오류 발생", e);
             return ResponseEntity.internalServerError().body("루리웹 크롤링 과정에서 서버 에러가 발생했습니다.");
@@ -97,7 +97,7 @@ public class CrawlingController {
     public ResponseEntity<String> crawledCoolenjoy() {
         try {
             crawlingService.crawlingCoolenjoy();
-            return ResponseEntity.ok("쿨엔조이의 body 내용이 성공적으로 저장되었습니다.");
+            return ResponseEntity.ok("쿨엔조이의 내용이 성공적으로 저장되었습니다.");
         } catch (Exception e) {
             log.error("쿨엔조이 크롤링 과정에서 오류 발생", e);
             return ResponseEntity.internalServerError().body("쿨엔조이 크롤링 과정에서 서버 에러가 발생했습니다.");
@@ -113,7 +113,7 @@ public class CrawlingController {
     public ResponseEntity<String> crawledQuasarzone() {
         try {
             crawlingService.crawlingQuasarzone();
-            return ResponseEntity.ok("퀘사이존의 body 내용이 성공적으로 저장되었습니다.");
+            return ResponseEntity.ok("퀘사이존의 내용이 성공적으로 저장되었습니다.");
         } catch (Exception e) {
             log.error("퀘사이존 크롤링 과정에서 오류 발생", e);
             return ResponseEntity.internalServerError().body("퀘사이존 크롤링 과정에서 서버 에러가 발생했습니다.");

@@ -25,32 +25,7 @@ public class CrawlingService {
     @Value("${CHROME_DRIVER}")
     private String chromedriver;
 
-    // 뽐뿌(국내게시판)
-    public void crawlingPpomppuDomestic() {
-        crawlingWebSite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu");
-    }
-
-    // 뽐뿌(해외게시판)
-    public void crawinglPpomppuOverseas() {
-        crawlingWebSite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4");
-    }
-
-    // 루리웹(예판 핫딜 뽐뿌 게시판)
-    public void crawlingRuliweb() {
-        crawlingWebSite("https://bbs.ruliweb.com/news/board/1020");
-    }
-
-    // 쿨엔조이(지름/알뜰정보 페이지)
-    public void crawlingCoolenjoy() {
-        crawlingWebSite("https://coolenjoy.net/bbs/jirum");
-    }
-
-    // 퀘사이존(핫딜게시판)
-    public void crawlingQuasarzone() {
-        crawlingWebSite("https://quasarzone.com/bbs/qb_saleinfo");
-    }
-
-    // 뽐뿌(국내게시판)와 뽐뿌(해외게시판) 크롤링 메소드
+    // 뽐뿌
     public void crawlingPpomppu(String url) {
         System.setProperty("webdriver.chrome.driver", chromedriver);
         WebDriver driver = new ChromeDriver(getChromeOptions());
@@ -59,6 +34,59 @@ public class CrawlingService {
             driver.get(url);
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("tr.baseList.bbs_new1")));
             List<WebElement> elements = driver.findElements(By.cssSelector("tr.baseList.bbs_new1"));
+            String elementsText = elements.stream().map(WebElement::getText).collect(Collectors.joining("\n"));
+            Crawling crawling = Crawling.builder().text(elementsText).build();
+            crawlingRepository.save(crawling);
+        } finally {
+            driver.quit();
+        }
+    }
+
+    // 루리웹(예판 핫딜 뽐뿌 게시판)
+    public void crawlingRuliweb() {
+        System.setProperty("webdriver.chrome.driver", chromedriver);
+        WebDriver driver = new ChromeDriver(getChromeOptions());
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        try {
+            driver.get("https://bbs.ruliweb.com/news/board/1020");
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("tr.table_body")));
+            List<WebElement> elements = driver.findElements(By.cssSelector("tr.table_body.best.inside.blocktarget.other, tr.table_body.best.inside.blocktarget, tr.table_body.blocktarget"));
+            String elementsText = elements.stream()
+                    .map(WebElement::getText)
+                    .collect(Collectors.joining("\n"));
+            Crawling crawling = Crawling.builder().text(elementsText).build();
+            crawlingRepository.save(crawling);
+        } finally {
+            driver.quit();
+        }
+    }
+
+    // 쿨엔조이(지름/알뜰정보 페이지)
+    public void crawlingCoolenjoy() {
+        System.setProperty("webdriver.chrome.driver", chromedriver);
+        WebDriver driver = new ChromeDriver(getChromeOptions());
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        try {
+            driver.get("https://coolenjoy.net/bbs/jirum");
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("ul.na-table.d-md-table.w-100")));
+            List<WebElement> elements = driver.findElements(By.cssSelector("ul.na-table.d-md-table.w-100"));
+            String elementsText = elements.stream().map(WebElement::getText).collect(Collectors.joining("\n"));
+            Crawling crawling = Crawling.builder().text(elementsText).build();
+            crawlingRepository.save(crawling);
+        } finally {
+            driver.quit();
+        }
+    }
+
+    // 퀘사이존(핫딜게시판)
+    public void crawlingQuasarzone() {
+        System.setProperty("webdriver.chrome.driver", chromedriver);
+        WebDriver driver = new ChromeDriver(getChromeOptions());
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        try {
+            driver.get("https://quasarzone.com/bbs/qb_saleinfo");
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("tbody")));
+            List<WebElement> elements = driver.findElements(By.cssSelector("tbody > tr"));
             String elementsText = elements.stream().map(WebElement::getText).collect(Collectors.joining("\n"));
             Crawling crawling = Crawling.builder().text(elementsText).build();
             crawlingRepository.save(crawling);
