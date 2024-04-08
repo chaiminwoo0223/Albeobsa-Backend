@@ -28,12 +28,11 @@ public class CrawlingController {
     @GetMapping("/crawling")
     public ResponseEntity<String> crawledWebSites() {
         try {
-            crawlingService.crawlPpomppuDomestic();
-            crawlingService.crawlPpomppuOverseas();
-            crawlingService.crawlClien();
-            crawlingService.crawlRuliweb();
-            crawlingService.crawlCoolenjoy();
-            crawlingService.crawlQuasarzone();
+            crawlingService.crawlingPpomppuDomestic();
+            crawlingService.crawinglPpomppuOverseas();
+            crawlingService.crawlingRuliweb();
+            crawlingService.crawlingCoolenjoy();
+            crawlingService.crawlingQuasarzone();
             return ResponseEntity.ok("모든 사이트의 Body 내용이 성공적으로 저장되었습니다.");
         } catch (Exception e) {
             log.error("크롤링 과정에서 오류 발생", e);
@@ -49,7 +48,7 @@ public class CrawlingController {
     @GetMapping("/crawling/ppomppu")
     public ResponseEntity<String> crawledPpomppu() {
         try {
-            crawlingService.crawlPpomppuDomestic();
+            crawlingService.crawlingPpomppuDomestic();
             return ResponseEntity.ok("뽐뿌(국내게시판)의 Body 내용이 성공적으로 저장되었습니다.");
         } catch (Exception e) {
             log.error("뽐뿌(국내게시판) 크롤링 과정에서 오류 발생", e);
@@ -65,27 +64,11 @@ public class CrawlingController {
     @GetMapping("/crawling/ppomppu4")
     public ResponseEntity<String> crawledPpomppu4() {
         try {
-            crawlingService.crawlPpomppuOverseas();
+            crawlingService.crawinglPpomppuOverseas();
             return ResponseEntity.ok("뿜뿌(해외게시판)의 body 내용이 성공적으로 저장되었습니다.");
         } catch (Exception e) {
             log.error("뽐뿌(해외게시판) 크롤링 과정에서 오류 발생", e);
             return ResponseEntity.internalServerError().body("뽐뿌(해외게시판) 크롤링 과정에서 서버 에러가 발생했습니다.");
-        }
-    }
-
-    @Operation(summary = "클리앙 크롤링", description = "클리앙의 내용을 크롤링하여 결과를 저장합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "클리앙 크롤링 성공"),
-            @ApiResponse(responseCode = "500", description = "서버 에러")
-    })
-    @GetMapping("/crawling/clien")
-    public ResponseEntity<String> crawledClien() {
-        try {
-            crawlingService.crawlClien();
-            return ResponseEntity.ok("클리앙의 body 내용이 성공적으로 저장되었습니다.");
-        } catch (Exception e) {
-            log.error("클리앙 크롤링 과정에서 오류 발생", e);
-            return ResponseEntity.internalServerError().body("클리앙 크롤링 과정에서 서버 에러가 발생했습니다.");
         }
     }
 
@@ -97,7 +80,7 @@ public class CrawlingController {
     @GetMapping("/crawling/ruliweb")
     public ResponseEntity<String> crawledRuliweb() {
         try {
-            crawlingService.crawlRuliweb();
+            crawlingService.crawlingRuliweb();
             return ResponseEntity.ok("루리웹의 body 내용이 성공적으로 저장되었습니다.");
         } catch (Exception e) {
             log.error("루리웹 크롤링 과정에서 오류 발생", e);
@@ -113,7 +96,7 @@ public class CrawlingController {
     @GetMapping("/crawling/coolenjoy")
     public ResponseEntity<String> crawledCoolenjoy() {
         try {
-            crawlingService.crawlCoolenjoy();
+            crawlingService.crawlingCoolenjoy();
             return ResponseEntity.ok("쿨엔조이의 body 내용이 성공적으로 저장되었습니다.");
         } catch (Exception e) {
             log.error("쿨엔조이 크롤링 과정에서 오류 발생", e);
@@ -129,7 +112,7 @@ public class CrawlingController {
     @GetMapping("/crawling/quasarzone")
     public ResponseEntity<String> crawledQuasarzone() {
         try {
-            crawlingService.crawlQuasarzone();
+            crawlingService.crawlingQuasarzone();
             return ResponseEntity.ok("퀘사이존의 body 내용이 성공적으로 저장되었습니다.");
         } catch (Exception e) {
             log.error("퀘사이존 크롤링 과정에서 오류 발생", e);

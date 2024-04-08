@@ -24,37 +24,32 @@ public class CrawlingService {
     private String chromedriver;
 
     // 뽐뿌(국내게시판)
-    public void crawlPpomppuDomestic() {
-        crawlWebSite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu");
+    public void crawlingPpomppuDomestic() {
+        crawlingWebSite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu");
     }
 
     // 뽐뿌(해외게시판)
-    public void crawlPpomppuOverseas() {
-        crawlWebSite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4");
-    }
-
-    // 클리앙(알뜰구매 게시판)
-    public void crawlClien() {
-        crawlWebSite("https://www.clien.net/service/board/jirum");
+    public void crawinglPpomppuOverseas() {
+        crawlingWebSite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4");
     }
 
     // 루리웹(예판 핫딜 뽐뿌 게시판)
-    public void crawlRuliweb() {
-        crawlWebSite("https://bbs.ruliweb.com/news/board/1020");
+    public void crawlingRuliweb() {
+        crawlingWebSite("https://bbs.ruliweb.com/news/board/1020");
     }
 
     // 쿨엔조이(지름/알뜰정보 페이지)
-    public void crawlCoolenjoy() {
-        crawlWebSite("https://coolenjoy.net/bbs/jirum");
+    public void crawlingCoolenjoy() {
+        crawlingWebSite("https://coolenjoy.net/bbs/jirum");
     }
 
     // 퀘사이존(핫딜게시판)
-    public void crawlQuasarzone() {
-        crawlWebSite("https://quasarzone.com/bbs/qb_saleinfo");
+    public void crawlingQuasarzone() {
+        crawlingWebSite("https://quasarzone.com/bbs/qb_saleinfo");
     }
 
     // 범용 크롤링 메소드
-    private void crawlWebSite(String url) {
+    private void crawlingWebSite(String url) {
         System.setProperty("webdriver.chrome.driver", chromedriver);
         WebDriver driver = new ChromeDriver(getChromeOptions());
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
