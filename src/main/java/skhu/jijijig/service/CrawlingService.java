@@ -10,6 +10,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import skhu.jijijig.domain.model.Crawling;
 import skhu.jijijig.domain.repository.CrawlingRepository;
 
@@ -26,27 +27,32 @@ public class CrawlingService {
     private String chromedriver;
 
     // 뽐뿌(국내게시판)
+    @Transactional
     public void crawlingPpomppu() {
         crawlingWebSite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "tr.baseList.bbs_new1");
     }
 
     // 뽐뿌(해외게시판)
+    @Transactional
     public void crawlingPpomppu4() {
         crawlingWebSite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "tr.baseList.bbs_new1");
     }
 
     // 루리웹(예판 핫딜 뽐뿌 게시판)
+    @Transactional
     public void crawlingRuliweb() {
         String cssSelectors = "tr.table_body.best.inside.blocktarget.other, tr.table_body.best.inside.blocktarget, tr.table_body.blocktarget";
         crawlingWebSite("https://bbs.ruliweb.com/news/board/1020", cssSelectors);
     }
 
     // 쿨엔조이(지름/알뜰정보 페이지)
+    @Transactional
     public void crawlingCoolenjoy() {
         crawlingWebSite("https://coolenjoy.net/bbs/jirum", "ul.na-table.d-md-table.w-100");
     }
 
     // 퀘사이존(핫딜게시판)
+    @Transactional
     public void crawlingQuasarzone() {
         crawlingWebSite("https://quasarzone.com/bbs/qb_saleinfo", "tbody > tr");
     }
@@ -81,4 +87,3 @@ public class CrawlingService {
                 .addArguments("user-agent=Mozilla/5.0..."); // 사용자 에이전트 설정
     }
 }
-
