@@ -2,9 +2,6 @@ package skhu.jijijig.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import skhu.jijijig.domain.dto.CrawlingDTO;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Builder

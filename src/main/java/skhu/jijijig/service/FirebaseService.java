@@ -14,7 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import skhu.jijijig.domain.dto.TokenDTO;
 import skhu.jijijig.domain.model.Member;
-import skhu.jijijig.domain.repository.MemberRepository;
+import skhu.jijijig.repository.MemberRepository;
 import skhu.jijijig.exception.FirebaseAuthenticationException;
 import skhu.jijijig.token.TokenProvider;
 

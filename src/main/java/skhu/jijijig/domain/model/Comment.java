@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.access.AccessDeniedException;
 import skhu.jijijig.domain.dto.CommentDTO;
-import skhu.jijijig.domain.repository.CommentRepository;
+import skhu.jijijig.repository.CommentRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;

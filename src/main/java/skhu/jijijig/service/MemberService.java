@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import skhu.jijijig.domain.dto.MemberDTO;
 import skhu.jijijig.domain.dto.TokenDTO;
 import skhu.jijijig.domain.model.Member;
-import skhu.jijijig.domain.repository.MemberRepository;
+import skhu.jijijig.repository.MemberRepository;
 import skhu.jijijig.token.TokenProvider;
 
 @RequiredArgsConstructor

@@ -7,9 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import skhu.jijijig.domain.model.Board;
 import skhu.jijijig.domain.model.Comment;
 import skhu.jijijig.domain.model.Member;
-import skhu.jijijig.domain.repository.BoardRepository;
-import skhu.jijijig.domain.repository.CommentRepository;
-import skhu.jijijig.domain.repository.MemberRepository;
+import skhu.jijijig.repository.BoardRepository;
+import skhu.jijijig.repository.CommentRepository;
+import skhu.jijijig.repository.MemberRepository;
 import skhu.jijijig.exception.ResourceNotFoundException;
 
 @Service

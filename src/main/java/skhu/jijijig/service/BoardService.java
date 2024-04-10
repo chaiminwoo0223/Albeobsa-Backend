@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import skhu.jijijig.domain.dto.BoardDTO;
 import skhu.jijijig.domain.model.*;
-import skhu.jijijig.domain.repository.BoardRepository;
-import skhu.jijijig.domain.repository.CommentRepository;
-import skhu.jijijig.domain.repository.HeartRepository;
-import skhu.jijijig.domain.repository.MemberRepository;
+import skhu.jijijig.repository.BoardRepository;
+import skhu.jijijig.repository.CommentRepository;
+import skhu.jijijig.repository.HeartRepository;
+import skhu.jijijig.repository.MemberRepository;
 import skhu.jijijig.exception.ResourceNotFoundException;
 
 @Service

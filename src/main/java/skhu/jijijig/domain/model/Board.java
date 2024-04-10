@@ -6,9 +6,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.access.AccessDeniedException;
 import skhu.jijijig.domain.dto.BoardDTO;
-import skhu.jijijig.domain.repository.BoardRepository;
-import skhu.jijijig.domain.repository.CommentRepository;
-import skhu.jijijig.domain.repository.HeartRepository;
+import skhu.jijijig.repository.BoardRepository;
+import skhu.jijijig.repository.CommentRepository;
+import skhu.jijijig.repository.HeartRepository;
 
 import java.util.List;
 

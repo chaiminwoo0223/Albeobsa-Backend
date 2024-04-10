@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import skhu.jijijig.domain.model.Crawling;
-import skhu.jijijig.domain.repository.CrawlingRepository;
+import skhu.jijijig.repository.CrawlingRepository;
 
 import java.time.Duration;
 import java.util.List;
