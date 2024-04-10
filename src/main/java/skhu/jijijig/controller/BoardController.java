@@ -83,10 +83,34 @@ public class BoardController {
         }
     }
 
+    @Operation(summary = "게시글 수정", description = "게시글을 수정합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "게시글 수정 성공"),
+            @ApiResponse(responseCode = "403", description = "게시글 수정 권한 없음"),
+            @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음")
+    })
+    @PutMapping("/{boardId}")
+    public ResponseEntity<?> updateBoard(Principal principal, @PathVariable Long boardId, @RequestBody BoardDTO boardDTO) {
+        Long memberId = Long.parseLong(principal.getName());
+        try {
+            boardService.editBoard(boardId, boardDTO, memberId);
+            return ResponseEntity.ok().build();
+        } catch (ResourceNotFoundException e) {
+            log.error("게시글 수정 실패: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (AccessDeniedException e) {
+            log.error("게시글 수정 권한 없음: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (Exception e) {
+            log.error("게시글 수정 중 예외 발생: {}", e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @Operation(summary = "게시글 삭제", description = "게시글을 삭제합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "삭제 성공"),
-            @ApiResponse(responseCode = "403", description = "삭제 권한 없음"),
+            @ApiResponse(responseCode = "204", description = "게시글 삭제 성공"),
+            @ApiResponse(responseCode = "403", description = "게시글 삭제 권한 없음"),
             @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음")
     })
     @DeleteMapping("/{boardId}")
@@ -130,7 +154,7 @@ public class BoardController {
     @Operation(summary = "댓글 삭제", description = "게시글의 댓글을 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "댓글 삭제 성공"),
-            @ApiResponse(responseCode = "403", description = "삭제 권한 없음"),
+            @ApiResponse(responseCode = "403", description = "댓글 삭제 권한 없음"),
             @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
     })
     @DeleteMapping("/{boardId}/comments/{commentId}")
@@ -141,13 +165,13 @@ public class BoardController {
             return ResponseEntity.ok().body("댓글이 성공적으로 삭제되었습니다.");
         } catch (ResourceNotFoundException e) {
             log.error("댓글 삭제 실패: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 댓글을 찾을 수 없습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (AccessDeniedException e) {
             log.error("댓글 삭제 권한 없음: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("삭제 권한이 없습니다.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (Exception e) {
             log.error("댓글 삭제 중 예외 발생: {}", e.getMessage());
-            return ResponseEntity.internalServerError().body("댓글 삭제 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().build();
         }
     }
 

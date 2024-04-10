@@ -3,6 +3,7 @@ package skhu.jijijig.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import skhu.jijijig.domain.dto.BoardDTO;
@@ -40,6 +41,17 @@ public class BoardService {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 ID의 회원을 찾을 수 없습니다: " + memberId));
         Board board = Board.createNewBoard(boardDTO, member);
         return boardRepository.save(board).getId();
+    }
+
+    @Transactional
+    public void editBoard(Long boardId, BoardDTO boardDTO, Long memberId) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 ID의 게시글을 찾을 수 없습니다: " + boardId));
+        if (!board.getMember().getId().equals(memberId)) {
+            throw new AccessDeniedException("게시글 수정 권한이 없습니다.");
+        }
+        board.updateDetails(boardDTO.getTitle(), boardDTO.getContent());
+        boardRepository.save(board);
     }
 
     @Transactional

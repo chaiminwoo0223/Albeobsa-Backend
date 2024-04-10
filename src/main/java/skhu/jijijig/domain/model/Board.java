@@ -57,6 +57,11 @@ public class Board extends BaseEntity {
                 .build();
     }
 
+    public void updateDetails(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
+
     public void deleteBoardIfAuthorized(Member member, BoardRepository boardRepository, CommentRepository commentRepository, HeartRepository heartRepository) {
         if (this.member.isAuthorizedToDelete(member)) {
             commentRepository.deleteByBoardId(this.id); // 이 게시글에 대한 모든 댓글 삭제
