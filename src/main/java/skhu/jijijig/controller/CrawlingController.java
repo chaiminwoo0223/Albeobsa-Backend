@@ -33,6 +33,7 @@ public class CrawlingController {
             crawlingService.crawlingRuliweb();
             crawlingService.crawlingCoolenjoy();
             crawlingService.crawlingQuasarzone();
+            crawlingService.crawlingEomisae();
             return ResponseEntity.ok("모든 사이트의 내용이 성공적으로 저장되었습니다.");
         } catch (Exception e) {
             log.error("크롤링 과정에서 오류 발생", e);
@@ -117,6 +118,22 @@ public class CrawlingController {
         } catch (Exception e) {
             log.error("퀘사이존 크롤링 과정에서 오류 발생", e);
             return ResponseEntity.internalServerError().body("퀘사이존 크롤링 과정에서 서버 에러가 발생했습니다.");
+        }
+    }
+
+    @Operation(summary = "어미새 크롤링", description = "어미새의 내용을 크롤링하여 결과를 저장합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "어미새 크롤링 성공"),
+            @ApiResponse(responseCode = "500", description = "서버 에러")
+    })
+    @GetMapping("/eomisae")
+    public ResponseEntity<String> crawledEomisae() {
+        try {
+            crawlingService.crawlingEomisae();
+            return ResponseEntity.ok("어미새의 내용이 성공적으로 저장되었습니다.");
+        } catch (Exception e) {
+            log.error("어미새 크롤링 과정에서 오류 발생", e);
+            return ResponseEntity.internalServerError().body("어미새 크롤링 과정에서 서버 에러가 발생했습니다.");
         }
     }
 }

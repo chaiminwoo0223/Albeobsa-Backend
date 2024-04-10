@@ -57,6 +57,12 @@ public class CrawlingService {
         crawlingWebSite("https://quasarzone.com/bbs/qb_saleinfo", "tbody > tr");
     }
 
+    // 어미새(기타정보)
+    @Transactional
+    public void crawlingEomisae() {
+        crawlingWebSite("https://eomisae.co.kr/rt", "div._bd.cf.clear");
+    }
+
     // 공통 크롤링 메소드
     private void crawlingWebSite(String url, String cssSelector) {
         System.setProperty("webdriver.chrome.driver", chromedriver);
