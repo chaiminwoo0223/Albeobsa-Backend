@@ -151,6 +151,30 @@ public class BoardController {
         }
     }
 
+    @Operation(summary = "댓글 수정", description = "게시글의 댓글을 수정합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "댓글 수정 성공"),
+            @ApiResponse(responseCode = "403", description = "댓글 수정 권한 없음"),
+            @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
+    })
+    @PatchMapping("/{boardId}/comments/{commentId}")
+    public ResponseEntity<?> updateComment(Principal principal, @PathVariable Long boardId, @PathVariable Long commentId, @RequestBody CommentDTO commentDTO) {
+        Long memberId = Long.parseLong(principal.getName());
+        try {
+            commentService.editComment(boardId, commentId, memberId, commentDTO.getContent());
+            return ResponseEntity.ok().build();
+        } catch (ResourceNotFoundException e) {
+            log.error("댓글 수정 실패: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (AccessDeniedException e) {
+            log.error("댓글 수정 권한 없음: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (Exception e) {
+            log.error("댓글 수정 중 예외 발생: {}", e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @Operation(summary = "댓글 삭제", description = "게시글의 댓글을 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "댓글 삭제 성공"),

@@ -1,6 +1,7 @@
 package skhu.jijijig.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import skhu.jijijig.domain.model.Board;
@@ -25,6 +26,17 @@ public class CommentService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 ID의 회원을 찾을 수 없습니다: " + memberId));
         board.attachComment(member, content, commentRepository);
+    }
+
+    @Transactional
+    public void editComment(Long boardId, Long commentId, Long memberId, String content) {
+        Comment comment = commentRepository.findByIdAndBoardId(commentId, boardId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 ID의 댓글을 찾을 수 없습니다: " + commentId));
+        if (!comment.getMember().getId().equals(memberId)) {
+            throw new AccessDeniedException("댓글 수정 권한이 없습니다.");
+        }
+        comment.updateContent(content);
+        commentRepository.save(comment);
     }
 
     @Transactional

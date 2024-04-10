@@ -39,11 +39,8 @@ public class Comment extends BaseEntity {
         this.content = content;
     }
 
-    public static List<CommentDTO> toDTOsForBoard(Board board, CommentRepository commentRepository) {
-        List<Comment> comments = commentRepository.findByBoardId(board.getId());
-        return comments.stream()
-                .map(CommentDTO::fromEntity)
-                .collect(Collectors.toList());
+    public void updateContent(String content) {
+        this.content = content;
     }
 
     public void deleteCommentIfAuthorized(Member member, CommentRepository commentRepository) {
@@ -52,5 +49,12 @@ public class Comment extends BaseEntity {
         } else {
             throw new AccessDeniedException("댓글 삭제 권한이 없습니다.");
         }
+    }
+
+    public static List<CommentDTO> toDTOsForBoard(Board board, CommentRepository commentRepository) {
+        List<Comment> comments = commentRepository.findByBoardId(board.getId());
+        return comments.stream()
+                .map(CommentDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 }
