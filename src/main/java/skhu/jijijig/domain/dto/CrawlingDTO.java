@@ -17,8 +17,8 @@ public class CrawlingDTO {
     @Schema(description = "이름", example = "chaiminwoo0223")
     private String name;
 
-    @Schema(description = "이미지", example = "image URL")
-    private String image;
+    @Schema(description = "이미지 URL", example = "image URL")
+    private String imageURL;
 
     @Schema(description = "링크", example = "https://link.com")
     private String link;
@@ -27,7 +27,7 @@ public class CrawlingDTO {
     private String createdDateTime;
 
     @Schema(description = "조회수", example = "10")
-    private Integer view;
+    private Integer views;
 
     @Schema(description = "추천수", example = "10")
     private Integer recommendCnt;

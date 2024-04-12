@@ -29,13 +29,91 @@ public class CrawlingService {
     // 뽐뿌(국내게시판)
     @Transactional
     public void crawlingPpomppu() {
-        crawlingWebSite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "tr.baseList.bbs_new1");
+        System.setProperty("webdriver.chrome.driver", chromedriver);
+        WebDriver driver = new ChromeDriver(getChromeOptions());
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        try {
+            driver.get("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu");
+            wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("tr.baseList.bbs_new1")));
+            List<WebElement> rows = driver.findElements(By.cssSelector("tr.baseList.bbs_new1"));
+            int totalRows = rows.size();
+            List<Crawling> crawlings = rows.stream()
+                    .limit(totalRows - 4) // 마지막 네 개 행을 제외
+                    .map(row -> {
+                        // 제목
+                        String title = row.findElement(By.cssSelector("a.baseList-title")).getText();
+                        // 이름
+                        String name = row.findElements(By.cssSelector("td")).get(1).getText();
+                        // 이미지 URL
+                        String imageURL = row.findElement(By.cssSelector("a.baseList-thumb img")).getAttribute("src");
+                        imageURL = imageURL.startsWith("//") ? "https:" + imageURL : imageURL;
+                        // 조회수
+                        String viewsText = row.findElement(By.cssSelector("td.baseList-space.baseList-views")).getText();
+                        Integer views = viewsText.isEmpty() ? 0 : Integer.parseInt(viewsText);
+                        // 추천수
+                        String recText = row.findElement(By.cssSelector("td.baseList-space.baseList-rec")).getText();
+                        Integer recommendCnt = recText.isEmpty() ? 0 : Integer.parseInt(recText.split(" - ")[0].trim());
+                        // 댓글수
+                        Integer commentCnt = row.findElements(By.cssSelector("span.baseList-c")).isEmpty() ? 0 : Integer.parseInt(row.findElement(By.cssSelector("span.baseList-c")).getText().replace("(", "").replace(")", ""));
+                        return Crawling.builder()
+                                .title(title)
+                                .name(name)
+                                .imageURL(imageURL)
+                                .views(views)
+                                .recommendCnt(recommendCnt)
+                                .commentCnt(commentCnt)
+                                .text(row.getText()) // 전체 텍스트
+                                .build();
+                    }).collect(Collectors.toList());
+            crawlingRepository.saveAll(crawlings);
+        } finally {
+            driver.quit();
+        }
     }
 
     // 뽐뿌(해외게시판)
     @Transactional
     public void crawlingPpomppu4() {
-        crawlingWebSite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "tr.baseList.bbs_new1");
+        System.setProperty("webdriver.chrome.driver", chromedriver);
+        WebDriver driver = new ChromeDriver(getChromeOptions());
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        try {
+            driver.get("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu");
+            wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("tr.baseList.bbs_new1")));
+            List<WebElement> rows = driver.findElements(By.cssSelector("tr.baseList.bbs_new1"));
+            int totalRows = rows.size();
+            List<Crawling> crawlings = rows.stream()
+                    .limit(totalRows - 4) // 마지막 네 개 행을 제외
+                    .map(row -> {
+                        // 제목
+                        String title = row.findElement(By.cssSelector("a.baseList-title")).getText();
+                        // 이름
+                        String name = row.findElements(By.cssSelector("td")).get(1).getText();
+                        // 이미지 URL
+                        String imageURL = row.findElement(By.cssSelector("a.baseList-thumb img")).getAttribute("src");
+                        imageURL = imageURL.startsWith("//") ? "https:" + imageURL : imageURL;
+                        // 조회수
+                        String viewsText = row.findElement(By.cssSelector("td.baseList-space.baseList-views")).getText();
+                        Integer views = viewsText.isEmpty() ? 0 : Integer.parseInt(viewsText);
+                        // 추천수
+                        String recText = row.findElement(By.cssSelector("td.baseList-space.baseList-rec")).getText();
+                        Integer recommendCnt = recText.isEmpty() ? 0 : Integer.parseInt(recText.split(" - ")[0].trim());
+                        // 댓글수
+                        Integer commentCnt = row.findElements(By.cssSelector("span.baseList-c")).isEmpty() ? 0 : Integer.parseInt(row.findElement(By.cssSelector("span.baseList-c")).getText().replace("(", "").replace(")", ""));
+                        return Crawling.builder()
+                                .title(title)
+                                .name(name)
+                                .imageURL(imageURL)
+                                .views(views)
+                                .recommendCnt(recommendCnt)
+                                .commentCnt(commentCnt)
+                                .text(row.getText()) // 전체 텍스트
+                                .build();
+                    }).collect(Collectors.toList());
+            crawlingRepository.saveAll(crawlings);
+        } finally {
+            driver.quit();
+        }
     }
 
     // 루리웹(예판 핫딜 뽐뿌 게시판)
