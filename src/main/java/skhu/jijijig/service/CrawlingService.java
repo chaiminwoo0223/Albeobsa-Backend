@@ -52,7 +52,11 @@ public class CrawlingService {
                         String recText = row.findElement(By.cssSelector("td.baseList-space.baseList-rec")).getText();
                         Integer recommendCnt = recText.isEmpty() ? 0 : Integer.parseInt(recText.split(" - ")[0].trim());
                         // 댓글수
-                        Integer commentCnt = row.findElements(By.cssSelector("span.baseList-c")).isEmpty() ? 0 : Integer.parseInt(row.findElement(By.cssSelector("span.baseList-c")).getText().replace("(", "").replace(")", ""));
+                        Integer commentCnt = row.findElements(By.cssSelector("span.baseList-c"))
+                                .stream()
+                                .findFirst()
+                                .map(webElement -> Integer.parseInt(webElement.getText().replace("(", "").replace(")", "")))
+                                .orElse(0);
                         return Crawling.builder()
                                 .title(title)
                                 .name(name)
@@ -74,7 +78,7 @@ public class CrawlingService {
     public void crawlingPpomppu4() {
         System.setProperty("webdriver.chrome.driver", chromedriver);
         WebDriver driver = new ChromeDriver(getChromeOptions());
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60)); // 대기 시간을 길게 설정
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10)); // 대기 시간을 길게 설정
         try {
             driver.get("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4");
             List<WebElement> rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("tr.baseList.bbs_new1")));
@@ -112,7 +116,7 @@ public class CrawlingService {
             driver.quit();
         }
     }
-    
+
     // 루리웹(예판 핫딜 뽐뿌 게시판)
     @Transactional
     public void crawlingRuliweb() {
