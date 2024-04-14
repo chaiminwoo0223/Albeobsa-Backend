@@ -23,8 +23,8 @@ public class CrawlingDTO {
     @Schema(description = "링크", example = "https://link.com")
     private String link;
 
-    @Schema(description = "등록일", example = "2024-03-30 15:00:00")
-    private String createdDateTime;
+    @Schema(description = "등록일", example = "2024-03-30")
+    private String createdDate;
 
     @Schema(description = "조회수", example = "10")
     private Integer views;

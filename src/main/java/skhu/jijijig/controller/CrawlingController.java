@@ -28,8 +28,8 @@ public class CrawlingController {
     @GetMapping()
     public ResponseEntity<String> crawledWebSites() {
         try {
-            crawlingService.crawlingPpomppu();
-            crawlingService.crawlingPpomppu4();
+            crawlingService.crawlingPpomppuDomestic();
+            crawlingService.crawlingPpomppuOverseas();
             crawlingService.crawlingRuliweb();
             crawlingService.crawlingCoolenjoy();
             crawlingService.crawlingQuasarzone();
@@ -47,9 +47,9 @@ public class CrawlingController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/ppomppu")
-    public ResponseEntity<String> crawledPpomppu() {
+    public ResponseEntity<String> crawledPpomppuDomestic() {
         try {
-            crawlingService.crawlingPpomppu();
+            crawlingService.crawlingPpomppuDomestic();
             return ResponseEntity.ok("뽐뿌(국내게시판)의 내용이 성공적으로 저장되었습니다.");
         } catch (Exception e) {
             log.error("뽐뿌(국내게시판) 크롤링 과정에서 오류 발생", e);
@@ -63,9 +63,9 @@ public class CrawlingController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/ppomppu4")
-    public ResponseEntity<String> crawledPpomppu4() {
+    public ResponseEntity<String> crawledPpomppuOverseas() {
         try {
-            crawlingService.crawlingPpomppu4();
+            crawlingService.crawlingPpomppuOverseas();
             return ResponseEntity.ok("뿜뿌(해외게시판)의 내용이 성공적으로 저장되었습니다.");
         } catch (Exception e) {
             log.error("뽐뿌(해외게시판) 크롤링 과정에서 오류 발생", e);

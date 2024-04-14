@@ -13,7 +13,7 @@ public class Crawling {
     @Column(name = "crawling_id")
     private Long id;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String text; // 크롤링한 텍스트 데이터를 저장
 
     private String title;
@@ -24,11 +24,24 @@ public class Crawling {
 
     private String link;
 
-    private String createdDateTime;
+    private String createdDate;
 
     private Integer views;
 
     private Integer recommendCnt;
 
     private Integer commentCnt;
+
+    public static Crawling of(String title, String name, String imageURL, Integer views, Integer recommendCnt, Integer commentCnt, String createdDate, String link) {
+        return Crawling.builder()
+                .title(title)
+                .name(name)
+                .imageURL(imageURL)
+                .views(views)
+                .recommendCnt(recommendCnt)
+                .commentCnt(commentCnt)
+                .createdDate(createdDate)
+                .link(link)
+                .build();
+    }
 }
