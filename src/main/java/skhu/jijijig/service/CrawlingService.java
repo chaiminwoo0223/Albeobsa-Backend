@@ -63,6 +63,7 @@ public class CrawlingService {
         crawlingWebSite("https://eomisae.co.kr/rt", "div._bd.cf.clear");
     }
 
+    // 뽐뿌 크롤링 메소드
     private void crawlingPpomppu(String url) {
         System.setProperty("webdriver.chrome.driver", chromedriver);
         WebDriver driver = new ChromeDriver(getChromeOptions());
@@ -73,43 +74,38 @@ public class CrawlingService {
             int totalRows = rows.size();
             List<Crawling> crawlings = new ArrayList<>();
             for (int i = 0; i < totalRows - 4; i++) {
+                // 외부 정보 수집
                 WebElement row = rows.get(i);
                 String title = row.findElement(By.cssSelector("a.baseList-title")).getText();
                 String imageURL = Optional.ofNullable(row.findElement(By.cssSelector("a.baseList-thumb img")).getAttribute("src"))
                         .map(src -> src.startsWith("//") ? "https:" + src : src)
                         .orElse("No Image");
-                Integer views = Optional.ofNullable(row.findElement(By.cssSelector("td.baseList-space.baseList-views")).getText())
+                int views = Optional.ofNullable(row.findElement(By.cssSelector("td.baseList-space.baseList-views")).getText())
                         .filter(s -> !s.isEmpty())
                         .map(Integer::parseInt)
                         .orElse(0);
-                Integer recommendCnt = Optional.ofNullable(row.findElement(By.cssSelector("td.baseList-space.baseList-rec")).getText())
+                int recommendCnt = Optional.ofNullable(row.findElement(By.cssSelector("td.baseList-space.baseList-rec")).getText())
                         .map(s -> s.split(" - ")[0].trim())
                         .filter(s -> !s.isEmpty())
                         .map(Integer::parseInt)
                         .orElse(0);
-                Integer commentCnt = row.findElements(By.cssSelector("span.baseList-c"))
+                int commentCnt = row.findElements(By.cssSelector("span.baseList-c"))
                         .stream()
                         .findFirst()
-                        .map(e -> e.getText().replaceAll("[()]", ""))
-                        .filter(s -> !s.isEmpty())
-                        .map(Integer::parseInt)
+                        .map(e -> Integer.parseInt(e.getText().replaceAll("[()]", "")))
                         .orElse(0);
-
+                // 내부 페이지로 이동
                 String href = row.findElement(By.cssSelector("a.baseList-title")).getAttribute("href");
                 driver.get(href);
-                try {
-                    WebElement detailContent = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.sub-top-contents-box")));
-                    String name = detailContent.findElement(By.cssSelector("a.baseList-name")).getText();
-                    String createdDate = detailContent.getText().split("등록일:")[1].trim().split("\\s")[0];
-                    String link = detailContent.findElement(By.cssSelector("a")).getAttribute("href");
-                    Crawling crawling = Crawling.of(title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
-                    crawlings.add(crawling);
-                } catch (TimeoutException e) {
-                    System.err.println("상세 내용 로딩 시간 초과: " + title + ". 해당 항목을 건너뜁니다.");
-                } finally {
-                    driver.navigate().back();
-                    rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("tr.baseList.bbs_new1")));
-                }
+                WebElement detailContent = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.sub-top-contents-box")));
+                String name = detailContent.findElement(By.cssSelector("a.baseList-name")).getText();
+                String createdDate = detailContent.getText().split("등록일:")[1].trim().split("\\s")[0];
+                String link = detailContent.findElement(By.cssSelector("a")).getAttribute("href");
+                // Build
+                Crawling crawling = Crawling.of(title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
+                crawlings.add(crawling);
+                driver.navigate().back();
+                rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("tr.baseList.bbs_new1")));
             }
             crawlingRepository.saveAll(crawlings);
         } catch (Exception e) {

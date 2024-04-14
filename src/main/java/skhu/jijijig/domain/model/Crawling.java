@@ -26,13 +26,13 @@ public class Crawling {
 
     private String createdDate;
 
-    private Integer views;
+    private int views;
 
-    private Integer recommendCnt;
+    private int recommendCnt;
 
-    private Integer commentCnt;
+    private int commentCnt;
 
-    public static Crawling of(String title, String name, String imageURL, Integer views, Integer recommendCnt, Integer commentCnt, String createdDate, String link) {
+    public static Crawling of(String title, String name, String imageURL, int views, int recommendCnt, int commentCnt, String createdDate, String link) {
         return Crawling.builder()
                 .title(title)
                 .name(name)

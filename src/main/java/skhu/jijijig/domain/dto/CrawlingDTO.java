@@ -27,11 +27,11 @@ public class CrawlingDTO {
     private String createdDate;
 
     @Schema(description = "조회수", example = "10")
-    private Integer views;
+    private int views;
 
     @Schema(description = "추천수", example = "10")
-    private Integer recommendCnt;
+    private int recommendCnt;
 
     @Schema(description = "댓글수", example = "10")
-    private Integer commentCnt;
+    private int commentCnt;
 }
