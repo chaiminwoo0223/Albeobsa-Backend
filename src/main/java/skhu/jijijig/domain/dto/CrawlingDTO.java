@@ -2,6 +2,7 @@ package skhu.jijijig.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import skhu.jijijig.domain.model.Crawling;
 
 @Builder
 @Getter
@@ -34,4 +35,17 @@ public class CrawlingDTO {
 
     @Schema(description = "댓글수", example = "10")
     private int commentCnt;
+
+    public static CrawlingDTO fromEntity(Crawling crawling) {
+        return CrawlingDTO.builder()
+                .title(crawling.getTitle())
+                .name(crawling.getName())
+                .imageURL(crawling.getImageURL())
+                .link(crawling.getLink())
+                .createdDate(crawling.getCreatedDate())
+                .views(crawling.getViews())
+                .recommendCnt(crawling.getRecommendCnt())
+                .commentCnt(crawling.getCommentCnt())
+                .build();
+    }
 }

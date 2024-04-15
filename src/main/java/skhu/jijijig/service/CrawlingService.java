@@ -28,14 +28,14 @@ public class CrawlingService {
 
     // 뽐뿌(국내게시판)
     @Transactional
-    public void crawlingPpomppuDomestic() {
-        crawlingPpomppu("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu");
+    public List<Crawling> crawlingPpomppuDomestic() {
+        return crawlingPpomppu("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu");
     }
 
     // 뽐뿌(해외게시판)
     @Transactional
-    public void crawlingPpomppuOverseas() {
-        crawlingPpomppu("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4");
+    public List<Crawling> crawlingPpomppuOverseas() {
+        return crawlingPpomppu("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4");
     }
 
     // 루리웹(예판 핫딜 뽐뿌 게시판)
@@ -64,15 +64,15 @@ public class CrawlingService {
     }
 
     // 뽐뿌 크롤링 메소드
-    private void crawlingPpomppu(String url) {
+    private List<Crawling> crawlingPpomppu(String url) {
         System.setProperty("webdriver.chrome.driver", chromedriver);
         WebDriver driver = new ChromeDriver(getChromeOptions());
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+        List<Crawling> crawlings = new ArrayList<>();
         try {
             driver.get(url);
             List<WebElement> rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("tr.baseList.bbs_new1")));
             int totalRows = rows.size();
-            List<Crawling> crawlings = new ArrayList<>();
             for (int i = 0; i < totalRows - 4; i++) {
                 // 외부 정보 수집
                 WebElement row = rows.get(i);
@@ -108,11 +108,13 @@ public class CrawlingService {
                 rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("tr.baseList.bbs_new1")));
             }
             crawlingRepository.saveAll(crawlings);
+            return crawlings;
         } catch (Exception e) {
             System.err.println("크롤링 중 오류 발생: " + e.getMessage());
         } finally {
             driver.quit();
         }
+        return crawlings;
     }
 
     // 공통 크롤링 메소드
