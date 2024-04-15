@@ -77,6 +77,7 @@ public class CrawlingService {
                 // 외부 정보 수집
                 WebElement row = rows.get(i);
                 String title = row.findElement(By.cssSelector("a.baseList-title")).getText();
+                String name = row.findElement(By.cssSelector("a.baseList-name")).getText();
                 String imageURL = Optional.ofNullable(row.findElement(By.cssSelector("a.baseList-thumb img")).getAttribute("src"))
                         .map(src -> src.startsWith("//") ? "https:" + src : src)
                         .orElse("No Image");
@@ -94,13 +95,12 @@ public class CrawlingService {
                         .findFirst()
                         .map(e -> Integer.parseInt(e.getText().replaceAll("[()]", "")))
                         .orElse(0);
+                String link = row.findElement(By.cssSelector("a.baseList-title")).getAttribute("href");
                 // 내부 페이지로 이동
                 String href = row.findElement(By.cssSelector("a.baseList-title")).getAttribute("href");
                 driver.get(href);
                 WebElement detailContent = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.sub-top-contents-box")));
-                String name = detailContent.findElement(By.cssSelector("a.baseList-name")).getText();
                 String createdDate = detailContent.getText().split("등록일:")[1].trim().split("\\s")[0];
-                String link = detailContent.findElement(By.cssSelector("a")).getAttribute("href");
                 // Build
                 Crawling crawling = Crawling.of(title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
                 crawlings.add(crawling);
