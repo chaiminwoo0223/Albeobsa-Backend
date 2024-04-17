@@ -80,19 +80,22 @@ public class CrawlingController {
         }
     }
 
-    @Operation(summary = "루리웹 크롤링", description = "루리웹의 내용을 크롤링하여 결과를 저장합니다.")
+    @Operation(summary = "루리웹 크롤링", description = "루리웹의 내용을 크롤링하여 결과를 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "루리웹 크롤링 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/ruliweb")
-    public ResponseEntity<String> crawledRuliweb() {
+    public ResponseEntity<List<CrawlingDTO>> crawledRuliweb() {
         try {
-            crawlingService.crawlingRuliweb();
-            return ResponseEntity.ok("루리웹의 내용이 성공적으로 저장되었습니다.");
+            List<Crawling> crawlings = crawlingService.crawlingRuliweb();
+            List<CrawlingDTO> crawlingDTOs = crawlings.stream()
+                    .map(CrawlingDTO::fromEntity)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(crawlingDTOs);
         } catch (Exception e) {
             log.error("루리웹 크롤링 과정에서 오류 발생", e);
-            return ResponseEntity.internalServerError().body("루리웹 크롤링 과정에서 서버 에러가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(null);
         }
     }
 
