@@ -38,10 +38,12 @@ public class CrawlingService {
                 // 외부 정보 수집
                 WebElement row = rows.get(i);
                 String title = row.findElement(By.cssSelector("a.baseList-title")).getText();
-                String name = row.findElement(By.cssSelector("a.baseList-name")).getText();
+                String name = Optional.ofNullable(row.findElement(By.cssSelector("a.baseList-name")).getText())
+                        .filter(s -> !s.isEmpty())
+                        .orElse(null);
                 String imageURL = Optional.ofNullable(row.findElement(By.cssSelector("a.baseList-thumb img")).getAttribute("src"))
                         .map(src -> src.startsWith("//") ? "https:" + src : src)
-                        .orElse("No Image");
+                        .orElse(null);
                 int views = Optional.ofNullable(row.findElement(By.cssSelector("td.baseList-space.baseList-views")).getText())
                         .filter(s -> !s.isEmpty())
                         .map(Integer::parseInt)
@@ -91,10 +93,12 @@ public class CrawlingService {
                 // 외부 정보 수집
                 WebElement row = rows.get(i);
                 String title = row.findElement(By.cssSelector("a.baseList-title")).getText();
-                String name = row.findElement(By.cssSelector("a.baseList-name")).getText();
+                String name = Optional.ofNullable(row.findElement(By.cssSelector("a.baseList-name")).getText())
+                        .filter(s -> !s.isEmpty())
+                        .orElse(null);
                 String imageURL = Optional.ofNullable(row.findElement(By.cssSelector("a.baseList-thumb img")).getAttribute("src"))
                         .map(src -> src.startsWith("//") ? "https:" + src : src)
-                        .orElse("No Image");
+                        .orElse(null);
                 int views = Optional.ofNullable(row.findElement(By.cssSelector("td.baseList-space.baseList-views")).getText())
                         .filter(s -> !s.isEmpty())
                         .map(Integer::parseInt)
@@ -165,7 +169,7 @@ public class CrawlingService {
                 String imageURL = driver.findElements(By.cssSelector("a.img_load img")).stream()
                         .findFirst()
                         .map(e -> e.getAttribute("src").startsWith("//") ? "https:" + e.getAttribute("src") : e.getAttribute("src"))
-                        .orElse("No Image");
+                        .orElse(null);
                 String createdDate = driver.findElement(By.cssSelector("span.regdate")).getText().split(" ")[0].replace('.', '-');
                 // build
                 Crawling crawling = Crawling.of("루리웹", title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
@@ -223,7 +227,7 @@ public class CrawlingService {
                         .findFirst()
                         .or(() -> driver.findElements(By.cssSelector("a.view_image img")).stream().findFirst())
                         .map(s -> s.getAttribute("src").startsWith("//") ? "https:" + s.getAttribute("src") : s.getAttribute("src"))
-                        .orElse("No Image");
+                        .orElse(null);
                 String createdDate = driver.findElement(By.cssSelector("time.f-xs")).getText().split(" ")[0].replace('.', '-');
                 // build
                 Crawling crawling = Crawling.of("쿨엔조이", title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
@@ -258,7 +262,9 @@ public class CrawlingService {
                 if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue;
                 String title = row.findElement(By.cssSelector("a.subject-link")).getText().split(" ")[0];
                 String name = row.findElement(By.cssSelector("div.user-nick-text")).getText();
-                String imageURL = Optional.ofNullable(row.findElement(By.cssSelector("a.thumb img")).getAttribute("src")).orElse("No Image");
+                String imageURL = Optional.ofNullable(row.findElement(By.cssSelector("a.thumb img")).getAttribute("src"))
+                        .map(src -> src.startsWith("//") ? "https:" + src : src)
+                        .orElse(null);
                 int views = Optional.ofNullable(row.findElement(By.cssSelector("span.count")).getText())
                         .map(s -> s.endsWith("k") ? (int)(Double.parseDouble(s.replace("k", "")) * 1000) : Integer.parseInt(s))
                         .orElse(0);
@@ -302,7 +308,7 @@ public class CrawlingService {
                 String name = row.findElement(By.cssSelector("div.info")).getText();
                 String imageURL = Optional.ofNullable(row.findElement(By.cssSelector("img.tmb")).getAttribute("src"))
                         .map(src -> src.startsWith("//") ? "https:" + src : src)
-                        .orElse("No Image");
+                        .orElse(null);
                 int views = Optional.ofNullable(row.findElement(By.cssSelector("span.fr:nth-child(1)")).getText())
                         .filter(s -> !s.isEmpty())
                         .map(Integer::parseInt)
