@@ -12,11 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import skhu.jijijig.domain.model.Crawling;
 import skhu.jijijig.repository.CrawlingRepository;
 
+import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -245,21 +243,49 @@ public class CrawlingService {
 
     // 퀘사이존(핫딜게시판)
     @Transactional
-    public void crawlingQuasarzone() {
+    public List<Crawling> crawlingQuasarzone() {
         System.setProperty("webdriver.chrome.driver", chromedriver);
         WebDriver driver = new ChromeDriver(getChromeOptions());
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+        List<Crawling> crawlings = new ArrayList<>();
+        Calendar todayCalendar = Calendar.getInstance();
+        String todayDate = new SimpleDateFormat("yyyy-MM-dd").format(todayCalendar.getTime());
         try {
             driver.get("https://quasarzone.com/bbs/qb_saleinfo");
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("tbody > tr")));
-            List<WebElement> elements = driver.findElements(By.cssSelector("tbody > tr"));
-            String elementsText = elements.stream().map(WebElement::getText).collect(Collectors.joining("\n"));
-            Crawling crawling = Crawling.builder().text(elementsText).build();
-            crawlingRepository.save(crawling);
+            List<WebElement> rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("tbody > tr")));
+            for (WebElement row : rows) {
+                // 외부 정보 수집
+                if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue;
+                String title = row.findElement(By.cssSelector("a.subject-link")).getText().split(" ")[0];
+                String name = row.findElement(By.cssSelector("div.user-nick-text")).getText();
+                String imageURL = Optional.ofNullable(row.findElement(By.cssSelector("a.thumb img")).getAttribute("src")).orElse("No Image");
+                int views = Optional.ofNullable(row.findElement(By.cssSelector("span.count")).getText())
+                        .map(s -> s.endsWith("k") ? (int)(Double.parseDouble(s.replace("k", "")) * 1000) : Integer.parseInt(s))
+                        .orElse(0);
+                int commentCnt = row.findElements(By.cssSelector("span.ctn-count")).stream().findFirst().map(e -> Integer.parseInt(e.getText())).orElse(0);
+                String link = row.findElement(By.cssSelector("a.subject-link")).getAttribute("href");
+                String createdDate = row.findElement(By.cssSelector("span.date")).getText().split(" ")[0].replace('.', '-');
+                if (createdDate.contains(":")) {
+                    createdDate = todayDate;
+                } else {
+                    int currentMonth = todayCalendar.get(Calendar.MONTH) + 1;
+                    int createdMonth = Integer.parseInt(createdDate.split("-")[0]);
+                    createdDate = (todayCalendar.get(Calendar.YEAR) + (createdMonth > currentMonth ? -1 : 0)) + "-" + createdDate;
+                }
+                // Build
+                Crawling crawling = Crawling.of(title, name, imageURL, views, -1, commentCnt, createdDate, link);
+                crawlings.add(crawling);
+            }
+            crawlingRepository.saveAll(crawlings);
+            return crawlings;
+        } catch (Exception e) {
+            System.err.println("크롤링 중 오류 발생: " + e.getMessage());
         } finally {
             driver.quit();
         }
+        return crawlings;
     }
+
 
     // 어미새(기타정보)
     @Transactional
