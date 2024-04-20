@@ -9,8 +9,8 @@ import skhu.jijijig.domain.model.Crawling;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CrawlingDTO {
-    @Schema(description = "텍스트 데이터", example = "지지직")
-    private String text;
+    @Schema(description = "라벨", example = "지지직")
+    private String label;
 
     @Schema(description = "제목", example = "비타민 A, B, C, D, E, F")
     private String title;
@@ -38,6 +38,7 @@ public class CrawlingDTO {
 
     public static CrawlingDTO fromEntity(Crawling crawling) {
         return CrawlingDTO.builder()
+                .label(crawling.getLabel())
                 .title(crawling.getTitle())
                 .name(crawling.getName())
                 .imageURL(crawling.getImageURL())

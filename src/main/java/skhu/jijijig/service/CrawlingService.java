@@ -62,7 +62,7 @@ public class CrawlingService {
                 WebElement detailContent = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.sub-top-contents-box")));
                 String createdDate = detailContent.getText().split("등록일:")[1].trim().split("\\s")[0];
                 // Build
-                Crawling crawling = Crawling.of(title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
+                Crawling crawling = Crawling.of("뽐뿌(국내게시판)", title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
                 crawlings.add(crawling);
                 driver.navigate().back();
                 rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("tr.baseList.bbs_new1")));
@@ -115,7 +115,7 @@ public class CrawlingService {
                 WebElement detailContent = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.sub-top-contents-box")));
                 String createdDate = detailContent.getText().split("등록일:")[1].trim().split("\\s")[0];
                 // Build
-                Crawling crawling = Crawling.of(title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
+                Crawling crawling = Crawling.of("뽐뿌(해외게시판)", title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
                 crawlings.add(crawling);
                 driver.navigate().back();
                 rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("tr.baseList.bbs_new1")));
@@ -168,7 +168,7 @@ public class CrawlingService {
                         .orElse("No Image");
                 String createdDate = driver.findElement(By.cssSelector("span.regdate")).getText().split(" ")[0].replace('.', '-');
                 // build
-                Crawling crawling = Crawling.of(title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
+                Crawling crawling = Crawling.of("루리웹", title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
                 crawlings.add(crawling);
                 driver.navigate().back();
                 rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("tr.table_body.blocktarget")));
@@ -226,7 +226,7 @@ public class CrawlingService {
                         .orElse("No Image");
                 String createdDate = driver.findElement(By.cssSelector("time.f-xs")).getText().split(" ")[0].replace('.', '-');
                 // build
-                Crawling crawling = Crawling.of(title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
+                Crawling crawling = Crawling.of("쿨엔조이", title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
                 crawlings.add(crawling);
                 driver.navigate().back();
                 rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom")));
@@ -273,7 +273,7 @@ public class CrawlingService {
                     createdDate = (todayCalendar.get(Calendar.YEAR) + (createdMonth > currentMonth ? -1 : 0)) + "-" + createdDate;
                 }
                 // Build
-                Crawling crawling = Crawling.of(title, name, imageURL, views, -1, commentCnt, createdDate, link);
+                Crawling crawling = Crawling.of("퀘사이존", title, name, imageURL, views, -1, commentCnt, createdDate, link);
                 crawlings.add(crawling);
             }
             crawlingRepository.saveAll(crawlings);
@@ -285,7 +285,6 @@ public class CrawlingService {
         }
         return crawlings;
     }
-
 
     // 어미새(기타정보)
     @Transactional
@@ -319,7 +318,7 @@ public class CrawlingService {
                 String link = row.findElement(By.cssSelector("a.pjax.hx")).getAttribute("href");
                 String createdDate = "20" + driver.findElement(By.cssSelector("p > span:nth-child(2)")).getText().replace('.', '-');
                 // Build
-                Crawling crawling = Crawling.of(title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
+                Crawling crawling = Crawling.of("어미새", title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
                 crawlings.add(crawling);
             }
             crawlingRepository.saveAll(crawlings);
