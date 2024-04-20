@@ -14,6 +14,7 @@ import skhu.jijijig.domain.dto.CrawlingDTO;
 import skhu.jijijig.domain.model.Crawling;
 import skhu.jijijig.service.CrawlingService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,24 +26,28 @@ import java.util.stream.Collectors;
 public class CrawlingController {
     private final CrawlingService crawlingService;
 
-    @Operation(summary = "모든 사이트 크롤링", description = "모든 사이트의 내용을 크롤링하여 결과를 저장합니다.")
+    @Operation(summary = "모든 사이트 크롤링", description = "모든 사이트의 내용을 크롤링하여 결과를 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "모든 사이트 크롤링 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping()
-    public ResponseEntity<String> crawledWebSites() {
+    public ResponseEntity<List<CrawlingDTO>> crawledAllSites() {
+        List<Crawling> crawlings  = new ArrayList<>();
         try {
-            crawlingService.crawlingPpomppuDomestic();
-            crawlingService.crawlingPpomppuOverseas();
-            crawlingService.crawlingRuliweb();
-            crawlingService.crawlingCoolenjoy();
-            crawlingService.crawlingQuasarzone();
-            crawlingService.crawlingEomisae();
-            return ResponseEntity.ok("모든 사이트의 내용이 성공적으로 저장되었습니다.");
+            crawlings.addAll(crawlingService.crawlingPpomppuDomestic());
+            crawlings.addAll(crawlingService.crawlingPpomppuOverseas());
+            crawlings.addAll(crawlingService.crawlingRuliweb());
+            crawlings.addAll(crawlingService.crawlingCoolenjoy());
+            crawlings.addAll(crawlingService.crawlingQuasarzone());
+            crawlings.addAll(crawlingService.crawlingEomisae());
+            List<CrawlingDTO> crawlingDTOs = crawlings.stream()
+                    .map(CrawlingDTO::fromEntity)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(crawlingDTOs);
         } catch (Exception e) {
             log.error("크롤링 과정에서 오류 발생", e);
-            return ResponseEntity.internalServerError().body("크롤링 과정에서 서버 에러가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(null);
         }
     }
 
