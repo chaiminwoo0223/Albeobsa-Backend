@@ -134,19 +134,22 @@ public class CrawlingController {
         }
     }
 
-    @Operation(summary = "어미새 크롤링", description = "어미새의 내용을 크롤링하여 결과를 저장합니다.")
+    @Operation(summary = "어미새 크롤링", description = "어미새의 내용을 크롤링하여 결과를 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "어미새 크롤링 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/eomisae")
-    public ResponseEntity<String> crawledEomisae() {
+    public ResponseEntity<List<CrawlingDTO>> crawledEomisae() {
         try {
-            crawlingService.crawlingEomisae();
-            return ResponseEntity.ok("어미새의 내용이 성공적으로 저장되었습니다.");
+            List<Crawling> crawlings = crawlingService.crawlingEomisae();
+            List<CrawlingDTO> crawlingDTOs = crawlings.stream()
+                    .map(CrawlingDTO::fromEntity)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(crawlingDTOs);
         } catch (Exception e) {
             log.error("어미새 크롤링 과정에서 오류 발생", e);
-            return ResponseEntity.internalServerError().body("어미새 크롤링 과정에서 서버 에러가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(null);
         }
     }
 }

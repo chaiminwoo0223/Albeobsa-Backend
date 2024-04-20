@@ -56,7 +56,7 @@ public class CrawlingService {
                 int commentCnt = row.findElements(By.cssSelector("span.baseList-c"))
                         .stream()
                         .findFirst()
-                        .map(e -> Integer.parseInt(e.getText().replaceAll("[()]", "")))
+                        .map(s -> Integer.parseInt(s.getText().replaceAll("[()]", "")))
                         .orElse(0);
                 String link = row.findElement(By.cssSelector("a.baseList-title")).getAttribute("href");
                 // 내부 페이지로 이동
@@ -109,7 +109,7 @@ public class CrawlingService {
                 int commentCnt = row.findElements(By.cssSelector("span.baseList-c"))
                         .stream()
                         .findFirst()
-                        .map(e -> Integer.parseInt(e.getText().replaceAll("[()]", "")))
+                        .map(s -> Integer.parseInt(s.getText().replaceAll("[()]", "")))
                         .orElse(0);
                 String link = row.findElement(By.cssSelector("a.baseList-title")).getAttribute("href");
                 // 내부 페이지로 이동
@@ -158,7 +158,7 @@ public class CrawlingService {
                 int commentCnt = row.findElements(By.cssSelector("a.num_reply span.num"))
                         .stream()
                         .findFirst()
-                        .map(e -> Integer.parseInt(e.getText()))
+                        .map(s -> Integer.parseInt(s.getText()))
                         .orElse(0);
                 String link = row.findElement(By.cssSelector("a.deco")).getAttribute("href");
                 // 내부 페이지로 이동
@@ -215,7 +215,7 @@ public class CrawlingService {
                 int commentCnt = row.findElements(By.cssSelector("span.count-plus"))
                         .stream()
                         .findFirst()
-                        .map(e -> Integer.parseInt(e.getText().replaceAll("[\\[\\]]", ""))) // 괄호 제거 후 파싱
+                        .map(s -> Integer.parseInt(s.getText().replaceAll("[\\[\\]]", ""))) // 괄호 제거 후 파싱
                         .orElse(0);
                 String link = row.findElement(By.cssSelector("div.na-item a")).getAttribute("href");
                 // 내부 페이지로 이동
@@ -224,7 +224,7 @@ public class CrawlingService {
                 String imageURL = driver.findElements(By.cssSelector("img.fr-fic")).stream()
                         .findFirst()
                         .or(() -> driver.findElements(By.cssSelector("a.view_image img")).stream().findFirst())
-                        .map(e -> e.getAttribute("src").startsWith("//") ? "https:" + e.getAttribute("src") : e.getAttribute("src"))
+                        .map(s -> s.getAttribute("src").startsWith("//") ? "https:" + s.getAttribute("src") : s.getAttribute("src"))
                         .orElse("No Image");
                 String createdDate = driver.findElement(By.cssSelector("time.f-xs")).getText().split(" ")[0].replace('.', '-');
                 // build
@@ -251,8 +251,48 @@ public class CrawlingService {
 
     // 어미새(기타정보)
     @Transactional
-    public void crawlingEomisae() {
-        crawlingWebSite("https://eomisae.co.kr/rt", "div._bd.cf.clear");
+    public List<Crawling> crawlingEomisae() {
+        System.setProperty("webdriver.chrome.driver", chromedriver);
+        WebDriver driver = new ChromeDriver(getChromeOptions());
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+        List<Crawling> crawlings = new ArrayList<>();
+        try {
+            driver.get("https://eomisae.co.kr/rt");
+            List<WebElement> rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("div.card_el.n_ntc.clear")));
+            for (int i = 0; i < rows.size(); i++) {
+                // 외부 정보 수집
+                WebElement row = rows.get(i);
+                String title = row.findElement(By.cssSelector("h3 a.pjax")).getText();
+                String name = row.findElement(By.cssSelector("div.info")).getText();
+                String imageURL = Optional.ofNullable(row.findElement(By.cssSelector("img.tmb")).getAttribute("src"))
+                        .map(src -> src.startsWith("//") ? "https:" + src : src)
+                        .orElse("No Image");
+                int views = Optional.ofNullable(row.findElement(By.cssSelector("span.fr:nth-child(1)")).getText())
+                        .filter(s -> !s.isEmpty())
+                        .map(Integer::parseInt)
+                        .orElse(0);
+                int recommendCnt = Optional.ofNullable(row.findElement(By.cssSelector("span.fr:nth-child(3)")).getText())
+                        .filter(s -> !s.isEmpty())
+                        .map(Integer::parseInt)
+                        .orElse(0);
+                int commentCnt = Optional.ofNullable(row.findElement(By.cssSelector("span.fr:nth-child(2)")).getText())
+                        .filter(s -> !s.isEmpty())
+                        .map(Integer::parseInt)
+                        .orElse(0);
+                String link = row.findElement(By.cssSelector("a.pjax.hx")).getAttribute("href");
+                String createdDate = "20" + driver.findElement(By.cssSelector("p > span:nth-child(2)")).getText().replace('.', '-');
+                // Build
+                Crawling crawling = Crawling.of(title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
+                crawlings.add(crawling);
+            }
+            crawlingRepository.saveAll(crawlings);
+            return crawlings;
+        } catch (Exception e) {
+            System.err.println("크롤링 중 오류 발생: " + e.getMessage());
+        } finally {
+            driver.quit();
+        }
+        return crawlings;
     }
 
     // 공통 크롤링 메소드
