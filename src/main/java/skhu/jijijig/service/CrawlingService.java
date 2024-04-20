@@ -187,8 +187,60 @@ public class CrawlingService {
 
     // 쿨엔조이(지름/알뜰정보 페이지)
     @Transactional
-    public void crawlingCoolenjoy() {
-        crawlingWebSite("https://coolenjoy.net/bbs/jirum", "ul.na-table.d-md-table.w-100");
+    public List<Crawling> crawlingCoolenjoy() {
+        System.setProperty("webdriver.chrome.driver", chromedriver);
+        WebDriver driver = new ChromeDriver(getChromeOptions());
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+        List<Crawling> crawlings = new ArrayList<>();
+        try {
+            driver.get("https://coolenjoy.net/bbs/jirum");
+            List<WebElement> rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom")));
+            for (int i = 0; i < rows.size(); i++) {
+                // 외부 정보 수집
+                WebElement row = rows.get(i);
+                if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue; // 잠긴 게시물 건너뛰기
+                String title = Optional.ofNullable(row.findElement(By.cssSelector("div.na-item")).getText())
+                        .map(t -> t.split("\\n")[0])
+                        .orElse("");
+                String name = row.findElement(By.cssSelector("a.sv_member")).getText();
+                int views = Optional.ofNullable(row.findElement(By.cssSelector("div.float-left.float-md-none.d-md-table-cell.nw-4.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1")).getText())
+                        .map(s -> s.replaceAll("[^0-9]", ""))
+                        .filter(s -> !s.isEmpty())
+                        .map(Integer::parseInt)
+                        .orElse(0);
+                int recommendCnt = Optional.ofNullable(row.findElement(By.cssSelector("span.rank-icon_vote")).getText())
+                        .filter(s -> !s.isEmpty())
+                        .map(Integer::parseInt)
+                        .orElse(0);
+                int commentCnt = row.findElements(By.cssSelector("span.count-plus"))
+                        .stream()
+                        .findFirst()
+                        .map(e -> Integer.parseInt(e.getText().replaceAll("[\\[\\]]", ""))) // 괄호 제거 후 파싱
+                        .orElse(0);
+                String link = row.findElement(By.cssSelector("div.na-item a")).getAttribute("href");
+                // 내부 페이지로 이동
+                driver.get(link);
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("article.mb-4")));
+                String imageURL = driver.findElements(By.cssSelector("img.fr-fic")).stream()
+                        .findFirst()
+                        .or(() -> driver.findElements(By.cssSelector("a.view_image img")).stream().findFirst())
+                        .map(e -> e.getAttribute("src").startsWith("//") ? "https:" + e.getAttribute("src") : e.getAttribute("src"))
+                        .orElse("No Image");
+                String createdDate = driver.findElement(By.cssSelector("time.f-xs")).getText().split(" ")[0].replace('.', '-');
+                // build
+                Crawling crawling = Crawling.of(title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
+                crawlings.add(crawling);
+                driver.navigate().back();
+                rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom")));
+            }
+            crawlingRepository.saveAll(crawlings);
+            return crawlings;
+        } catch (Exception e) {
+            System.err.println("크롤링 중 오류 발생: " + e.getMessage());
+        } finally {
+            driver.quit();
+        }
+        return crawlings;
     }
 
     // 퀘사이존(핫딜게시판)
