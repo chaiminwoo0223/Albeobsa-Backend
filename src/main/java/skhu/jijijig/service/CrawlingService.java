@@ -246,7 +246,19 @@ public class CrawlingService {
     // 퀘사이존(핫딜게시판)
     @Transactional
     public void crawlingQuasarzone() {
-        crawlingWebSite("https://quasarzone.com/bbs/qb_saleinfo", "tbody > tr");
+        System.setProperty("webdriver.chrome.driver", chromedriver);
+        WebDriver driver = new ChromeDriver(getChromeOptions());
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        try {
+            driver.get("https://quasarzone.com/bbs/qb_saleinfo");
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("tbody > tr")));
+            List<WebElement> elements = driver.findElements(By.cssSelector("tbody > tr"));
+            String elementsText = elements.stream().map(WebElement::getText).collect(Collectors.joining("\n"));
+            Crawling crawling = Crawling.builder().text(elementsText).build();
+            crawlingRepository.save(crawling);
+        } finally {
+            driver.quit();
+        }
     }
 
     // 어미새(기타정보)
@@ -259,9 +271,8 @@ public class CrawlingService {
         try {
             driver.get("https://eomisae.co.kr/rt");
             List<WebElement> rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("div.card_el.n_ntc.clear")));
-            for (int i = 0; i < rows.size(); i++) {
+            for (WebElement row : rows) {
                 // 외부 정보 수집
-                WebElement row = rows.get(i);
                 String title = row.findElement(By.cssSelector("h3 a.pjax")).getText();
                 String name = row.findElement(By.cssSelector("div.info")).getText();
                 String imageURL = Optional.ofNullable(row.findElement(By.cssSelector("img.tmb")).getAttribute("src"))
@@ -293,23 +304,6 @@ public class CrawlingService {
             driver.quit();
         }
         return crawlings;
-    }
-
-    // 공통 크롤링 메소드
-    private void crawlingWebSite(String url, String cssSelector) {
-        System.setProperty("webdriver.chrome.driver", chromedriver);
-        WebDriver driver = new ChromeDriver(getChromeOptions());
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        try {
-            driver.get(url);
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(cssSelector)));
-            List<WebElement> elements = driver.findElements(By.cssSelector(cssSelector));
-            String elementsText = elements.stream().map(WebElement::getText).collect(Collectors.joining("\n"));
-            Crawling crawling = Crawling.builder().text(elementsText).build();
-            crawlingRepository.save(crawling);
-        } finally {
-            driver.quit();
-        }
     }
 
     // ChromeOptions 설정 메소드
