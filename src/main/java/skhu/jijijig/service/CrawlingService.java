@@ -24,6 +24,9 @@ public class CrawlingService {
     @Value("${CHROME_DRIVER}")
     private String chromedriver;
 
+    Calendar todayCalendar = Calendar.getInstance();
+    String todayDate = new SimpleDateFormat("yyyy-MM-dd").format(todayCalendar.getTime());
+
     // 뽐뿌(국내게시판)
     @Transactional
     public List<Crawling> crawlingPpomppuDomestic() {
@@ -59,15 +62,20 @@ public class CrawlingService {
                         .map(s -> Integer.parseInt(s.getText().replaceAll("[()]", "")))
                         .orElse(0);
                 String link = row.findElement(By.cssSelector("a.baseList-title")).getAttribute("href");
-                // 내부 페이지로 이동
-                driver.get(link);
-                WebElement detailContent = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.sub-top-contents-box")));
-                String createdDate = detailContent.getText().split("등록일:")[1].trim().split("\\s")[0];
+                String createdDate = row.findElement(By.cssSelector("time.baseList-time")).getText();
+                if (createdDate.contains(":")) {
+                    createdDate = todayDate;
+                } else {
+                    int currentMonth = todayCalendar.get(Calendar.MONTH) + 1;
+                    int createdMonth = Integer.parseInt(createdDate.split("/")[1]);
+                    int createdDay = Integer.parseInt(createdDate.split("/")[2]);
+                    createdDate = (todayCalendar.get(Calendar.YEAR) + (createdMonth > currentMonth ? -1 : 0)) + "-" +
+                            (createdMonth < 10 ? "0" + createdMonth : createdMonth) + "-" +
+                            (createdDay < 10 ? "0" + createdDay : createdDay);
+                }
                 // Build
                 Crawling crawling = Crawling.of("뽐뿌(국내게시판)", title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
                 crawlings.add(crawling);
-                driver.navigate().back();
-                rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("tr.baseList.bbs_new1")));
             }
             crawlingRepository.saveAll(crawlings);
             return crawlings;
@@ -114,15 +122,20 @@ public class CrawlingService {
                         .map(s -> Integer.parseInt(s.getText().replaceAll("[()]", "")))
                         .orElse(0);
                 String link = row.findElement(By.cssSelector("a.baseList-title")).getAttribute("href");
-                // 내부 페이지로 이동
-                driver.get(link);
-                WebElement detailContent = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.sub-top-contents-box")));
-                String createdDate = detailContent.getText().split("등록일:")[1].trim().split("\\s")[0];
+                String createdDate = row.findElement(By.cssSelector("time.baseList-time")).getText();
+                if (createdDate.contains(":")) {
+                    createdDate = todayDate;
+                } else {
+                    int currentMonth = todayCalendar.get(Calendar.MONTH) + 1;
+                    int createdMonth = Integer.parseInt(createdDate.split("/")[1]);
+                    int createdDay = Integer.parseInt(createdDate.split("/")[2]);
+                    createdDate = (todayCalendar.get(Calendar.YEAR) + (createdMonth > currentMonth ? -1 : 0)) + "-" +
+                            (createdMonth < 10 ? "0" + createdMonth : createdMonth) + "-" +
+                            (createdDay < 10 ? "0" + createdDay : createdDay);
+                }
                 // Build
                 Crawling crawling = Crawling.of("뽐뿌(해외게시판)", title, name, imageURL, views, recommendCnt, commentCnt, createdDate, link);
                 crawlings.add(crawling);
-                driver.navigate().back();
-                rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("tr.baseList.bbs_new1")));
             }
             crawlingRepository.saveAll(crawlings);
             return crawlings;
@@ -252,8 +265,6 @@ public class CrawlingService {
         WebDriver driver = new ChromeDriver(getChromeOptions());
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
         List<Crawling> crawlings = new ArrayList<>();
-        Calendar todayCalendar = Calendar.getInstance();
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd").format(todayCalendar.getTime());
         try {
             driver.get("https://quasarzone.com/bbs/qb_saleinfo");
             List<WebElement> rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("tbody > tr")));
