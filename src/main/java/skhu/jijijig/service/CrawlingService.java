@@ -1,12 +1,11 @@
 package skhu.jijijig.service;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.RequiredArgsConstructor;
 import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.chrome.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import skhu.jijijig.domain.model.Crawling;
@@ -21,17 +20,13 @@ import java.util.*;
 public class CrawlingService {
     private final CrawlingRepository crawlingRepository;
 
-    @Value("${CHROME_DRIVER}")
-    private String chromedriver;
-
     Calendar todayCalendar = Calendar.getInstance();
     String todayDate = new SimpleDateFormat("yyyy-MM-dd").format(todayCalendar.getTime());
 
     // 뽐뿌(국내게시판)
     @Transactional
     public List<Crawling> crawlingPpomppuDomestic() {
-        System.setProperty("webdriver.chrome.driver", chromedriver);
-        WebDriver driver = new ChromeDriver(getChromeOptions());
+        WebDriver driver = getChromeDriver();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
         List<Crawling> crawlings = new ArrayList<>();
         try {
@@ -90,8 +85,7 @@ public class CrawlingService {
     // 뽐뿌(해외게시판)
     @Transactional
     public List<Crawling> crawlingPpomppuOverseas() {
-        System.setProperty("webdriver.chrome.driver", chromedriver);
-        WebDriver driver = new ChromeDriver(getChromeOptions());
+        WebDriver driver = getChromeDriver();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
         List<Crawling> crawlings = new ArrayList<>();
         try {
@@ -150,8 +144,7 @@ public class CrawlingService {
     // 루리웹(예판 핫딜 뽐뿌 게시판)
     @Transactional
     public List<Crawling> crawlingRuliweb() {
-        System.setProperty("webdriver.chrome.driver", chromedriver);
-        WebDriver driver = new ChromeDriver(getChromeOptions());
+        WebDriver driver = getChromeDriver();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
         List<Crawling> crawlings = new ArrayList<>();
         try {
@@ -203,8 +196,7 @@ public class CrawlingService {
     // 쿨엔조이(지름/알뜰정보 페이지)
     @Transactional
     public List<Crawling> crawlingCoolenjoy() {
-        System.setProperty("webdriver.chrome.driver", chromedriver);
-        WebDriver driver = new ChromeDriver(getChromeOptions());
+        WebDriver driver = getChromeDriver();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
         List<Crawling> crawlings = new ArrayList<>();
         try {
@@ -261,8 +253,7 @@ public class CrawlingService {
     // 퀘사이존(핫딜게시판)
     @Transactional
     public List<Crawling> crawlingQuasarzone() {
-        System.setProperty("webdriver.chrome.driver", chromedriver);
-        WebDriver driver = new ChromeDriver(getChromeOptions());
+        WebDriver driver = getChromeDriver();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
         List<Crawling> crawlings = new ArrayList<>();
         try {
@@ -304,8 +295,7 @@ public class CrawlingService {
     // 어미새(기타정보)
     @Transactional
     public List<Crawling> crawlingEomisae() {
-        System.setProperty("webdriver.chrome.driver", chromedriver);
-        WebDriver driver = new ChromeDriver(getChromeOptions());
+        WebDriver driver = getChromeDriver();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
         List<Crawling> crawlings = new ArrayList<>();
         try {
@@ -346,16 +336,23 @@ public class CrawlingService {
         return crawlings;
     }
 
-    // ChromeOptions 설정 메소드
-    private ChromeOptions getChromeOptions() {
-        return new ChromeOptions()
-                .addArguments("--headless") // GUI 없는 환경에서 실행
-                .addArguments("--disable-gpu") // GPU 가속 비활성화
-                .addArguments("--no-sandbox") // 샌드박스 모드 비활성화, Docker에서 필수
-                .addArguments("--disable-dev-shm-usage") // 컨테이너 환경에서 공유 메모리 사용량 최적화
-                .addArguments("--disable-extensions") // 확장 프로그램 비활성화
-                .addArguments("--disable-popup-blocking") // 팝업 차단 해제
-                .addArguments("--start-maximized") // 브라우저 최대 크기로 시작
-                .addArguments("user-agent=Mozilla/5.0..."); // 사용자 에이전트 설정
+    // ChromeDriver 설정 메소드
+    private WebDriver getChromeDriver() {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless"); // GUI 없는 환경에서 실행
+        options.addArguments("--disable-gpu"); // GPU 가속 비활성화
+        options.addArguments("--no-sandbox"); // 샌드박스 모드 비활성화, Docker에서 필수
+        options.addArguments("--disable-dev-shm-usage"); // 컨테이너 환경에서 공유 메모리 사용량 최적화
+        options.addArguments("--disable-extensions"); // 확장 프로그램 비활성화
+        options.addArguments("--disable-popup-blocking"); // 팝업 차단 해제
+        options.addArguments("--start-maximized"); // 브라우저 최대 크기로 시작
+        options.addArguments("--window-size=1920,1080"); // 창 크기 명시적 설정
+        options.addArguments("user-agent=Mozilla/5.0..."); // 사용자 에이전트 설정
+        options.addArguments("--disable-infobars"); // 정보 바 비활성화
+        options.addArguments("--disable-browser-side-navigation"); // 브라우저 사이드 네비게이션 비활성화
+        options.addArguments("--disable-setuid-sandbox"); // 프로세스 간 샌드박스 모드 비활성화
+        options.setCapability("goog:loggingPrefs", java.util.Collections.singletonMap("browser", "ALL")); // 로깅 레벨 설정 (에러 발생 시 로그를 확인할 수 있도록)
+        WebDriverManager.chromedriver().setup(); // WebDriverManager를 이용한 ChromeDriver 설정
+        return new ChromeDriver(options);
     }
 }

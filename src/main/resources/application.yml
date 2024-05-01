@@ -26,6 +26,8 @@ spring:
 
 server:
   port: 8080
+#  tomcat:
+#    connection-timeout: 60000
 
 jwt:
   secret: ${JWT_SECRET}

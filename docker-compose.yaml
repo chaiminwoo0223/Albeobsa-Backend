@@ -13,7 +13,6 @@ services:
       ACCESS_SECOND: ${ACCESS_SECOND}
       REFRESH_SECOND: ${REFRESH_SECOND}
       FIREBASE_KEY: ${FIREBASE_KEY}
-      CHROME_DRIVER: ${CHROME_DRIVER}
     ports:
       - "8080:8080"
     restart: on-failure
