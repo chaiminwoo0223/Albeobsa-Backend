@@ -14,17 +14,29 @@ public class Report extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id", nullable = false)
-    private Comment comment;
+    @JoinColumn(name = "board_id")
+    private Board board; // 신고 대상 게시글
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comment_id")
+    private Comment comment; // 신고 대상 댓글
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member reporter;
+    private Member reporter; // 신고자
 
     @Column(columnDefinition = "TEXT")
-    private Reason reason;
+    private Reason reason; // 신고 이유
 
-    public static Report createReport(Comment comment, Member reporter, Reason reason) {
+    public static Report createReportForBoard(Board board, Member reporter, Reason reason) {
+        return Report.builder()
+                .board(board)
+                .reporter(reporter)
+                .reason(reason)
+                .build();
+    }
+
+    public static Report createReportForComment(Comment comment, Member reporter, Reason reason) {
         return Report.builder()
                 .comment(comment)
                 .reporter(reporter)

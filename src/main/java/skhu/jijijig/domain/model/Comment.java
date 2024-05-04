@@ -1,6 +1,7 @@
 package skhu.jijijig.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.access.AccessDeniedException;
@@ -32,6 +33,11 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "board_id", nullable = false)
     @JsonBackReference
     private Board board; // 댓글이 달린 게시판
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Report> reports; // 댓글에 대한 신고 목록
+
 
     public Comment(Board board, Member member, String content) {
         this.board = board;

@@ -8,5 +8,7 @@ import java.util.List;
 
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
+    List<Report> findByBoardId(Long boardId);
+
     List<Report> findByCommentId(Long commentId);
 }

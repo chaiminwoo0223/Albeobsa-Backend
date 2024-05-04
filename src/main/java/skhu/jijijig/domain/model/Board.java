@@ -43,6 +43,10 @@ public class Board extends BaseEntity {
     @JsonManagedReference
     private List<Comment> comments;
 
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Report> reports; // 게시글에 대한 신고 목록
+
     @OneToMany(mappedBy = "board", orphanRemoval = true)
     @JsonManagedReference
     private List<Heart> hearts;

@@ -42,6 +42,10 @@ public class Member {
     @JsonManagedReference
     private List<Comment> comments; // 댓글
 
+    @OneToMany(mappedBy = "reporter", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Report> reports; // 회원이 신고한 내역
+
     @OneToMany(mappedBy = "member", orphanRemoval = true)
     @JsonManagedReference
     private List<Heart> hearts; // 유저가 누른 좋아요
