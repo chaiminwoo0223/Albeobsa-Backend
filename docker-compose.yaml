@@ -12,12 +12,18 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       ACCESS_SECOND: ${ACCESS_SECOND}
       REFRESH_SECOND: ${REFRESH_SECOND}
-      FIREBASE_KEY: ${FIREBASE_KEY}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
+      GOOGLE_TOKEN_URL: ${GOOGLE_TOKEN_URL}
+      GOOGLE_USERINFO_URI: ${GOOGLE_USERINFO_URI}
     ports:
       - "8080:8080"
     restart: on-failure
-    volumes:
-      - ./firebase:/app/firebase
+    deploy:
+      resources:
+        limits:
+          memory: 2048MB
     networks:
       - jijijig-network
 
