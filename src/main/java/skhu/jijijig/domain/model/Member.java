@@ -1,7 +1,6 @@
 package skhu.jijijig.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.google.firebase.auth.FirebaseToken;
 import jakarta.persistence.*;
 import lombok.*;
 import skhu.jijijig.domain.dto.MemberDTO;
@@ -59,16 +58,6 @@ public class Member {
                 .name(memberDTO.getName())
                 .email(memberDTO.getEmail())
                 .picture(memberDTO.getPicture())
-                .role(Role.USER)
-                .firebaseAuth(true)
-                .build();
-    }
-
-    public static Member fromToken(FirebaseToken firebaseToken) {
-        return Member.builder()
-                .name(firebaseToken.getName())
-                .email(firebaseToken.getEmail())
-                .picture(firebaseToken.getPicture())
                 .role(Role.USER)
                 .firebaseAuth(true)
                 .build();

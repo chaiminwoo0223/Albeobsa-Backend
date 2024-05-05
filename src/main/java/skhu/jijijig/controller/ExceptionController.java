@@ -6,31 +6,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import skhu.jijijig.domain.dto.ErrorResponseDTO;
-import skhu.jijijig.exception.EmailAlreadyExistsException;
-import skhu.jijijig.exception.FirebaseAuthenticationException;
-import skhu.jijijig.exception.InvalidTokenException;
 import skhu.jijijig.exception.ResourceNotFoundException;
 
 @RestControllerAdvice
 public class ExceptionController {
-    @ExceptionHandler(FirebaseAuthenticationException.class)
-    public ResponseEntity<ErrorResponseDTO> handleFirebaseAuthenticationException(FirebaseAuthenticationException e) {
-        ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage(), e.getStatus().value());
-        return new ResponseEntity<>(errorResponse, e.getStatus());
-    }
-
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponseDTO> handleEmailAlreadyExistsException(EmailAlreadyExistsException e) {
-        ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage(), HttpStatus.BAD_REQUEST.value());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<ErrorResponseDTO> handleInvalidTokenException(InvalidTokenException e) {
-        ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage(), HttpStatus.UNAUTHORIZED.value());
-        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
-    }
-
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<String> handleResourceNotFoundException(ResourceNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

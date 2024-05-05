@@ -6,7 +6,6 @@ import lombok.*;
 @Data
 @Builder
 @Getter
-@Setter
 @AllArgsConstructor
 public class TokenDTO {
     @Schema(description = "토큰 타입")
