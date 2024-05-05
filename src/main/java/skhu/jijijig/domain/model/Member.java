@@ -30,9 +30,6 @@ public class Member {
     @Column(nullable = false)
     private Role role;
 
-    @Column(nullable = false)
-    private boolean firebaseAuth;
-
     @OneToMany(mappedBy = "member", orphanRemoval = true)
     @JsonManagedReference
     private List<Board> boards; // 작성글
@@ -59,7 +56,6 @@ public class Member {
                 .email(memberDTO.getEmail())
                 .picture(memberDTO.getPicture())
                 .role(Role.USER)
-                .firebaseAuth(true)
                 .build();
     }
 }

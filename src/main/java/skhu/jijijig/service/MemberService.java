@@ -26,6 +26,7 @@ import java.util.Map;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final TokenProvider tokenProvider;
+    private final TokenBlackListService tokenBlackListService;
 
     @Value("${spring.security.oauth2.google-client-id}")
     private String googleClientId;
@@ -42,11 +43,6 @@ public class MemberService {
     @Value("${spring.security.oauth2.google-userInfo-uri}")
     private String googleUserInfoUri;
 
-    /**
-     * Google로부터 Access Token을 획득
-     * @param code 인증 코드
-     * @return Access Token
-     */
     public String getGoogleTokens(String code) throws RestClientException {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -74,11 +70,6 @@ public class MemberService {
         }
     }
 
-    /**
-     * Google로부터 사용자 정보 획득
-     * @param accessToken 액세스 토큰
-     * @return 사용자 정보
-     */
     public MemberDTO getMemberDTO(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
         String url = googleUserInfoUri + "?access_token=" + accessToken;
@@ -94,16 +85,23 @@ public class MemberService {
         }
     }
 
-    /**
-     * Google OAuth를 사용하여 로그인 또는 회원가입 처리
-     * @param code 인증 코드
-     * @return 토큰 정보
-     */
     public TokenDTO googleLoginSignup(String code) {
         String accessToken = getGoogleTokens(code);
         MemberDTO memberDTO = getMemberDTO(accessToken);
         Member member = memberRepository.findByEmail(memberDTO.getEmail())
                 .orElseGet(() -> memberRepository.save(Member.fromDTO(memberDTO)));
         return tokenProvider.createTokens(member);
+    }
+
+    public TokenDTO refreshAccessToken(String refreshToken) {
+        if (tokenBlackListService.isBlackListed(refreshToken)) {
+            throw new RuntimeException("블랙리스트에 포함된 새로고침 토큰입니다.");
+        }
+        return tokenProvider.renewToken(refreshToken);
+    }
+
+    public void deactivateTokens(String accessToken, String refreshToken) {
+        tokenBlackListService.addToBlackList(accessToken);
+        tokenBlackListService.addToBlackList(refreshToken);
     }
 }
