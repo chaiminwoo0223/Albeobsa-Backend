@@ -50,7 +50,7 @@ public class Comment extends BaseEntity {
     }
 
     public void deleteCommentIfAuthorized(Member member, CommentRepository commentRepository) {
-        if (this.member.isAuthorizedToDelete(member)) {
+        if (this.member.equals(member) || member.getRole().equals(Role.ADMIN)) {
             commentRepository.delete(this);
         } else {
             throw new AccessDeniedException("댓글 삭제 권한이 없습니다.");

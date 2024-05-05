@@ -46,10 +46,6 @@ public class Member {
     @JsonManagedReference
     private List<Heart> hearts; // 유저가 누른 좋아요
 
-    public boolean isAuthorizedToDelete(Member member) {
-        return this.equals(member) || member.getRole().equals(Role.ADMIN);
-    }
-
     public static Member fromDTO(MemberDTO memberDTO) {
         return Member.builder()
                 .name(memberDTO.getName())

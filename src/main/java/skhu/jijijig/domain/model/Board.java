@@ -67,7 +67,7 @@ public class Board extends BaseEntity {
     }
 
     public void deleteBoardIfAuthorized(Member member, BoardRepository boardRepository, CommentRepository commentRepository, HeartRepository heartRepository) {
-        if (this.member.isAuthorizedToDelete(member)) {
+        if (this.member.equals(member) || member.getRole().equals(Role.ADMIN)) {
             commentRepository.deleteByBoardId(this.id); // 이 게시글에 대한 모든 댓글 삭제
             heartRepository.deleteAll(hearts); // 이 게시글에 대한 모든 좋아요 삭제
             boardRepository.delete(this); // 게시글 삭제
@@ -76,10 +76,10 @@ public class Board extends BaseEntity {
         }
     }
 
-    public void attachComment(Member member, String content, CommentRepository commentRepository) {
-        Comment comment = new Comment(this, member, content);
-        commentRepository.save(comment);
+    public Comment attachComment(Member member, String content) {
+        return new Comment(this, member, content);
     }
+
 
     public void attachHeart(Member member, HeartRepository heartRepository) {
         if (!heartRepository.existsByBoardAndMember(this, member)) {

@@ -20,18 +20,19 @@ public class CommentService {
     private final CommentRepository commentRepository;
 
     @Transactional
-    public void addComment(Long boardId, Long memberId, String content) {
+    public Long addComment(Long boardId, Long memberId, String content) {
         Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 ID의 게시글을 찾을 수 없습니다: " + boardId));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 Id의 게시글을 찾을 수 없습니다: " + boardId));
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 ID의 회원을 찾을 수 없습니다: " + memberId));
-        board.attachComment(member, content, commentRepository);
+                .orElseThrow(() -> new ResourceNotFoundException("해당 Id의 회원을 찾을 수 없습니다: " + memberId));
+        Comment newComment = board.attachComment(member, content);
+        return commentRepository.save(newComment).getId();
     }
 
     @Transactional
     public void editComment(Long boardId, Long commentId, Long memberId, String content) {
         Comment comment = commentRepository.findByIdAndBoardId(commentId, boardId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 ID의 댓글을 찾을 수 없습니다: " + commentId));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 Id의 댓글을 찾을 수 없습니다: " + commentId));
         if (!comment.getMember().getId().equals(memberId)) {
             throw new AccessDeniedException("댓글 수정 권한이 없습니다.");
         }
@@ -42,9 +43,9 @@ public class CommentService {
     @Transactional
     public void removeComment(Long boardId, Long commentId, Long memberId) {
         Comment comment = commentRepository.findByIdAndBoardId(commentId, boardId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 ID의 게시글을 찾을 수 없습니다: " + boardId));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 Id의 댓글을 찾을 수 없습니다: " + commentId));
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 ID의 회원을 찾을 수 없습니다: " + memberId));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 Id의 회원을 찾을 수 없습니다: " + memberId));
         comment.deleteCommentIfAuthorized(member, commentRepository);
     }
 }

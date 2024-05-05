@@ -31,14 +31,14 @@ public class BoardService {
     @Transactional
     public BoardDTO getBoard(Long boardId) {
         Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 ID의 게시글을 찾을 수 없습니다: " + boardId));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 Id의 게시글을 찾을 수 없습니다: " + boardId));
         return BoardDTO.fromEntity(board, Comment.toDTOsForBoard(board, commentRepository));
     }
 
     @Transactional
     public Long addBoard(BoardDTO boardDTO, Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 ID의 회원을 찾을 수 없습니다: " + memberId));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 Id의 회원을 찾을 수 없습니다: " + memberId));
         Board board = Board.createNewBoard(boardDTO, member);
         return boardRepository.save(board).getId();
     }
@@ -46,7 +46,7 @@ public class BoardService {
     @Transactional
     public void editBoard(Long boardId, BoardDTO boardDTO, Long memberId) {
         Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 ID의 게시글을 찾을 수 없습니다: " + boardId));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 Id의 게시글을 찾을 수 없습니다: " + boardId));
         if (!board.getMember().getId().equals(memberId)) {
             throw new AccessDeniedException("게시글 수정 권한이 없습니다.");
         }
@@ -57,9 +57,9 @@ public class BoardService {
     @Transactional
     public void removeBoard(Long boardId, Long memberId) {
         Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 ID의 게시글을 찾을 수 없습니다: " + boardId));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 Id의 게시글을 찾을 수 없습니다: " + boardId));
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 ID의 회원을 찾을 수 없습니다: " + memberId));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 Id의 회원을 찾을 수 없습니다: " + memberId));
         board.deleteBoardIfAuthorized(member, boardRepository, commentRepository, heartRepository);
     }
 }

@@ -36,7 +36,7 @@ public class BoardController {
             @ApiResponse(responseCode = "200", description = "전체 게시글 조회 성공"),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<Page<BoardDTO>> readBoards(Pageable pageable) {
         try {
             Page<BoardDTO> boards = boardService.getBoards(pageable);
@@ -76,7 +76,7 @@ public class BoardController {
         try {
             Long memberId = Long.parseLong(principal.getName());
             Long boardId = boardService.addBoard(boardDTO, memberId);
-            return new ResponseEntity<>(boardId, HttpStatus.CREATED);
+            return ResponseEntity.status(HttpStatus.CREATED).body("게시글이 성공적으로 생성되었습니다. boardId: " + boardId);
         } catch (Exception e) {
             log.error("게시글 생성 중 예외 발생: {}", e.getMessage());
             return ResponseEntity.internalServerError().build();
@@ -85,7 +85,7 @@ public class BoardController {
 
     @Operation(summary = "게시글 수정", description = "게시글을 수정합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "게시글 수정 성공"),
+            @ApiResponse(responseCode = "202", description = "게시글 수정 성공"),
             @ApiResponse(responseCode = "403", description = "게시글 수정 권한 없음"),
             @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음")
     })
@@ -94,7 +94,7 @@ public class BoardController {
         Long memberId = Long.parseLong(principal.getName());
         try {
             boardService.editBoard(boardId, boardDTO, memberId);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.accepted().body("게시글이 성공적으로 수정되었습니다. boardId: " + boardId);
         } catch (ResourceNotFoundException e) {
             log.error("게시글 수정 실패: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -109,7 +109,7 @@ public class BoardController {
 
     @Operation(summary = "게시글 삭제", description = "게시글을 삭제합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "게시글 삭제 성공"),
+            @ApiResponse(responseCode = "202", description = "게시글 삭제 성공"),
             @ApiResponse(responseCode = "403", description = "게시글 삭제 권한 없음"),
             @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음")
     })
@@ -118,7 +118,7 @@ public class BoardController {
         Long memberId = Long.parseLong(principal.getName());
         try {
             boardService.removeBoard(boardId, memberId);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.accepted().body("게시글이 성공적으로 삭제되었습니다. boardId: " + boardId);
         } catch (ResourceNotFoundException e) {
             log.error("게시글 삭제 실패: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -140,8 +140,8 @@ public class BoardController {
     public ResponseEntity<?> createComment(Principal principal, @PathVariable Long boardId, @RequestBody CommentDTO commentDTO) {
         Long memberId = Long.parseLong(principal.getName());
         try {
-            commentService.addComment(boardId, memberId, commentDTO.getContent());
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            Long commentId = commentService.addComment(boardId, memberId, commentDTO.getContent());
+            return ResponseEntity.status(HttpStatus.CREATED).body("댓글이 성공적으로 생성되었습니다. commentId: " + commentId);
         } catch (ResourceNotFoundException e) {
             log.error("댓글 생성 실패: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -153,7 +153,7 @@ public class BoardController {
 
     @Operation(summary = "댓글 수정", description = "게시글의 댓글을 수정합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "댓글 수정 성공"),
+            @ApiResponse(responseCode = "202", description = "댓글 수정 성공"),
             @ApiResponse(responseCode = "403", description = "댓글 수정 권한 없음"),
             @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
     })
@@ -162,7 +162,7 @@ public class BoardController {
         Long memberId = Long.parseLong(principal.getName());
         try {
             commentService.editComment(boardId, commentId, memberId, commentDTO.getContent());
-            return ResponseEntity.ok().build();
+            return ResponseEntity.accepted().body("댓글이 성공적으로 수정되었습니다. commentId: " + commentId);
         } catch (ResourceNotFoundException e) {
             log.error("댓글 수정 실패: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -177,7 +177,7 @@ public class BoardController {
 
     @Operation(summary = "댓글 삭제", description = "게시글의 댓글을 삭제합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "댓글 삭제 성공"),
+            @ApiResponse(responseCode = "202", description = "댓글 삭제 성공"),
             @ApiResponse(responseCode = "403", description = "댓글 삭제 권한 없음"),
             @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
     })
@@ -186,7 +186,7 @@ public class BoardController {
         Long memberId = Long.parseLong(principal.getName());
         try {
             commentService.removeComment(boardId, commentId, memberId);
-            return ResponseEntity.ok().body("댓글이 성공적으로 삭제되었습니다.");
+            return ResponseEntity.accepted().body("댓글이 성공적으로 삭제되었습니다. commentId: " + commentId);
         } catch (ResourceNotFoundException e) {
             log.error("댓글 삭제 실패: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -209,7 +209,7 @@ public class BoardController {
         Long memberId = Long.parseLong(principal.getName());
         try {
             heartService.addHeart(boardId, memberId);
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            return ResponseEntity.status(HttpStatus.CREATED).body("좋아요가 성공적으로 생성되었습니다.");
         } catch (ResourceNotFoundException e) {
             log.error("좋아요 생성 실패: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -221,7 +221,7 @@ public class BoardController {
 
     @Operation(summary = "좋아요 삭제", description = "게시글의 좋아요를 삭제합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "좋아요 삭제 성공"),
+            @ApiResponse(responseCode = "202", description = "좋아요 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음")
     })
     @DeleteMapping("/{boardId}/hearts")
@@ -229,7 +229,7 @@ public class BoardController {
         Long memberId = Long.parseLong(principal.getName());
         try {
             heartService.removeHeart(boardId, memberId);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return ResponseEntity.accepted().body("좋아요가 성공적으로 삭제되었습니다.");
         } catch (ResourceNotFoundException e) {
             log.error("좋아요 삭제 실패: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
