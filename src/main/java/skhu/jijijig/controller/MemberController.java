@@ -25,7 +25,7 @@ public class MemberController {
 
     @Operation(summary = "인증", description = "Google OAuth 인증 코드를 받아서, 클라이언트에게 반환합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "인증 코드 반환 성공", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "200", description = "인증 성공", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
@@ -34,8 +34,11 @@ public class MemberController {
     public ResponseEntity<?> authenticate(@RequestParam("code") String code) {
         try {
             return ResponseEntity.ok(code);
+        } catch (IllegalArgumentException e) {
+            log.error("인증 실패", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponseDTO(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
         } catch (Exception e) {
-            log.error("인증 코드 반환 실패", e);
+            log.error("인증 처리 중 서버 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponseDTO("서버 오류 발생", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
     }
