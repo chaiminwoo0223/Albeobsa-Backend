@@ -23,24 +23,42 @@ import skhu.jijijig.service.MemberService;
 public class MemberController {
     private final MemberService memberService;
 
-    @Operation(summary = "Google 로그인", description = "Google OAuth 인증 코드를 사용하여, 사용자 로그인을 처리하고 토큰을 반환합니다.")
+    @Operation(summary = "인증", description = "Google OAuth 인증 코드를 받아서, 클라이언트에게 반환합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "인증 코드 반환 성공", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    @GetMapping("/authenticate")
+    public ResponseEntity<?> authenticate(@RequestParam("code") String code) {
+        try {
+            return ResponseEntity.ok(code);
+        } catch (Exception e) {
+            log.error("인증 코드 반환 실패", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponseDTO("서버 오류 발생", HttpStatus.INTERNAL_SERVER_ERROR.value()));
+        }
+    }
+
+
+    @Operation(summary = "로그인", description = "Google OAuth 인증 코드를 사용하여, 사용자 로그인을 처리하고 토큰을 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(schema = @Schema(implementation = TokenDTO.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
-    @GetMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam("code") String code) {
         try {
             TokenDTO tokens = memberService.googleLoginSignup(code);
             return ResponseEntity.ok(tokens);
         } catch (IllegalArgumentException e) {
-            log.error("로그인 실패: 부적절한 인자", e);
-            return ResponseEntity.badRequest().body(new ErrorResponseDTO(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
+            log.error("로그인 실패: 잘못된 코드입니다.", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponseDTO(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
         } catch (Exception e) {
             log.error("로그인 처리 중 서버 오류 발생", e);
-            return ResponseEntity.internalServerError().body(new ErrorResponseDTO("서버 오류 발생", HttpStatus.INTERNAL_SERVER_ERROR.value()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponseDTO("서버 오류 발생", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
     }
 
