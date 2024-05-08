@@ -33,17 +33,6 @@ public class ReportController {
         return ResponseEntity.ok(reports);
     }
 
-    @Operation(summary = "댓글별 신고 내역 조회", description = "특정 댓글에 대한 모든 신고 내역을 조회합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "신고 내역 조회 성공"),
-            @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
-    })
-    @GetMapping("/comments/{commentId}")
-    public ResponseEntity<List<ReportDTO>> findAllReportsForComment(@PathVariable Long commentId) {
-        List<ReportDTO> reports = reportService.findAllReportsForComment(commentId);
-        return ResponseEntity.ok(reports);
-    }
-
     @Operation(summary = "게시글 신고", description = "게시글을 신고합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "게시글 신고 성공"),
@@ -55,6 +44,17 @@ public class ReportController {
         Long reporterId = Long.parseLong(principal.getName());
         ReportDTO reportDTO = reportService.reportBoard(boardId, reporterId, reason);
         return new ResponseEntity<>(reportDTO, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "댓글별 신고 내역 조회", description = "특정 댓글에 대한 모든 신고 내역을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "신고 내역 조회 성공"),
+            @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
+    })
+    @GetMapping("/comments/{commentId}")
+    public ResponseEntity<List<ReportDTO>> findAllReportsForComment(@PathVariable Long commentId) {
+        List<ReportDTO> reports = reportService.findAllReportsForComment(commentId);
+        return ResponseEntity.ok(reports);
     }
 
     @Operation(summary = "댓글 신고", description = "댓글을 신고합니다.")
