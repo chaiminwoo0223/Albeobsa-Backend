@@ -24,14 +24,14 @@ import java.util.stream.Collectors;
 public class CrawlingController {
     private final CrawlingService crawlingService;
 
-    @Operation(summary = "뽐뿌(국내게시판) 크롤링", description = "뽐뿌(국내게시판)의 내용을 비동기적으로 크롤링하여 결과를 조회합니다.")
+    @Operation(summary = "뽐뿌(국내게시판) 크롤링", description = "뽐뿌(국내게시판)의 내용을 크롤링하여 결과를 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "뽐뿌(해외게시판) 크롤링 성공"),
+            @ApiResponse(responseCode = "200", description = "뽐뿌(국내게시판) 크롤링 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/ppomppu")
     public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> crawledPpomppuDomestic() {
-        return crawlingService.crawlingPpomppuDomestic()
+        return crawlingService.performCrawlingForPpomppuDomestic()
                 .thenApply(crawlings -> ResponseEntity.ok(crawlings.stream()
                         .map(CrawlingDTO::fromEntity)
                         .collect(Collectors.toList())))
@@ -45,7 +45,7 @@ public class CrawlingController {
     })
     @GetMapping("/ppomppu4")
     public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> crawledPpomppuOverseas() {
-        return crawlingService.crawlingPpomppuOverseas()
+        return crawlingService.performCrawlingForPpomppuOverseas()
                 .thenApply(crawlings -> ResponseEntity.ok(crawlings.stream()
                         .map(CrawlingDTO::fromEntity)
                         .collect(Collectors.toList())))

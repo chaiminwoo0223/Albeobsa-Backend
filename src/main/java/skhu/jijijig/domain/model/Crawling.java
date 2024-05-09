@@ -29,7 +29,7 @@ public class Crawling {
     private String link;
 
     @Column(nullable = false)
-    private String createdDate;
+    private String createdDateTime;
 
     @Column(nullable = false)
     private int views;
@@ -40,7 +40,7 @@ public class Crawling {
     @Column(nullable = false)
     private int commentCnt;
 
-    public static Crawling of(String label, String title, String name, String imageURL, int views, int recommendCnt, int commentCnt, String createdDate, String link) {
+    public static Crawling of(String label, String title, String name, String imageURL, int views, int recommendCnt, int commentCnt, String createdDateTime, String link) {
         return Crawling.builder()
                 .label(label)
                 .title(title)
@@ -49,7 +49,7 @@ public class Crawling {
                 .views(views)
                 .recommendCnt(recommendCnt)
                 .commentCnt(commentCnt)
-                .createdDate(createdDate)
+                .createdDateTime(createdDateTime)
                 .link(link)
                 .build();
     }
