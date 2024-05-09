@@ -33,6 +33,9 @@ public class CrawlingDTO {
     @Schema(description = "추천수", example = "10")
     private int recommendCnt;
 
+    @Schema(description = "비추천수", example = "2")
+    private int unrecommendCnt;
+
     @Schema(description = "댓글수", example = "10")
     private int commentCnt;
 
@@ -46,6 +49,7 @@ public class CrawlingDTO {
                 .createdDateTime(crawling.getCreatedDateTime())
                 .views(crawling.getViews())
                 .recommendCnt(crawling.getRecommendCnt())
+                .unrecommendCnt(crawling.getUnrecommendCnt())
                 .commentCnt(crawling.getCommentCnt())
                 .build();
     }

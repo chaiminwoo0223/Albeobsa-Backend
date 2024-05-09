@@ -75,15 +75,16 @@ public class CrawlingService {
     private Crawling extractDataFromRow(WebElement row, String label) {
         try {
             String title = row.findElement(By.cssSelector("a.baseList-title")).getText();
-            String name = Optional.ofNullable(row.findElement(By.cssSelector("a.baseList-name")).getText()).orElse("이름 없음");
+            String name = Optional.ofNullable(row.findElement(By.cssSelector("a.baseList-name")).getText()).orElse("No name");
             String imageURL = Optional.ofNullable(row.findElement(By.cssSelector("a.baseList-thumb img")).getAttribute("src"))
-                    .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("이미지 없음");
+                    .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("No image");
             int views = parseInteger(row.findElement(By.cssSelector("td.baseList-space.baseList-views")).getText());
             int recommendCnt = parseInteger(row.findElement(By.cssSelector("td.baseList-space.baseList-rec")).getText().split(" - ")[0]);
             int commentCnt = parseInteger(row.findElements(By.cssSelector("span.baseList-c")).stream().findFirst().orElseThrow().getText());
+            int unrecommendCnt = 0;
             String link = row.findElement(By.cssSelector("a.baseList-title")).getAttribute("href");
             String createdDateTime = row.findElement(By.cssSelector("time.baseList-time")).getText();
-            return Crawling.of(label, title, name, imageURL, views, recommendCnt, commentCnt, createdDateTime, link);
+            return Crawling.of(label, title, name, imageURL, link, createdDateTime, views, recommendCnt, unrecommendCnt, commentCnt);
         } catch (Exception e) {
             return null;
         }

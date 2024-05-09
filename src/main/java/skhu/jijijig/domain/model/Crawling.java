@@ -19,7 +19,7 @@ public class Crawling {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
@@ -38,19 +38,23 @@ public class Crawling {
     private int recommendCnt;
 
     @Column(nullable = false)
+    private int unrecommendCnt;
+
+    @Column(nullable = false)
     private int commentCnt;
 
-    public static Crawling of(String label, String title, String name, String imageURL, int views, int recommendCnt, int commentCnt, String createdDateTime, String link) {
+    public static Crawling of(String label, String title, String name, String imageURL, String link, String createdDateTime, int views, int recommendCnt, int unrecommendCnt, int commentCnt) {
         return Crawling.builder()
                 .label(label)
                 .title(title)
                 .name(name)
                 .imageURL(imageURL)
+                .link(link)
+                .createdDateTime(createdDateTime)
                 .views(views)
                 .recommendCnt(recommendCnt)
+                .unrecommendCnt(unrecommendCnt)
                 .commentCnt(commentCnt)
-                .createdDateTime(createdDateTime)
-                .link(link)
                 .build();
     }
 }
