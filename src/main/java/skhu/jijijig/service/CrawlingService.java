@@ -32,35 +32,50 @@ public class CrawlingService {
     private final ApplicationContext applicationContext;
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
-    @Scheduled(fixedRate = 300000) // 5분마다 실행
+    @Scheduled(fixedRate = 180000) // 3분마다 실행
     public void scheduleCrawlingTasks() {
         applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuDomestic();
         applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuOverseas();
+        applicationContext.getBean(CrawlingService.class).performCrawlingForQuasarzone();
     }
 
     @Transactional
     @Async
     public CompletableFuture<List<Crawling>> performCrawlingForPpomppuDomestic() {
-        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)"), executor);
+        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tr.baseList.bbs_new1"), executor);
     }
 
     @Transactional
     @Async
     public CompletableFuture<List<Crawling>> performCrawlingForPpomppuOverseas() {
-        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)"), executor);
+        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tr.baseList.bbs_new1"), executor);
     }
 
-    private List<Crawling> crawlWebsite(String url, String label) {
+    @Transactional
+    @Async
+    public CompletableFuture<List<Crawling>> performCrawlingForQuasarzone() {
+        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://quasarzone.com/bbs/qb_saleinfo", "퀘사이존", "tbody > tr"), executor);
+    }
+
+    private List<Crawling> crawlWebsite(String url, String label, String ROWS) {
         WebDriver driver = setupChromeDriver();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
         List<Crawling> crawlings = new ArrayList<>();
         try {
             driver.get(url);
-            List<WebElement> rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("tr.baseList.bbs_new1")));
+            List<WebElement> rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector(ROWS)));
             for (WebElement row : rows) {
-                Crawling crawling = extractDataFromRow(row, label);
-                if (crawling != null) {
-                    crawlings.add(crawling);
+                if (label.startsWith("뽐뿌")) {
+                    Crawling crawling = extractPpomppu(row, label);
+                    if (crawling != null) {
+                        crawlings.add(crawling);
+                    }
+                } else if (label.startsWith("퀘사이존")) {
+                    if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue;
+                    Crawling crawling = extractQuasarzone(row, label);
+                    if (crawling != null) {
+                        crawlings.add(crawling);
+                    }
                 }
             }
             crawlingRepository.saveAll(crawlings);
@@ -72,19 +87,39 @@ public class CrawlingService {
         return crawlings;
     }
 
-    private Crawling extractDataFromRow(WebElement row, String label) {
+    private Crawling extractPpomppu(WebElement row, String label) {
         try {
             String title = row.findElement(By.cssSelector("a.baseList-title")).getText();
             String name = Optional.ofNullable(row.findElement(By.cssSelector("a.baseList-name")).getText()).orElse("No name");
-            String imageURL = Optional.ofNullable(row.findElement(By.cssSelector("a.baseList-thumb img")).getAttribute("src"))
+            String image = Optional.ofNullable(row.findElement(By.cssSelector("a.baseList-thumb img")).getAttribute("src"))
                     .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("No image");
-            int views = parseInteger(row.findElement(By.cssSelector("td.baseList-space.baseList-views")).getText());
-            int recommendCnt = parseInteger(row.findElement(By.cssSelector("td.baseList-space.baseList-rec")).getText().split(" - ")[0]);
-            int commentCnt = parseInteger(row.findElements(By.cssSelector("span.baseList-c")).stream().findFirst().orElseThrow().getText());
-            int unrecommendCnt = 0;
             String link = row.findElement(By.cssSelector("a.baseList-title")).getAttribute("href");
             String createdDateTime = row.findElement(By.cssSelector("time.baseList-time")).getText();
-            return Crawling.of(label, title, name, imageURL, link, createdDateTime, views, recommendCnt, unrecommendCnt, commentCnt);
+            int views = parseInteger(row.findElement(By.cssSelector("td.baseList-space.baseList-views")).getText());
+            int recommendCnt = parseInteger(row.findElement(By.cssSelector("td.baseList-space.baseList-rec")).getText().split(" - ")[0]);
+            int unrecommendCnt = parseInteger(row.findElement(By.cssSelector("td.baseList-space.baseList-rec")).getText().split(" - ")[1]);
+            int commentCnt = parseInteger(row.findElements(By.cssSelector("span.baseList-c")).stream().findFirst().orElseThrow().getText());
+            return Crawling.of(label, title, name, image, link, createdDateTime, views, recommendCnt, unrecommendCnt, commentCnt);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private Crawling extractQuasarzone(WebElement row, String label) {
+        try {
+            String title = row.findElement(By.cssSelector("a.subject-link")).getText();
+            String name = Optional.ofNullable(row.findElement(By.cssSelector("div.user-nick-text")).getText()).orElse("No name");
+            String image = Optional.ofNullable(row.findElement(By.cssSelector("a.thumb img")).getAttribute("src"))
+                    .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("No image");
+            String link = row.findElement(By.cssSelector("a.subject-link")).getAttribute("href");
+            String createdDateTime = row.findElement(By.cssSelector("span.date")).getText();
+            int views = Optional.ofNullable(row.findElement(By.cssSelector("span.count")).getText())
+                    .map(s -> s.endsWith("k") ? (int)(Double.parseDouble(s.replace("k", "")) * 1000) : Integer.parseInt(s))
+                    .orElse(0);
+            int recommendCnt = 0;
+            int unrecommendCnt = 0;
+            int commentCnt = parseInteger(row.findElements(By.cssSelector("span.ctn-count")).stream().findFirst().orElseThrow().getText());
+            return Crawling.of(label, title, name, image, link, createdDateTime, views, recommendCnt, unrecommendCnt, commentCnt);
         } catch (Exception e) {
             return null;
         }

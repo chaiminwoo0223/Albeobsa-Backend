@@ -18,8 +18,8 @@ public class CrawlingDTO {
     @Schema(description = "이름", example = "chaiminwoo0223")
     private String name;
 
-    @Schema(description = "이미지 URL", example = "image URL")
-    private String imageURL;
+    @Schema(description = "이미지", example = "https://image.jpg")
+    private String image;
 
     @Schema(description = "링크", example = "https://link.com")
     private String link;
@@ -44,7 +44,7 @@ public class CrawlingDTO {
                 .label(crawling.getLabel())
                 .title(crawling.getTitle())
                 .name(crawling.getName())
-                .imageURL(crawling.getImageURL())
+                .image(crawling.getImage())
                 .link(crawling.getLink())
                 .createdDateTime(crawling.getCreatedDateTime())
                 .views(crawling.getViews())

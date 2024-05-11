@@ -51,4 +51,18 @@ public class CrawlingController {
                         .collect(Collectors.toList())))
                 .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
+
+    @Operation(summary = "퀘사이존 크롤링", description = "퀘사이존의 내용을 크롤링하여 결과를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "퀘사이존 크롤링 성공"),
+            @ApiResponse(responseCode = "500", description = "서버 에러")
+    })
+    @GetMapping("/quasarzone")
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> crawledQuasarzone() {
+        return crawlingService.performCrawlingForQuasarzone()
+                .thenApply(crawlings -> ResponseEntity.ok(crawlings.stream()
+                        .map(CrawlingDTO::fromEntity)
+                        .collect(Collectors.toList())))
+                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+    }
 }
