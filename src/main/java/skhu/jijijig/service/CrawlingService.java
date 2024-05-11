@@ -32,29 +32,43 @@ public class CrawlingService {
     private final ApplicationContext applicationContext;
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
-    @Scheduled(fixedRate = 180000) // 3분마다 실행
+    @Scheduled(fixedRate = 300000) // 5분마다 실행
     public void scheduleCrawlingTasks() {
         applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuDomestic();
         applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuOverseas();
         applicationContext.getBean(CrawlingService.class).performCrawlingForQuasarzone();
+        applicationContext.getBean(CrawlingService.class).performCrawlingForRuliweb();
+        applicationContext.getBean(CrawlingService.class).performCrawlingForCoolenjoy();
     }
 
     @Transactional
     @Async
     public CompletableFuture<List<Crawling>> performCrawlingForPpomppuDomestic() {
-        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tr.baseList.bbs_new1"), executor);
+        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1"), executor);
     }
 
     @Transactional
     @Async
     public CompletableFuture<List<Crawling>> performCrawlingForPpomppuOverseas() {
-        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tr.baseList.bbs_new1"), executor);
+        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1"), executor);
     }
 
     @Transactional
     @Async
     public CompletableFuture<List<Crawling>> performCrawlingForQuasarzone() {
         return CompletableFuture.supplyAsync(() -> crawlWebsite("https://quasarzone.com/bbs/qb_saleinfo", "퀘사이존", "tbody > tr"), executor);
+    }
+
+    @Transactional
+    @Async
+    public CompletableFuture<List<Crawling>> performCrawlingForRuliweb() {
+        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://bbs.ruliweb.com/news/board/1020", "루리웹", "tr.table_body.blocktarget"), executor);
+    }
+
+    @Transactional
+    @Async
+    public CompletableFuture<List<Crawling>> performCrawlingForCoolenjoy() {
+        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom"), executor);
     }
 
     private List<Crawling> crawlWebsite(String url, String label, String ROWS) {
@@ -73,6 +87,17 @@ public class CrawlingService {
                 } else if (label.startsWith("퀘사이존")) {
                     if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue;
                     Crawling crawling = extractQuasarzone(row, label);
+                    if (crawling != null) {
+                        crawlings.add(crawling);
+                    }
+                } else if (label.startsWith("루리웹")) {
+                    Crawling crawling = extractRuliweb(row, label);
+                    if (crawling != null) {
+                        crawlings.add(crawling);
+                    }
+                } else if (label.startsWith("쿨엔조이")) {
+                    if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue;
+                    Crawling crawling = extractCoolenjoy(row, label);
                     if (crawling != null) {
                         crawlings.add(crawling);
                     }
@@ -119,6 +144,42 @@ public class CrawlingService {
             int recommendCnt = 0;
             int unrecommendCnt = 0;
             int commentCnt = parseInteger(row.findElements(By.cssSelector("span.ctn-count")).stream().findFirst().orElseThrow().getText());
+            return Crawling.of(label, title, name, image, link, createdDateTime, views, recommendCnt, unrecommendCnt, commentCnt);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // 내부 페이지로 이동 없음
+    private Crawling extractRuliweb(WebElement row, String label) {
+        try {
+            String title = row.findElement(By.cssSelector("a.deco")).getText();
+            String name = Optional.ofNullable(row.findElement(By.cssSelector("td.writer.text_over")).getText()).orElse("No name");
+            String image = "No image";
+            String link = row.findElement(By.cssSelector("a.deco")).getAttribute("href");
+            String createdDateTime = row.findElement(By.cssSelector("td.time")).getText();
+            int views = parseInteger(row.findElement(By.cssSelector("td.hit")).getText());
+            int recommendCnt = parseInteger(row.findElement(By.cssSelector("td.recomd")).getText().split(" - ")[0]);
+            int unrecommendCnt = 0;
+            int commentCnt = parseInteger(row.findElements(By.cssSelector("a.num_reply span.num")).stream().findFirst().orElseThrow().getText());
+            return Crawling.of(label, title, name, image, link, createdDateTime, views, recommendCnt, unrecommendCnt, commentCnt);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // 내부 페이지로 이동 없음
+    private Crawling extractCoolenjoy(WebElement row, String label) {
+        try {
+            String title = row.findElement(By.cssSelector("div.na-item")).getText();
+            String name = Optional.ofNullable(row.findElement(By.cssSelector("a.sv_member")).getText()).orElse("No name");
+            String image = "No image";
+            String link = row.findElement(By.cssSelector("div.na-item a")).getAttribute("href");
+            String createdDateTime = row.findElement(By.cssSelector("div.float-left.float-md-none.d-md-table-cell.nw-6.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1")).getText();
+            int views = parseInteger(row.findElement(By.cssSelector("div.float-left.float-md-none.d-md-table-cell.nw-4.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1")).getText());
+            int recommendCnt = parseInteger(row.findElement(By.cssSelector("span.rank-icon_vote")).getText().split(" - ")[0]);
+            int unrecommendCnt = 0;
+            int commentCnt = parseInteger(row.findElements(By.cssSelector("span.count-plus")).stream().findFirst().orElseThrow().getText());
             return Crawling.of(label, title, name, image, link, createdDateTime, views, recommendCnt, unrecommendCnt, commentCnt);
         } catch (Exception e) {
             return null;

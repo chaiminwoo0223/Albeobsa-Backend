@@ -65,4 +65,32 @@ public class CrawlingController {
                         .collect(Collectors.toList())))
                 .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
+
+    @Operation(summary = "루리웹 크롤링", description = "루리웹의 내용을 크롤링하여 결과를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "루리웹 크롤링 성공"),
+            @ApiResponse(responseCode = "500", description = "서버 에러")
+    })
+    @GetMapping("/ruliweb")
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> crawledRuliweb() {
+        return crawlingService.performCrawlingForRuliweb()
+                .thenApply(crawlings -> ResponseEntity.ok(crawlings.stream()
+                        .map(CrawlingDTO::fromEntity)
+                        .collect(Collectors.toList())))
+                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+    }
+
+    @Operation(summary = "쿨엔조이 크롤링", description = "쿨엔조이의 내용을 크롤링하여 결과를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "쿨엔조이 크롤링 성공"),
+            @ApiResponse(responseCode = "500", description = "서버 에러")
+    })
+    @GetMapping("/coolenjoy")
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> crawledCoolenjoy() {
+        return crawlingService.performCrawlingForCoolenjoy()
+                .thenApply(crawlings -> ResponseEntity.ok(crawlings.stream()
+                        .map(CrawlingDTO::fromEntity)
+                        .collect(Collectors.toList())))
+                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+    }
 }
