@@ -37,6 +37,7 @@ public class CrawlingService {
         applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuDomestic();
         applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuOverseas();
         applicationContext.getBean(CrawlingService.class).performCrawlingForQuasarzone();
+        applicationContext.getBean(CrawlingService.class).performCrawlingForEomisae();
         applicationContext.getBean(CrawlingService.class).performCrawlingForRuliweb();
         applicationContext.getBean(CrawlingService.class).performCrawlingForCoolenjoy();
     }
@@ -57,6 +58,12 @@ public class CrawlingService {
     @Async
     public CompletableFuture<List<Crawling>> performCrawlingForQuasarzone() {
         return CompletableFuture.supplyAsync(() -> crawlWebsite("https://quasarzone.com/bbs/qb_saleinfo", "퀘사이존", "tbody > tr"), executor);
+    }
+
+    @Transactional
+    @Async
+    public CompletableFuture<List<Crawling>> performCrawlingForEomisae() {
+        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://eomisae.co.kr/rt", "어미새", "div.card_el.n_ntc.clear"), executor);
     }
 
     @Transactional
@@ -87,6 +94,11 @@ public class CrawlingService {
                 } else if (label.startsWith("퀘사이존")) {
                     if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue;
                     Crawling crawling = extractQuasarzone(row, label);
+                    if (crawling != null) {
+                        crawlings.add(crawling);
+                    }
+                } else if (label.startsWith("어미새")) {
+                    Crawling crawling = extractEomisae(row, label);
                     if (crawling != null) {
                         crawlings.add(crawling);
                     }
@@ -144,6 +156,24 @@ public class CrawlingService {
             int recommendCnt = 0;
             int unrecommendCnt = 0;
             int commentCnt = parseInteger(row.findElements(By.cssSelector("span.ctn-count")).stream().findFirst().orElseThrow().getText());
+            return Crawling.of(label, title, name, image, link, createdDateTime, views, recommendCnt, unrecommendCnt, commentCnt);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private Crawling extractEomisae(WebElement row, String label) {
+        try {
+            String title = row.findElement(By.cssSelector("h3 a.pjax")).getText();
+            String name = Optional.ofNullable(row.findElement(By.cssSelector("div.info")).getText()).orElse("No name");
+            String image = Optional.ofNullable(row.findElement(By.cssSelector("img.tmb")).getAttribute("src"))
+                    .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("No image");
+            String link = row.findElement(By.cssSelector("a.pjax.hx")).getAttribute("href");
+            String createdDateTime = row.findElement(By.cssSelector("p > span:nth-child(2)")).getText();
+            int views = parseInteger(row.findElement(By.cssSelector("span.fr:nth-child(1)")).getText());
+            int recommendCnt = parseInteger(row.findElement(By.cssSelector("span.fr:nth-child(3)")).getText().split(" - ")[0]);
+            int unrecommendCnt = 0;
+            int commentCnt = parseInteger(row.findElements(By.cssSelector("span.fr:nth-child(2)")).stream().findFirst().orElseThrow().getText());
             return Crawling.of(label, title, name, image, link, createdDateTime, views, recommendCnt, unrecommendCnt, commentCnt);
         } catch (Exception e) {
             return null;
