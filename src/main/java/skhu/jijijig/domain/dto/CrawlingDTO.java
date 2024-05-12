@@ -25,7 +25,7 @@ public class CrawlingDTO {
     private String link;
 
     @Schema(description = "등록일, 등록시간", example = "2024-03-30 or 19:30")
-    private String createdDateTime;
+    private String dateTime;
 
     @Schema(description = "조회수", example = "10")
     private int views;
@@ -46,7 +46,7 @@ public class CrawlingDTO {
                 .name(crawling.getName())
                 .image(crawling.getImage())
                 .link(crawling.getLink())
-                .createdDateTime(crawling.getCreatedDateTime())
+                .dateTime(crawling.getDateTime())
                 .views(crawling.getViews())
                 .recommendCnt(crawling.getRecommendCnt())
                 .unrecommendCnt(crawling.getUnrecommendCnt())

@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,7 +35,7 @@ public class CrawlingService {
     private final ApplicationContext applicationContext;
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
-    @Scheduled(fixedRate = 180000) // 1분마다 실행
+    @Scheduled(fixedRate = 180000) // 3분마다 실행
     public void scheduleCrawlingTasks() {
         applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuDomestic();
         applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuOverseas();
@@ -80,7 +83,7 @@ public class CrawlingService {
 
     private List<Crawling> crawlWebsite(String url, String label, String ROWS) {
         WebDriver driver = setupChromeDriver();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         List<Crawling> crawlings = new ArrayList<>();
         try {
             driver.get(url);
@@ -116,7 +119,7 @@ public class CrawlingService {
                 String image = Optional.of(row.findElement(By.cssSelector("a.baseList-thumb img")).getAttribute("src"))
                         .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("No image");
                 String link = row.findElement(By.cssSelector("a.baseList-title")).getAttribute("href");
-                String createdDateTime = row.findElement(By.cssSelector("time.baseList-time")).getText();
+                String dateTime = parseDateTime(row.findElement(By.cssSelector("time.baseList-time")).getText(), label);
                 int views = parseInteger(row.findElement(By.cssSelector("td.baseList-space.baseList-views")).getText());
                 String[] voteCnts = row.findElements(By.cssSelector("td.baseList-space.baseList-rec")).stream()
                         .findFirst()
@@ -128,7 +131,7 @@ public class CrawlingService {
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
-                Crawling crawling = Crawling.of(label, title, name, image, link, createdDateTime, views, recommendCnt, unrecommendCnt, commentCnt);
+                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, unrecommendCnt, commentCnt);
                 if (crawling != null && crawlingRepository.findByLink(crawling.getLink()).isEmpty()) {
                     crawlings.add(crawling);
                 }
@@ -149,7 +152,7 @@ public class CrawlingService {
                 String image = Optional.of(row.findElement(By.cssSelector("a.thumb img")).getAttribute("src"))
                         .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("No image");
                 String link = row.findElement(By.cssSelector("a.subject-link")).getAttribute("href");
-                String createdDateTime = row.findElement(By.cssSelector("span.date")).getText();
+                String dateTime = parseDateTime(row.findElement(By.cssSelector("span.date")).getText(), label);
                 int views = Optional.ofNullable(row.findElement(By.cssSelector("span.count")).getText())
                         .map(s -> s.endsWith("k") ? (int)(Double.parseDouble(s.replace("k", "")) * 1000) : Integer.parseInt(s))
                         .orElse(0);
@@ -157,7 +160,7 @@ public class CrawlingService {
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
-                Crawling crawling = Crawling.of(label, title, name, image, link, createdDateTime, views, 0, 0, commentCnt);
+                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, 0, 0, commentCnt);
                 if (crawling != null && crawlingRepository.findByLink(crawling.getLink()).isEmpty()) {
                     crawlings.add(crawling);
                 }
@@ -177,7 +180,7 @@ public class CrawlingService {
                 String image = Optional.of(row.findElement(By.cssSelector("img.tmb")).getAttribute("src"))
                         .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("No image");
                 String link = row.findElement(By.cssSelector("a.pjax.hx")).getAttribute("href");
-                String createdDateTime = row.findElement(By.cssSelector("p > span:nth-child(2)")).getText();
+                String dateTime = parseDateTime(row.findElement(By.cssSelector("p > span:nth-child(2)")).getText(), label);
                 int views = parseInteger(row.findElement(By.cssSelector("span.fr:nth-child(1)")).getText());
                 int recommendCnt = row.findElements(By.cssSelector("span.fr:nth-child(3)")).stream()
                         .findFirst()
@@ -188,7 +191,7 @@ public class CrawlingService {
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
-                Crawling crawling = Crawling.of(label, title, name, image, link, createdDateTime, views, recommendCnt, 0, commentCnt);
+                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, 0, commentCnt);
                 if (crawling != null && crawlingRepository.findByLink(crawling.getLink()).isEmpty()) {
                     crawlings.add(crawling);
                 }
@@ -208,7 +211,7 @@ public class CrawlingService {
                 String title = row.findElement(By.cssSelector("a.deco")).getText();
                 String name = Optional.of(row.findElement(By.cssSelector("td.writer.text_over")).getText()).orElse("No name");
                 String link = row.findElement(By.cssSelector("a.deco")).getAttribute("href");
-                String createdDateTime = row.findElement(By.cssSelector("td.time")).getText();
+                String dateTime = parseDateTime(row.findElement(By.cssSelector("td.time")).getText(), label);
                 int views = parseInteger(row.findElement(By.cssSelector("td.hit")).getText());
                 int recommendCnt = row.findElements(By.cssSelector("td.recomd")).stream()
                         .findFirst()
@@ -219,7 +222,7 @@ public class CrawlingService {
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
-                Crawling crawling = Crawling.of(label, title, name, "No image", link, createdDateTime, views, recommendCnt, 0, commentCnt);
+                Crawling crawling = Crawling.of(label, title, name, "https://img.ruliweb.com/img/2016/common/ruliweb_bi.png", link, dateTime, views, recommendCnt, 0, commentCnt);
                 if (crawling != null && crawlingRepository.findByLink(crawling.getLink()).isEmpty()) {
                     crawlings.add(crawling);
                 }
@@ -236,10 +239,12 @@ public class CrawlingService {
         for (WebElement row : rows) {
             if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue;
             try {
-                String title = row.findElement(By.cssSelector("div.na-item")).getText();
+                String title = Optional.ofNullable(row.findElement(By.cssSelector("div.na-item")).getText())
+                        .map(t -> t.split("\\n")[0])
+                        .orElse("");
                 String name = Optional.ofNullable(row.findElement(By.cssSelector("a.sv_member")).getText()).orElse("No name");
                 String link = row.findElement(By.cssSelector("div.na-item a")).getAttribute("href");
-                String createdDateTime = row.findElement(By.cssSelector("div.float-left.float-md-none.d-md-table-cell.nw-6.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1")).getText();
+                String dateTime = parseDateTime(row.findElement(By.cssSelector("div.float-left.float-md-none.d-md-table-cell.nw-6.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1")).getText(), label);
                 int views = parseInteger(row.findElement(By.cssSelector("div.float-left.float-md-none.d-md-table-cell.nw-4.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1")).getText());
                 int recommendCnt = row.findElements(By.cssSelector("span.rank-icon_vote")).stream()
                         .findFirst()
@@ -250,7 +255,7 @@ public class CrawlingService {
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
-                Crawling crawling = Crawling.of(label, title, name, "No image", link, createdDateTime, views, recommendCnt, 0, commentCnt);
+                Crawling crawling = Crawling.of(label, title, name, "https://coolenjoy.net/theme/BS4-Basic/storage/image/logo-test.svg", link, dateTime, views, recommendCnt, 0, commentCnt);
                 if (crawling != null && crawlingRepository.findByLink(crawling.getLink()).isEmpty()) {
                     crawlings.add(crawling);
                 }
@@ -259,6 +264,54 @@ public class CrawlingService {
             }
         }
         return crawlings;
+    }
+
+    private String parseDateTime(String dateTime, String label) {
+        LocalDate today = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss");
+        if (label.startsWith("뽐뿌")) {
+            if (dateTime.contains(":")) { // 시간 포맷이 들어오면 (예: "20:18:16")
+                return today.format(dateFormatter) + " " + dateTime;
+            } else if (dateTime.contains("/")) { // 날짜 포맷이 들어오면 (예: "24/05/11")
+                String[] parts = dateTime.split("/");
+                LocalDate date = LocalDate.of(today.getYear(), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+                return date.format(dateFormatter) + " 00:00:00";
+            }
+        } else if (label.startsWith("퀘사이존") || label.startsWith("루리웹")) {
+            if (dateTime.contains(":")) { // 시간 포맷 (예: "11:53")
+                return today.format(dateFormatter) + " " + dateTime + ":00"; // "2024-05-12 11:53:00"
+            } else if (dateTime.contains("-")) { // 날짜 포맷 (예: "05-11")
+                String[] parts = dateTime.split("-");
+                LocalDate date = LocalDate.of(today.getYear(), Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+                return date.format(dateFormatter) + " 00:00:00"; // "2024-05-11 00:00:00"
+            } else if (dateTime.contains(".")) {
+                String[] parts = dateTime.split("\\.");
+                LocalDate date = LocalDate.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+                return date.format(dateFormatter) + " 00:00:00";
+            }
+        } else if (label.startsWith("어미새")) {
+            if (dateTime.contains(".")) {
+                String[] parts = dateTime.split("\\.");
+                LocalDate date = LocalDate.of(today.getYear(), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+                if (date.isEqual(today)) { // 날짜가 오늘 날짜인 경우
+                    return now.format(timeFormatter);
+                } else { // 어제 날짜 또는 그 이전 날짜인 경우
+                    return date.format(dateFormatter) + " 00:00:00";
+                }
+            }
+        } else if (label.startsWith("쿨엔조이")) {
+            dateTime = dateTime.replaceAll("등록일\\s+", ""); // "등록일"과 모든 공백(공백, 탭, 개행 포함) 제거
+            if (dateTime.contains(":")) { // 시간 포맷 (예: "11:00")
+                return today.format(dateFormatter) + " " + dateTime + ":00"; // "2024-05-12 11:00:00"
+            } else if (dateTime.contains(".")) { // 날짜 포맷 (예: "05.11")
+                String[] parts = dateTime.split("\\.");
+                LocalDate date = LocalDate.of(today.getYear(), Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+                return date.format(dateFormatter) + " 00:00:00"; // "2024-05-11 00:00:00"
+            }
+        }
+        return today.format(timeFormatter);
     }
 
     private int parseInteger(String text) {
