@@ -109,25 +109,21 @@ public class CrawlingService {
         List<Crawling> crawlings = new ArrayList<>();
         for (int i = 0; i < rows.size() - 4; i++) {
             WebElement row = rows.get(i);
-            if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue;
+            if (!row.findElements(By.cssSelector("img[src*='/zboard/skin/DQ_Revolution_BBS_New1/end_icon.PNG']")).isEmpty()) continue;
             try {
                 String title = row.findElement(By.cssSelector("a.baseList-title")).getText();
-                String name = Optional.ofNullable(row.findElement(By.cssSelector("a.baseList-name")).getText()).orElse("No name");
-                String image = Optional.ofNullable(row.findElement(By.cssSelector("a.baseList-thumb img")).getAttribute("src"))
+                String name = Optional.of(row.findElement(By.cssSelector("a.baseList-name")).getText()).orElse("No name");
+                String image = Optional.of(row.findElement(By.cssSelector("a.baseList-thumb img")).getAttribute("src"))
                         .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("No image");
                 String link = row.findElement(By.cssSelector("a.baseList-title")).getAttribute("href");
                 String createdDateTime = row.findElement(By.cssSelector("time.baseList-time")).getText();
                 int views = parseInteger(row.findElement(By.cssSelector("td.baseList-space.baseList-views")).getText());
-                int recommendCnt = row.findElements(By.cssSelector("td.baseList-space.baseList-rec")).stream()
+                String[] voteCnts = row.findElements(By.cssSelector("td.baseList-space.baseList-rec")).stream()
                         .findFirst()
-                        .map(td -> td.getText().split(" - ")[0])
-                        .map(this::parseInteger)
-                        .orElse(0);
-                int unrecommendCnt = row.findElements(By.cssSelector("td.baseList-space.baseList-rec")).stream()
-                        .findFirst()
-                        .map(td -> td.getText().split(" - ")[1])
-                        .map(this::parseInteger)
-                        .orElse(0);
+                        .map(td -> td.getText().split(" - "))
+                        .orElse(new String[]{"0", "0"});
+                int recommendCnt = parseInteger(voteCnts.length > 0 ? voteCnts[0] : "0");
+                int unrecommendCnt = parseInteger(voteCnts.length > 1 ? voteCnts[1] : "0");
                 int commentCnt = row.findElements(By.cssSelector("span.baseList-c")).stream()
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
@@ -149,8 +145,8 @@ public class CrawlingService {
             if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue;
             try {
                 String title = row.findElement(By.cssSelector("a.subject-link")).getText();
-                String name = Optional.ofNullable(row.findElement(By.cssSelector("div.user-nick-text")).getText()).orElse("No name");
-                String image = Optional.ofNullable(row.findElement(By.cssSelector("a.thumb img")).getAttribute("src"))
+                String name = Optional.of(row.findElement(By.cssSelector("div.user-nick-text")).getText()).orElse("No name");
+                String image = Optional.of(row.findElement(By.cssSelector("a.thumb img")).getAttribute("src"))
                         .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("No image");
                 String link = row.findElement(By.cssSelector("a.subject-link")).getAttribute("href");
                 String createdDateTime = row.findElement(By.cssSelector("span.date")).getText();
@@ -178,8 +174,8 @@ public class CrawlingService {
             if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue;
             try {
                 String title = row.findElement(By.cssSelector("h3 a.pjax")).getText();
-                String name = Optional.ofNullable(row.findElement(By.cssSelector("div.info")).getText()).orElse("No name");
-                String image = Optional.ofNullable(row.findElement(By.cssSelector("img.tmb")).getAttribute("src"))
+                String name = Optional.of(row.findElement(By.cssSelector("div.info")).getText()).orElse("No name");
+                String image = Optional.of(row.findElement(By.cssSelector("img.tmb")).getAttribute("src"))
                         .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("No image");
                 String link = row.findElement(By.cssSelector("a.pjax.hx")).getAttribute("href");
                 String createdDateTime = row.findElement(By.cssSelector("p > span:nth-child(2)")).getText();
@@ -212,7 +208,7 @@ public class CrawlingService {
             if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue;
             try {
                 String title = row.findElement(By.cssSelector("a.deco")).getText();
-                String name = Optional.ofNullable(row.findElement(By.cssSelector("td.writer.text_over")).getText()).orElse("No name");
+                String name = Optional.of(row.findElement(By.cssSelector("td.writer.text_over")).getText()).orElse("No name");
                 String link = row.findElement(By.cssSelector("a.deco")).getAttribute("href");
                 String createdDateTime = row.findElement(By.cssSelector("td.time")).getText();
                 int views = parseInteger(row.findElement(By.cssSelector("td.hit")).getText());
