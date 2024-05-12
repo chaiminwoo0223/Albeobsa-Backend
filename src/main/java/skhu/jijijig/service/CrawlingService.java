@@ -32,7 +32,7 @@ public class CrawlingService {
     private final ApplicationContext applicationContext;
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
-    @Scheduled(fixedRate = 300000) // 5분마다 실행
+    @Scheduled(fixedRate = 180000) // 1분마다 실행
     public void scheduleCrawlingTasks() {
         applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuDomestic();
         applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuOverseas();
@@ -129,7 +129,7 @@ public class CrawlingService {
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
                 Crawling crawling = Crawling.of(label, title, name, image, link, createdDateTime, views, recommendCnt, unrecommendCnt, commentCnt);
-                if (crawling != null) {
+                if (crawling != null && crawlingRepository.findByLink(crawling.getLink()).isEmpty()) {
                     crawlings.add(crawling);
                 }
             } catch (Exception e) {
@@ -142,7 +142,7 @@ public class CrawlingService {
     private List<Crawling> extractQuasarzone(List<WebElement> rows, String label) {
         List<Crawling> crawlings = new ArrayList<>();
         for (WebElement row : rows) {
-            if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue;
+            if (!row.findElements(By.cssSelector("span.label.done")).isEmpty()) continue;
             try {
                 String title = row.findElement(By.cssSelector("a.subject-link")).getText();
                 String name = Optional.of(row.findElement(By.cssSelector("div.user-nick-text")).getText()).orElse("No name");
@@ -158,7 +158,7 @@ public class CrawlingService {
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
                 Crawling crawling = Crawling.of(label, title, name, image, link, createdDateTime, views, 0, 0, commentCnt);
-                if (crawling != null) {
+                if (crawling != null && crawlingRepository.findByLink(crawling.getLink()).isEmpty()) {
                     crawlings.add(crawling);
                 }
             } catch (Exception e) {
@@ -171,7 +171,6 @@ public class CrawlingService {
     private List<Crawling> extractEomisae(List<WebElement> rows, String label) {
         List<Crawling> crawlings = new ArrayList<>();
         for (WebElement row : rows) {
-            if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue;
             try {
                 String title = row.findElement(By.cssSelector("h3 a.pjax")).getText();
                 String name = Optional.of(row.findElement(By.cssSelector("div.info")).getText()).orElse("No name");
@@ -190,7 +189,7 @@ public class CrawlingService {
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
                 Crawling crawling = Crawling.of(label, title, name, image, link, createdDateTime, views, recommendCnt, 0, commentCnt);
-                if (crawling != null) {
+                if (crawling != null && crawlingRepository.findByLink(crawling.getLink()).isEmpty()) {
                     crawlings.add(crawling);
                 }
             } catch (Exception e) {
@@ -205,7 +204,6 @@ public class CrawlingService {
         List<Crawling> crawlings = new ArrayList<>();
         for (int i = 4; i < rows.size(); i++) {
             WebElement row = rows.get(i);
-            if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue;
             try {
                 String title = row.findElement(By.cssSelector("a.deco")).getText();
                 String name = Optional.of(row.findElement(By.cssSelector("td.writer.text_over")).getText()).orElse("No name");
@@ -222,7 +220,7 @@ public class CrawlingService {
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
                 Crawling crawling = Crawling.of(label, title, name, "No image", link, createdDateTime, views, recommendCnt, 0, commentCnt);
-                if (crawling != null) {
+                if (crawling != null && crawlingRepository.findByLink(crawling.getLink()).isEmpty()) {
                     crawlings.add(crawling);
                 }
             } catch (Exception e) {
@@ -253,7 +251,7 @@ public class CrawlingService {
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
                 Crawling crawling = Crawling.of(label, title, name, "No image", link, createdDateTime, views, recommendCnt, 0, commentCnt);
-                if (crawling != null) {
+                if (crawling != null && crawlingRepository.findByLink(crawling.getLink()).isEmpty()) {
                     crawlings.add(crawling);
                 }
             } catch (Exception e) {
