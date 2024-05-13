@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Builder
+@Builder(toBuilder = true)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
@@ -43,7 +43,14 @@ public class Crawling {
     @Column(nullable = false)
     private int commentCnt;
 
-    public static Crawling of(String label, String title, String name, String image, String link, String dateTime, int views, int recommendCnt, int unrecommendCnt, int commentCnt) {
+    @Column(nullable = false)
+    private boolean open;
+
+    public void updateOpen(boolean newOpen) {
+        this.open = newOpen;
+    }
+
+    public static Crawling of(String label, String title, String name, String image, String link, String dateTime, int views, int recommendCnt, int unrecommendCnt, int commentCnt, boolean open) {
         return Crawling.builder()
                 .label(label)
                 .title(title)
@@ -55,6 +62,7 @@ public class Crawling {
                 .recommendCnt(recommendCnt)
                 .unrecommendCnt(unrecommendCnt)
                 .commentCnt(commentCnt)
+                .open(open)
                 .build();
     }
 }

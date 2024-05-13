@@ -112,7 +112,7 @@ public class CrawlingService {
         List<Crawling> crawlings = new ArrayList<>();
         for (int i = 0; i < rows.size() - 4; i++) {
             WebElement row = rows.get(i);
-            if (!row.findElements(By.cssSelector("img[src*='/zboard/skin/DQ_Revolution_BBS_New1/end_icon.PNG']")).isEmpty()) continue;
+            boolean open = row.findElements(By.cssSelector("img[src*='/zboard/skin/DQ_Revolution_BBS_New1/end_icon.PNG']")).isEmpty();
             try {
                 String title = row.findElement(By.cssSelector("a.baseList-title")).getText();
                 String name = Optional.of(row.findElement(By.cssSelector("a.baseList-name")).getText()).orElse("No name");
@@ -131,10 +131,8 @@ public class CrawlingService {
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
-                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, unrecommendCnt, commentCnt);
-                if (crawling != null && crawlingRepository.findByLink(crawling.getLink()).isEmpty()) {
-                    crawlings.add(crawling);
-                }
+                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, unrecommendCnt, commentCnt, open);
+                updateOrCreateCrawling(crawling, open);
             } catch (Exception e) {
                 System.err.println("뽐뿌 데이터 추출 실패: " + e.getMessage());
             }
@@ -142,10 +140,11 @@ public class CrawlingService {
         return crawlings;
     }
 
+
     private List<Crawling> extractQuasarzone(List<WebElement> rows, String label) {
         List<Crawling> crawlings = new ArrayList<>();
         for (WebElement row : rows) {
-            if (!row.findElements(By.cssSelector("span.label.done")).isEmpty()) continue;
+            boolean open = row.findElements(By.cssSelector("span.label.done")).isEmpty();
             try {
                 String title = row.findElement(By.cssSelector("a.subject-link")).getText();
                 String name = Optional.of(row.findElement(By.cssSelector("div.user-nick-text")).getText()).orElse("No name");
@@ -160,10 +159,8 @@ public class CrawlingService {
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
-                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, 0, 0, commentCnt);
-                if (crawling != null && crawlingRepository.findByLink(crawling.getLink()).isEmpty()) {
-                    crawlings.add(crawling);
-                }
+                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, 0, 0, commentCnt, open);
+                updateOrCreateCrawling(crawling, open);
             } catch (Exception e) {
                 System.err.println("퀘사이존 데이터 추출 실패: " + e.getMessage());
             }
@@ -174,6 +171,7 @@ public class CrawlingService {
     private List<Crawling> extractEomisae(List<WebElement> rows, String label) {
         List<Crawling> crawlings = new ArrayList<>();
         for (WebElement row : rows) {
+            boolean open = true;
             try {
                 String title = row.findElement(By.cssSelector("h3 a.pjax")).getText();
                 String name = Optional.of(row.findElement(By.cssSelector("div.info")).getText()).orElse("No name");
@@ -191,8 +189,8 @@ public class CrawlingService {
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
-                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, 0, commentCnt);
-                if (crawling != null && crawlingRepository.findByLink(crawling.getLink()).isEmpty()) {
+                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, 0, commentCnt, open);
+                if (crawling != null && crawlingRepository.findByLinkAndDateTime(crawling.getLink(), crawling.getDateTime()).isEmpty()) {
                     crawlings.add(crawling);
                 }
             } catch (Exception e) {
@@ -202,11 +200,11 @@ public class CrawlingService {
         return crawlings;
     }
 
-    // 내부 페이지로 이동 없음
     private List<Crawling> extractRuliweb(List<WebElement> rows, String label) {
         List<Crawling> crawlings = new ArrayList<>();
         for (int i = 4; i < rows.size(); i++) {
             WebElement row = rows.get(i);
+            boolean open = true;
             try {
                 String title = row.findElement(By.cssSelector("a.deco")).getText();
                 String name = Optional.of(row.findElement(By.cssSelector("td.writer.text_over")).getText()).orElse("No name");
@@ -222,10 +220,8 @@ public class CrawlingService {
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
-                Crawling crawling = Crawling.of(label, title, name, "https://img.ruliweb.com/img/2016/common/ruliweb_bi.png", link, dateTime, views, recommendCnt, 0, commentCnt);
-                if (crawling != null && crawlingRepository.findByLink(crawling.getLink()).isEmpty()) {
-                    crawlings.add(crawling);
-                }
+                Crawling crawling = Crawling.of(label, title, name, "https://img.ruliweb.com/img/2016/common/ruliweb_bi.png", link, dateTime, views, recommendCnt, 0, commentCnt, open);
+                updateOrCreateCrawling(crawling, open);
             } catch (Exception e) {
                 System.err.println("루리웹 데이터 추출 실패: " + e.getMessage());
             }
@@ -233,11 +229,10 @@ public class CrawlingService {
         return crawlings;
     }
 
-    // 내부 페이지로 이동 없음
     private List<Crawling> extractCoolenjoy(List<WebElement> rows, String label) {
         List<Crawling> crawlings = new ArrayList<>();
         for (WebElement row : rows) {
-            if (!row.findElements(By.cssSelector(".fa-lock")).isEmpty()) continue;
+            boolean open = row.findElements(By.cssSelector(".fa-lock")).isEmpty();
             try {
                 String title = Optional.ofNullable(row.findElement(By.cssSelector("div.na-item")).getText())
                         .map(t -> t.split("\\n")[0])
@@ -255,10 +250,8 @@ public class CrawlingService {
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
-                Crawling crawling = Crawling.of(label, title, name, "https://coolenjoy.net/theme/BS4-Basic/storage/image/logo-test.svg", link, dateTime, views, recommendCnt, 0, commentCnt);
-                if (crawling != null && crawlingRepository.findByLink(crawling.getLink()).isEmpty()) {
-                    crawlings.add(crawling);
-                }
+                Crawling crawling = Crawling.of(label, title, name, "https://coolenjoy.net/theme/BS4-Basic/storage/image/logo-test.svg", link, dateTime, views, recommendCnt, 0, commentCnt, open);
+                updateOrCreateCrawling(crawling, open);
             } catch (Exception e) {
                 System.err.println("쿨엔조이 데이터 추출 실패: " + e.getMessage());
             }
@@ -319,6 +312,19 @@ public class CrawlingService {
             return Integer.parseInt(text.replaceAll("\\D+", ""));
         } catch (NumberFormatException e) {
             return 0;
+        }
+    }
+
+    private void updateOrCreateCrawling(Crawling crawling, boolean open) {
+        Optional<Crawling> existing = crawlingRepository.findByLinkAndDateTime(crawling.getLink(), crawling.getDateTime());
+        if (existing.isPresent()) {
+            Crawling existingCrawling = existing.get();
+            if (existingCrawling.isOpen() != open) {
+                existingCrawling.updateOpen(open);
+                crawlingRepository.save(existingCrawling);
+            }
+        } else {
+            crawlingRepository.save(crawling);
         }
     }
 

@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface CrawlingRepository extends JpaRepository<Crawling, Long> {
-    Optional<Crawling> findByLink(String link);
+    Optional<Crawling> findByLinkAndDateTime(String link, String dateTime);
 }

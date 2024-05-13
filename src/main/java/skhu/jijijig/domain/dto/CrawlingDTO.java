@@ -24,7 +24,7 @@ public class CrawlingDTO {
     @Schema(description = "링크", example = "https://link.com")
     private String link;
 
-    @Schema(description = "등록일, 등록시간", example = "2024-03-30 or 19:30")
+    @Schema(description = "등록일", example = "2024-05-12 23:28:30")
     private String dateTime;
 
     @Schema(description = "조회수", example = "10")
@@ -39,6 +39,9 @@ public class CrawlingDTO {
     @Schema(description = "댓글수", example = "10")
     private int commentCnt;
 
+    @Schema(description = "열림", example = "True or False")
+    private boolean open;
+
     public static CrawlingDTO fromEntity(Crawling crawling) {
         return CrawlingDTO.builder()
                 .label(crawling.getLabel())
@@ -51,6 +54,7 @@ public class CrawlingDTO {
                 .recommendCnt(crawling.getRecommendCnt())
                 .unrecommendCnt(crawling.getUnrecommendCnt())
                 .commentCnt(crawling.getCommentCnt())
+                .open(crawling.isOpen())
                 .build();
     }
 }
