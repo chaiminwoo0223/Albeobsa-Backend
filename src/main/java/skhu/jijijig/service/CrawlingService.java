@@ -4,6 +4,9 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -20,11 +23,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.CompletableFuture;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.By;
+import skhu.jijijig.domain.dto.CrawlingDTO;
 import skhu.jijijig.domain.model.Crawling;
 import skhu.jijijig.repository.CrawlingRepository;
 
@@ -47,38 +53,47 @@ public class CrawlingService {
 
     @Transactional
     @Async
-    public CompletableFuture<List<Crawling>> performCrawlingForPpomppuDomestic() {
-        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1"), executor);
+    public void performCrawlingForPpomppuDomestic() {
+        CompletableFuture.supplyAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1"), executor);
     }
 
     @Transactional
     @Async
-    public CompletableFuture<List<Crawling>> performCrawlingForPpomppuOverseas() {
-        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1"), executor);
+    public void performCrawlingForPpomppuOverseas() {
+        CompletableFuture.supplyAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1"), executor);
     }
 
     @Transactional
     @Async
-    public CompletableFuture<List<Crawling>> performCrawlingForQuasarzone() {
-        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://quasarzone.com/bbs/qb_saleinfo", "퀘사이존", "tbody > tr"), executor);
+    public void performCrawlingForQuasarzone() {
+        CompletableFuture.supplyAsync(() -> crawlWebsite("https://quasarzone.com/bbs/qb_saleinfo", "퀘사이존", "tbody > tr"), executor);
     }
 
     @Transactional
     @Async
-    public CompletableFuture<List<Crawling>> performCrawlingForEomisae() {
-        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://eomisae.co.kr/rt", "어미새", "div.card_el.n_ntc.clear"), executor);
+    public void performCrawlingForEomisae() {
+        CompletableFuture.supplyAsync(() -> crawlWebsite("https://eomisae.co.kr/rt", "어미새", "div.card_el.n_ntc.clear"), executor);
     }
 
     @Transactional
     @Async
-    public CompletableFuture<List<Crawling>> performCrawlingForRuliweb() {
-        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://bbs.ruliweb.com/news/board/1020", "루리웹", "tr.table_body.blocktarget"), executor);
+    public void performCrawlingForRuliweb() {
+        CompletableFuture.supplyAsync(() -> crawlWebsite("https://bbs.ruliweb.com/news/board/1020", "루리웹", "tr.table_body.blocktarget"), executor);
     }
 
     @Transactional
     @Async
-    public CompletableFuture<List<Crawling>> performCrawlingForCoolenjoy() {
-        return CompletableFuture.supplyAsync(() -> crawlWebsite("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom"), executor);
+    public void performCrawlingForCoolenjoy() {
+        CompletableFuture.supplyAsync(() -> crawlWebsite("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom"), executor);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CrawlingDTO> getSortedCrawlingsByLabel(String label, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Crawling> crawlings = crawlingRepository.findByLabelOrderByDateTimeDesc(label, pageable);
+        return crawlings.stream()
+                .map(CrawlingDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     private List<Crawling> crawlWebsite(String url, String label, String ROWS) {

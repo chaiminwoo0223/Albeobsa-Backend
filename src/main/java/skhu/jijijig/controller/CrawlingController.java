@@ -9,13 +9,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import skhu.jijijig.domain.dto.CrawlingDTO;
 import skhu.jijijig.service.CrawlingService;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @Tag(name = "Crawling API", description = "크롤링 관련 API")
 @RestController
@@ -24,87 +24,81 @@ import java.util.stream.Collectors;
 public class CrawlingController {
     private final CrawlingService crawlingService;
 
-    @Operation(summary = "뽐뿌(국내게시판) 크롤링", description = "뽐뿌(국내게시판)의 내용을 크롤링하여 결과를 조회합니다.")
+    @Operation(summary = "뽐뿌(국내게시판) 조회", description = "뽐뿌(국내게시판)의 내용을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "뽐뿌(국내게시판) 크롤링 성공"),
+            @ApiResponse(responseCode = "200", description = "뽐뿌(국내게시판) 조회 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/ppomppu")
-    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> crawledPpomppuDomestic() {
-        return crawlingService.performCrawlingForPpomppuDomestic()
-                .thenApply(crawlings -> ResponseEntity.ok(crawlings.stream()
-                        .map(CrawlingDTO::fromEntity)
-                        .collect(Collectors.toList())))
-                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> ppomppuDomestic(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "20") int size) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<CrawlingDTO> crawlings = crawlingService.getSortedCrawlingsByLabel("뽐뿌(국내게시판)", page, size);
+            return ResponseEntity.ok(crawlings);
+        }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
-    @Operation(summary = "뽐뿌(해외게시판) 크롤링", description = "뽐뿌(해외게시판)의 내용을 크롤링하여 결과를 조회합니다.")
+    @Operation(summary = "뽐뿌(해외게시판) 조회", description = "뽐뿌(해외게시판)의 내용을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "뽐뿌(해외게시판) 크롤링 성공"),
+            @ApiResponse(responseCode = "200", description = "뽐뿌(해외게시판) 조회 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/ppomppu4")
-    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> crawledPpomppuOverseas() {
-        return crawlingService.performCrawlingForPpomppuOverseas()
-                .thenApply(crawlings -> ResponseEntity.ok(crawlings.stream()
-                        .map(CrawlingDTO::fromEntity)
-                        .collect(Collectors.toList())))
-                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> ppomppuOverseas(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "20") int size) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<CrawlingDTO> crawlings = crawlingService.getSortedCrawlingsByLabel("뽐뿌(해외게시판)", page, size);
+            return ResponseEntity.ok(crawlings);
+        }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
-    @Operation(summary = "퀘사이존 크롤링", description = "퀘사이존의 내용을 크롤링하여 결과를 조회합니다.")
+    @Operation(summary = "퀘사이존 조회", description = "퀘사이존의 내용을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "퀘사이존 크롤링 성공"),
+            @ApiResponse(responseCode = "200", description = "퀘사이존 조회 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/quasarzone")
-    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> crawledQuasarzone() {
-        return crawlingService.performCrawlingForQuasarzone()
-                .thenApply(crawlings -> ResponseEntity.ok(crawlings.stream()
-                        .map(CrawlingDTO::fromEntity)
-                        .collect(Collectors.toList())))
-                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> quasarzone(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "20") int size) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<CrawlingDTO> crawlings = crawlingService.getSortedCrawlingsByLabel("퀘사이존", page, size);
+            return ResponseEntity.ok(crawlings);
+        }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
-    @Operation(summary = "어미새 크롤링", description = "어미새의 내용을 크롤링하여 결과를 조회합니다.")
+    @Operation(summary = "어미새 조회", description = "어미새의 내용을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "어미새 크롤링 성공"),
+            @ApiResponse(responseCode = "200", description = "어미새 조회 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/eomisae")
-    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> crawledEomisae() {
-        return crawlingService.performCrawlingForEomisae()
-                .thenApply(crawlings -> ResponseEntity.ok(crawlings.stream()
-                        .map(CrawlingDTO::fromEntity)
-                        .collect(Collectors.toList())))
-                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> eomisae(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "20") int size) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<CrawlingDTO> crawlings = crawlingService.getSortedCrawlingsByLabel("어미새", page, size);
+            return ResponseEntity.ok(crawlings);
+        }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
-    @Operation(summary = "루리웹 크롤링", description = "루리웹의 내용을 크롤링하여 결과를 조회합니다.")
+    @Operation(summary = "루리웹 조회", description = "루리웹의 내용을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "루리웹 크롤링 성공"),
+            @ApiResponse(responseCode = "200", description = "루리웹 조회 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/ruliweb")
-    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> crawledRuliweb() {
-        return crawlingService.performCrawlingForRuliweb()
-                .thenApply(crawlings -> ResponseEntity.ok(crawlings.stream()
-                        .map(CrawlingDTO::fromEntity)
-                        .collect(Collectors.toList())))
-                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> ruliweb(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "20") int size) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<CrawlingDTO> crawlings = crawlingService.getSortedCrawlingsByLabel("루리웹", page, size);
+            return ResponseEntity.ok(crawlings);
+        }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
-    @Operation(summary = "쿨엔조이 크롤링", description = "쿨엔조이의 내용을 크롤링하여 결과를 조회합니다.")
+    @Operation(summary = "쿨엔조이 조회", description = "쿨엔조이의 내용을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "쿨엔조이 크롤링 성공"),
+            @ApiResponse(responseCode = "200", description = "쿨엔조이 조회 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/coolenjoy")
-    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> crawledCoolenjoy() {
-        return crawlingService.performCrawlingForCoolenjoy()
-                .thenApply(crawlings -> ResponseEntity.ok(crawlings.stream()
-                        .map(CrawlingDTO::fromEntity)
-                        .collect(Collectors.toList())))
-                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> coolenjoy(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "20") int size) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<CrawlingDTO> crawlings = crawlingService.getSortedCrawlingsByLabel("쿨엔조이", page, size);
+            return ResponseEntity.ok(crawlings);
+        }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 }
