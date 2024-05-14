@@ -88,6 +88,14 @@ public class CrawlingService {
     }
 
     @Transactional(readOnly = true)
+    public List<CrawlingDTO> getTop10CrawlingsByRanking() {
+        List<Crawling> crawlings = crawlingRepository.findTop10ByOrderByRecommendCntDescUnrecommendCntAscCommentCntDesc();
+        return crawlings.stream()
+                .map(CrawlingDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public List<CrawlingDTO> getAllCrawlingsSortedByDateTime(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Crawling> crawlings = crawlingRepository.findAllByOrderByDateTimeDesc(pageable);
@@ -112,17 +120,7 @@ public class CrawlingService {
         try {
             driver.get(url);
             List<WebElement> rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector(ROWS)));
-            if (label.startsWith("뽐뿌")) {
-                crawlings.addAll(extractPpomppu(rows, label));
-            } else if (label.startsWith("퀘사이존")) {
-                crawlings.addAll(extractQuasarzone(rows, label));
-            } else if (label.startsWith("어미새")) {
-                crawlings.addAll(extractEomisae(rows, label));
-            } else if (label.startsWith("루리웹")) {
-                crawlings.addAll(extractRuliweb(rows, label));
-            } else if (label.startsWith("쿨엔조이")) {
-                crawlings.addAll(extractCoolenjoy(rows, label));
-            }
+            crawlings.addAll(handleCrawlingByLabel(label, rows));
             crawlingRepository.saveAll(crawlings);
         } catch (Exception e) {
             System.err.println("크롤링 도중 오류 발생: " + e.getMessage());
@@ -279,6 +277,22 @@ public class CrawlingService {
             } catch (Exception e) {
                 System.err.println("쿨엔조이 데이터 추출 실패: " + e.getMessage());
             }
+        }
+        return crawlings;
+    }
+
+    private List<Crawling> handleCrawlingByLabel(String label, List<WebElement> rows) {
+        List<Crawling> crawlings = new ArrayList<>();
+        if (label.startsWith("뽐뿌")) {
+            crawlings.addAll(extractPpomppu(rows, label));
+        } else if (label.startsWith("퀘사이존")) {
+            crawlings.addAll(extractQuasarzone(rows, label));
+        } else if (label.startsWith("어미새")) {
+            crawlings.addAll(extractEomisae(rows, label));
+        } else if (label.startsWith("루리웹")) {
+            crawlings.addAll(extractRuliweb(rows, label));
+        } else if (label.startsWith("쿨엔조이")) {
+            crawlings.addAll(extractCoolenjoy(rows, label));
         }
         return crawlings;
     }

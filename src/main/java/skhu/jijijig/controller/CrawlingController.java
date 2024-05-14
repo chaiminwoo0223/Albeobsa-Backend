@@ -24,6 +24,19 @@ import java.util.concurrent.CompletableFuture;
 public class CrawlingController {
     private final CrawlingService crawlingService;
 
+    @Operation(summary = "랭킹 조회", description = "랭킹의 내용을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "랭킹 조회 성공"),
+            @ApiResponse(responseCode = "500", description = "서버 에러")
+    })
+    @GetMapping("/ranking")
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> ranking() {
+        return CompletableFuture.supplyAsync(() -> {
+            List<CrawlingDTO> crawlings = crawlingService.getTop10CrawlingsByRanking();
+            return ResponseEntity.ok(crawlings);
+        }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+    }
+
     @Operation(summary = "핫딜 조회", description = "핫딜의 내용을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "핫딜 조회 성공"),
