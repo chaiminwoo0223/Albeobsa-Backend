@@ -41,7 +41,7 @@ public class CrawlingService {
     private final ApplicationContext applicationContext;
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
-    @Scheduled(fixedRate = 120000) // 2분마다 실행
+    @Scheduled(fixedRate = 600000) // 10분마다 실행
     public void scheduleCrawlingTasks() {
         applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuDomestic();
         applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuOverseas();
@@ -115,7 +115,7 @@ public class CrawlingService {
 
     private List<Crawling> crawlWebsite(String url, String label, String ROWS) {
         WebDriver driver = setupChromeDriver();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
         List<Crawling> crawlings = new ArrayList<>();
         try {
             driver.get(url);

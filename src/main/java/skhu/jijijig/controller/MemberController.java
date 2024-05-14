@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import skhu.jijijig.domain.dto.ErrorResponseDTO;
@@ -20,7 +21,10 @@ import skhu.jijijig.service.MemberService;
 public class MemberController {
     private final MemberService memberService;
 
-    @Operation(summary = "인증", description = "Google OAuth 인증 코드를 받아서, 클라이언트에게 반환합니다.")
+    @Value("${spring.security.oauth2.google-authentication-url}")
+    private String authentication_url;
+
+    @Operation(summary = "인증", description = "Google OAuth 인증 URL을 전달합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "인증 성공", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
@@ -28,8 +32,8 @@ public class MemberController {
             @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping("/authenticate")
-    public ResponseEntity<String> authenticate(@RequestParam("code") String code) {
-        return ResponseEntity.ok(code);
+    public ResponseEntity<String> authenticate() {
+        return ResponseEntity.ok(authentication_url);
     }
 
     @Operation(summary = "로그인", description = "Google OAuth 인증 코드를 사용하여, 사용자 로그인을 처리하고 토큰을 반환합니다.")
