@@ -88,7 +88,16 @@ public class CrawlingService {
     }
 
     @Transactional(readOnly = true)
-    public List<CrawlingDTO> getSortedCrawlingsByLabel(String label, int page, int size) {
+    public List<CrawlingDTO> getAllCrawlingsSortedByDateTime(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Crawling> crawlings = crawlingRepository.findAllByOrderByDateTimeDesc(pageable);
+        return crawlings.stream()
+                .map(CrawlingDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CrawlingDTO> getCrawlingsSortedByLabelAndDateTime(String label, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Crawling> crawlings = crawlingRepository.findByLabelOrderByDateTimeDesc(label, pageable);
         return crawlings.stream()
