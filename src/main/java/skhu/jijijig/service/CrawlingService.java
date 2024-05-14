@@ -41,7 +41,7 @@ public class CrawlingService {
     private final ApplicationContext applicationContext;
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
-    @Scheduled(fixedRate = 180000) // 3분마다 실행
+    @Scheduled(fixedRate = 120000) // 2분마다 실행
     public void scheduleCrawlingTasks() {
         applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuDomestic();
         applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuOverseas();
@@ -212,9 +212,7 @@ public class CrawlingService {
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
                 Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, 0, commentCnt, open);
-                if (crawling != null && crawlingRepository.findByLinkAndDateTime(crawling.getLink(), crawling.getDateTime()).isEmpty()) {
-                    crawlings.add(crawling);
-                }
+                updateOrCreateCrawling(crawling, open);
             } catch (Exception e) {
                 System.err.println("어미새 데이터 추출 실패: " + e.getMessage());
             }
@@ -354,7 +352,7 @@ public class CrawlingService {
     }
 
     private void updateOrCreateCrawling(Crawling crawling, boolean open) {
-        Optional<Crawling> existing = crawlingRepository.findByLinkAndDateTime(crawling.getLink(), crawling.getDateTime());
+        Optional<Crawling> existing = crawlingRepository.findByLink(crawling.getLink());
         if (existing.isPresent()) {
             Crawling existingCrawling = existing.get();
             if (existingCrawling.isOpen() != open) {

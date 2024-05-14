@@ -43,7 +43,7 @@ public class CrawlingController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/hotdeal")
-    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> hotdeal(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "100") int size) {
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> hotdeal(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "20") int size) {
         return CompletableFuture.supplyAsync(() -> {
             List<CrawlingDTO> crawlings = crawlingService.getAllCrawlingsSortedByDateTime(page, size);
             return ResponseEntity.ok(crawlings);

@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface CrawlingRepository extends JpaRepository<Crawling, Long> {
-    Optional<Crawling> findByLinkAndDateTime(String link, String dateTime);
+    Optional<Crawling> findByLink(String link);
 
     Page<Crawling> findAllByOrderByDateTimeDesc(Pageable pageable);
 
