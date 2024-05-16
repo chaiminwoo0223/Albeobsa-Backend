@@ -3,8 +3,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: chaiminwoo0223/jijijig:latest
+    image: chaiminwoo0223/albeobsa:latest
     container_name: spring-boot-app
+    restart: on-failure
     environment:
       DB_JDBC_URL: ${DB_JDBC_URL}
       DB_USER: ${DB_USER}
@@ -20,25 +21,29 @@ services:
       REFRESH_SECOND: ${REFRESH_SECOND}
     ports:
       - "8080:8080"
-    restart: on-failure
     deploy:
       resources:
         limits:
           memory: 2048MB
     networks:
-      - jijijig-network
+      - albeobsa-network
 
   nginx:
     image: nginx:latest
+    restart: always
     volumes:
-      - ./conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./conf/nginx.conf:/etc/nginx/nginx.conf  # 경로 수정
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
     command: /bin/sh -c 'while :; do sleep 6h & wait $$!; nginx -s reload; done & nginx -g "daemon off;"'
-    restart: always
     ports:
       - "80:80"
       - "443:443"
+    depends_on:
+      - certbot
+      - server  # spring-boot-app에 의존성 추가
+    networks:
+      - albeobsa-network
 
   certbot:
     image: certbot/certbot
@@ -54,8 +59,8 @@ services:
     ports:
       - "4444:4444"
     networks:
-      - jijijig-network
+      - albeobsa-network
 
 networks:
-  jijijig-network:
+  albeobsa-network:
     driver: bridge

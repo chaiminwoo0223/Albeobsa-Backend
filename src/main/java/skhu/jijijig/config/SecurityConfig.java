@@ -90,7 +90,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:8080", "http://localhost:3000", "https://jijijig.duckdns.org"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:8080", "https://albeobsa.duckdns.org", "http://localhost:3000", "https://albeobsa-front.vercel.app"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Access-Control-Allow-Credentials", "Authorization", "Set-Cookie"));

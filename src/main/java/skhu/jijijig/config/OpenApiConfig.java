@@ -16,8 +16,8 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI openAPI() {
         Info info = new Info()
-                .title("JiJiJig API Documentation")
-                .description("API 문서화")
+                .title("Albeobsa API Documentation")
+                .description("알법사 API 문서화")
                 .version("3.0.0");
 
         String JWTSchemeName = "JWT Authorization";
