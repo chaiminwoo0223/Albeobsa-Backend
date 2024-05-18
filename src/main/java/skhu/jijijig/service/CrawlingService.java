@@ -3,7 +3,6 @@ package skhu.jijijig.service;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,9 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -38,53 +35,79 @@ import skhu.jijijig.repository.CrawlingRepository;
 @RequiredArgsConstructor
 public class CrawlingService {
     private final CrawlingRepository crawlingRepository;
-    private final ApplicationContext applicationContext;
-    private final ExecutorService executor = Executors.newFixedThreadPool(10);
+
+    private ScheduledExecutorService executor = Executors.newScheduledThreadPool(10);
 
     @Scheduled(fixedRate = 600000) // 10분마다 실행
     public void scheduleCrawlingTasks() {
-        applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuDomestic();
-        applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuOverseas();
-        applicationContext.getBean(CrawlingService.class).performCrawlingForQuasarzone();
-        applicationContext.getBean(CrawlingService.class).performCrawlingForEomisae();
-        applicationContext.getBean(CrawlingService.class).performCrawlingForRuliweb();
-        applicationContext.getBean(CrawlingService.class).performCrawlingForCoolenjoy();
+        if (executor.isShutdown() || executor.isTerminated()) {
+            restartExecutor();
+        }
+        executor.schedule(this::performCrawlingForPpomppuDomestic, 0, TimeUnit.SECONDS);
+        executor.schedule(this::performCrawlingForPpomppuOverseas, 0, TimeUnit.SECONDS);
+        executor.schedule(this::performCrawlingForQuasarzone, 0, TimeUnit.SECONDS);
+        executor.schedule(this::performCrawlingForEomisae, 0, TimeUnit.SECONDS);
+        executor.schedule(this::performCrawlingForRuliweb, 0, TimeUnit.SECONDS);
+        executor.schedule(this::performCrawlingForCoolenjoy, 0, TimeUnit.SECONDS);
+    }
+
+    @Scheduled(fixedRate = 600000) // 10분마다 실행
+    public void manageThreads() {
+        System.out.println("Managing threads...");
+        if (executor.isShutdown() || executor.isTerminated()) {
+            restartExecutor();
+        }
+    }
+
+    private synchronized void restartExecutor() {
+        if (!executor.isShutdown() && !executor.isTerminated()) {
+            executor.shutdown(); // 기존 작업이 완료될 때까지 기다림
+            try {
+                if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                    executor.shutdownNow(); // 60초 후에도 종료되지 않으면 강제 종료
+                }
+            } catch (InterruptedException e) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
+        executor = Executors.newScheduledThreadPool(10);
     }
 
     @Transactional
     @Async
     public void performCrawlingForPpomppuDomestic() {
-        CompletableFuture.supplyAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1"), executor);
+        crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1");
     }
 
     @Transactional
     @Async
     public void performCrawlingForPpomppuOverseas() {
-        CompletableFuture.supplyAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1"), executor);
+        crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1");
     }
 
     @Transactional
     @Async
     public void performCrawlingForQuasarzone() {
-        CompletableFuture.supplyAsync(() -> crawlWebsite("https://quasarzone.com/bbs/qb_saleinfo", "퀘사이존", "tbody > tr"), executor);
+        crawlWebsite("https://quasarzone.com/bbs/qb_saleinfo", "퀘사이존", "tbody > tr");
     }
 
     @Transactional
     @Async
     public void performCrawlingForEomisae() {
-        CompletableFuture.supplyAsync(() -> crawlWebsite("https://eomisae.co.kr/rt", "어미새", "div.card_el.n_ntc.clear"), executor);
+        crawlWebsite("https://eomisae.co.kr/rt", "어미새", "div.card_el.n_ntc.clear");
     }
 
     @Transactional
     @Async
     public void performCrawlingForRuliweb() {
-        CompletableFuture.supplyAsync(() -> crawlWebsite("https://bbs.ruliweb.com/news/board/1020", "루리웹", "tr.table_body.blocktarget"), executor);
+        crawlWebsite("https://bbs.ruliweb.com/news/board/1020", "루리웹", "tr.table_body.blocktarget");
     }
 
     @Transactional
     @Async
     public void performCrawlingForCoolenjoy() {
-        CompletableFuture.supplyAsync(() -> crawlWebsite("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom"), executor);
+        crawlWebsite("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom");
     }
 
     @Transactional(readOnly = true)
@@ -113,7 +136,7 @@ public class CrawlingService {
                 .collect(Collectors.toList());
     }
 
-    private List<Crawling> crawlWebsite(String url, String label, String ROWS) {
+    private void crawlWebsite(String url, String label, String ROWS) {
         WebDriver driver = setupChromeDriver();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
         List<Crawling> crawlings = new ArrayList<>();
@@ -127,7 +150,6 @@ public class CrawlingService {
         } finally {
             driver.quit();
         }
-        return crawlings;
     }
 
     private List<Crawling> extractPpomppu(List<WebElement> rows, String label) {

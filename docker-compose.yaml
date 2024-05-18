@@ -53,14 +53,6 @@ services:
       - ./data/certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $$!; done;'"
 
-  chrome:
-    image: selenium/standalone-chrome:latest
-    container_name: google-chrome
-    ports:
-      - "4444:4444"
-    networks:
-      - albeobsa-network
-
 networks:
   albeobsa-network:
     driver: bridge
