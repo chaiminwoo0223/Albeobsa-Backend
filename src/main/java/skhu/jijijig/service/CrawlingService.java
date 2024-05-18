@@ -59,21 +59,6 @@ public class CrawlingService {
         }
     }
 
-    private synchronized void restartExecutor() {
-        if (!executor.isShutdown() && !executor.isTerminated()) {
-            executor.shutdown(); // 기존 작업이 완료될 때까지 기다림
-            try {
-                if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-                    executor.shutdownNow(); // 60초 후에도 종료되지 않으면 강제 종료
-                }
-            } catch (InterruptedException e) {
-                executor.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
-        }
-        executor = Executors.newScheduledThreadPool(10);
-    }
-
     @Transactional
     @Async
     public void performCrawlingForPpomppuDomestic() {
@@ -392,5 +377,20 @@ public class CrawlingService {
         options.setCapability("goog:loggingPrefs", java.util.Collections.singletonMap("browser", "ALL"));
         WebDriverManager.chromedriver().setup();
         return new ChromeDriver(options);
+    }
+
+    private synchronized void restartExecutor() {
+        if (!executor.isShutdown() && !executor.isTerminated()) {
+            executor.shutdown(); // 기존 작업이 완료될 때까지 기다림
+            try {
+                if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                    executor.shutdownNow(); // 60초 후에도 종료되지 않으면 강제 종료
+                }
+            } catch (InterruptedException e) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
+        executor = Executors.newScheduledThreadPool(10);
     }
 }

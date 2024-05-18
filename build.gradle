@@ -22,23 +22,48 @@ repositories {
 }
 
 dependencies {
+    // Spring Boot Starters
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    // SpringDoc OpenAPI
     implementation 'org.springdoc:springdoc-openapi-starter-common:2.3.0'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+
+    // JSON and Protobuf
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'com.google.protobuf:protobuf-java:3.16.3'
+
+    // Selenium and WebDriver
     implementation 'org.seleniumhq.selenium:selenium-java:4.19.0'
     implementation 'io.github.bonigarcia:webdrivermanager:5.8.0'
+
+    // QueryDSL
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+    // Development tools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    annotationProcessor 'org.projectlombok:lombok'
+
+    // Lombok
     compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Jakarta APIs
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+    // Database and JWT Runtime
     runtimeOnly 'com.mysql:mysql-connector-j'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
 }
