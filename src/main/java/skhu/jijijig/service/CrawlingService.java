@@ -140,26 +140,28 @@ public class CrawlingService {
         }
     }
 
-    private List<Crawling> extractPpomppu(List<WebElement> rows, String label) {
+    private List<Crawling> extractPpomppu(List<WebElement> rows, String label, int START, int MINUS,
+                                          String OPEN, String TITLE, String NAME, String DATETIME,
+                                          String IMAGE, String VIEWS,
+                                          String COMMENTCNT) {
         List<Crawling> crawlings = new ArrayList<>();
-        for (int i = 0; i < rows.size() - 4; i++) {
+        for (int i = START; i < rows.size() - MINUS; i++) {
             WebElement row = rows.get(i);
-            boolean open = row.findElements(By.cssSelector("img[src*='/zboard/skin/DQ_Revolution_BBS_New1/end_icon.PNG']")).isEmpty();
+            boolean open = parseOpen(row, OPEN);
             try {
-                String title = row.findElement(By.cssSelector("a.baseList-title")).getText();
-                String name = Optional.of(row.findElement(By.cssSelector("a.baseList-name")).getText()).orElse("No name");
-                String image = Optional.of(row.findElement(By.cssSelector("a.baseList-thumb img")).getAttribute("src"))
-                        .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("No image");
-                String link = row.findElement(By.cssSelector("a.baseList-title")).getAttribute("href");
-                String dateTime = parseDateTime(row.findElement(By.cssSelector("time.baseList-time")).getText(), label);
-                int views = parseInteger(row.findElement(By.cssSelector("td.baseList-space.baseList-views")).getText());
+                String title = parseTitle(row, label, TITLE);
+                String name = Optional.of(row.findElement(By.cssSelector(NAME)).getText()).orElse("No name");
+                String image = parseImage(row, label, IMAGE);
+                String link = parseLink(row, label, TITLE);
+                String dateTime = parseDateTime(row, label, DATETIME);
+                int views = parseViews(row, label, VIEWS);
                 String[] voteCnts = row.findElements(By.cssSelector("td.baseList-space.baseList-rec")).stream()
                         .findFirst()
                         .map(td -> td.getText().split(" - "))
                         .orElse(new String[]{"0", "0"});
                 int recommendCnt = parseInteger(voteCnts.length > 0 ? voteCnts[0] : "0");
                 int unrecommendCnt = parseInteger(voteCnts.length > 1 ? voteCnts[1] : "0");
-                int commentCnt = row.findElements(By.cssSelector("span.baseList-c")).stream()
+                int commentCnt = row.findElements(By.cssSelector(COMMENTCNT)).stream()
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
@@ -173,21 +175,22 @@ public class CrawlingService {
     }
 
 
-    private List<Crawling> extractQuasarzone(List<WebElement> rows, String label) {
+    private List<Crawling> extractQuasarzone(List<WebElement> rows, String label, int START, int MINUS,
+                                             String OPEN, String TITLE, String NAME, String DATETIME,
+                                             String IMAGE, String VIEWS,
+                                             String COMMENTCNT) {
         List<Crawling> crawlings = new ArrayList<>();
-        for (WebElement row : rows) {
-            boolean open = row.findElements(By.cssSelector("span.label.done")).isEmpty();
+        for (int i = START; i < rows.size() - MINUS; i++) {
+            WebElement row = rows.get(i);
+            boolean open = parseOpen(row, OPEN);
             try {
-                String title = row.findElement(By.cssSelector("a.subject-link")).getText();
-                String name = Optional.of(row.findElement(By.cssSelector("div.user-nick-text")).getText()).orElse("No name");
-                String image = Optional.of(row.findElement(By.cssSelector("a.thumb img")).getAttribute("src"))
-                        .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("No image");
-                String link = row.findElement(By.cssSelector("a.subject-link")).getAttribute("href");
-                String dateTime = parseDateTime(row.findElement(By.cssSelector("span.date")).getText(), label);
-                int views = Optional.ofNullable(row.findElement(By.cssSelector("span.count")).getText())
-                        .map(s -> s.endsWith("k") ? (int)(Double.parseDouble(s.replace("k", "")) * 1000) : Integer.parseInt(s))
-                        .orElse(0);
-                int commentCnt = row.findElements(By.cssSelector("span.ctn-count")).stream()
+                String title = parseTitle(row, label, TITLE);
+                String name = Optional.of(row.findElement(By.cssSelector(NAME)).getText()).orElse("No name");
+                String image = parseImage(row, label, IMAGE);
+                String link = parseLink(row, label, TITLE);
+                String dateTime = parseDateTime(row, label, DATETIME);
+                int views = parseViews(row, label, VIEWS);
+                int commentCnt = row.findElements(By.cssSelector(COMMENTCNT)).stream()
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
@@ -200,24 +203,27 @@ public class CrawlingService {
         return crawlings;
     }
 
-    private List<Crawling> extractEomisae(List<WebElement> rows, String label) {
+    private List<Crawling> extractEomisae(List<WebElement> rows, String label, int START, int MINUS,
+                                          String OPEN, String TITLE, String NAME, String DATETIME,
+                                          String IMAGE, String VIEWS,
+                                          String COMMENTCNT) {
         List<Crawling> crawlings = new ArrayList<>();
-        for (WebElement row : rows) {
-            boolean open = true;
+        for (int i = START; i < rows.size() - MINUS; i++) {
+            WebElement row = rows.get(i);
+            boolean open = parseOpen(row, OPEN);
             try {
-                String title = row.findElement(By.cssSelector("h3 a.pjax")).getText();
-                String name = Optional.of(row.findElement(By.cssSelector("div.info")).getText()).orElse("No name");
-                String image = Optional.of(row.findElement(By.cssSelector("img.tmb")).getAttribute("src"))
-                        .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("No image");
-                String link = row.findElement(By.cssSelector("a.pjax.hx")).getAttribute("href");
-                String dateTime = parseDateTime(row.findElement(By.cssSelector("p > span:nth-child(2)")).getText(), label);
-                int views = parseInteger(row.findElement(By.cssSelector("span.fr:nth-child(1)")).getText());
+                String title = parseTitle(row, label, TITLE);
+                String name = Optional.of(row.findElement(By.cssSelector(NAME)).getText()).orElse("No name");
+                String image = parseImage(row, label, IMAGE);
+                String link = parseLink(row, label, TITLE);
+                String dateTime = parseDateTime(row, label, DATETIME);
+                int views = parseViews(row, label, VIEWS);
                 int recommendCnt = row.findElements(By.cssSelector("span.fr:nth-child(3)")).stream()
                         .findFirst()
                         .map(td -> td.getText().split(" - ")[0])
                         .map(this::parseInteger)
                         .orElse(0);
-                int commentCnt = row.findElements(By.cssSelector("span.fr:nth-child(2)")).stream()
+                int commentCnt = row.findElements(By.cssSelector(COMMENTCNT)).stream()
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
@@ -230,27 +236,31 @@ public class CrawlingService {
         return crawlings;
     }
 
-    private List<Crawling> extractRuliweb(List<WebElement> rows, String label) {
+    private List<Crawling> extractRuliweb(List<WebElement> rows, String label, int START, int MINUS,
+                                          String OPEN, String TITLE, String NAME, String DATETIME,
+                                          String IMAGE, String VIEWS,
+                                          String COMMENTCNT) {
         List<Crawling> crawlings = new ArrayList<>();
-        for (int i = 4; i < rows.size(); i++) {
+        for (int i = START; i < rows.size() - MINUS; i++) {
             WebElement row = rows.get(i);
-            boolean open = true;
+            boolean open = parseOpen(row, OPEN);
             try {
-                String title = row.findElement(By.cssSelector("a.deco")).getText();
-                String name = Optional.of(row.findElement(By.cssSelector("td.writer.text_over")).getText()).orElse("No name");
-                String link = row.findElement(By.cssSelector("a.deco")).getAttribute("href");
-                String dateTime = parseDateTime(row.findElement(By.cssSelector("td.time")).getText(), label);
-                int views = parseInteger(row.findElement(By.cssSelector("td.hit")).getText());
+                String title = parseTitle(row, label, TITLE);
+                String name = Optional.of(row.findElement(By.cssSelector(NAME)).getText()).orElse("No name");
+                String link = parseLink(row, label, TITLE);
+                String image = parseImage(row, label, IMAGE);
+                String dateTime = parseDateTime(row, label, DATETIME);
+                int views = parseViews(row, label, VIEWS);
                 int recommendCnt = row.findElements(By.cssSelector("td.recomd")).stream()
                         .findFirst()
                         .map(td -> td.getText().split(" - ")[0])
                         .map(this::parseInteger)
                         .orElse(0);
-                int commentCnt = row.findElements(By.cssSelector("a.num_reply span.num")).stream()
+                int commentCnt = row.findElements(By.cssSelector(COMMENTCNT)).stream()
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
-                Crawling crawling = Crawling.of(label, title, name, "https://img.ruliweb.com/img/2016/common/ruliweb_bi.png", link, dateTime, views, recommendCnt, 0, commentCnt, open);
+                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, 0, commentCnt, open);
                 updateOrCreateCrawling(crawling, open);
             } catch (Exception e) {
                 System.err.println("루리웹 데이터 추출 실패: " + e.getMessage());
@@ -259,28 +269,32 @@ public class CrawlingService {
         return crawlings;
     }
 
-    private List<Crawling> extractCoolenjoy(List<WebElement> rows, String label) {
+    // parseLink
+    private List<Crawling> extractCoolenjoy(List<WebElement> rows, String label, int START, int MINUS,
+                                            String OPEN, String TITLE, String NAME, String DATETIME,
+                                            String IMAGE, String VIEWS,
+                                            String COMMENTCNT) {
         List<Crawling> crawlings = new ArrayList<>();
-        for (WebElement row : rows) {
-            boolean open = row.findElements(By.cssSelector(".fa-lock")).isEmpty();
+        for (int i = START; i < rows.size() -MINUS; i++) {
+            WebElement row = rows.get(i);
+            boolean open = parseOpen(row, OPEN);
             try {
-                String title = Optional.ofNullable(row.findElement(By.cssSelector("div.na-item")).getText())
-                        .map(t -> t.split("\\n")[0])
-                        .orElse("");
-                String name = Optional.ofNullable(row.findElement(By.cssSelector("a.sv_member")).getText()).orElse("No name");
-                String link = row.findElement(By.cssSelector("div.na-item a")).getAttribute("href");
-                String dateTime = parseDateTime(row.findElement(By.cssSelector("div.float-left.float-md-none.d-md-table-cell.nw-6.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1")).getText(), label);
-                int views = parseInteger(row.findElement(By.cssSelector("div.float-left.float-md-none.d-md-table-cell.nw-4.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1")).getText());
+                String title = parseTitle(row, label, TITLE);
+                String name = Optional.ofNullable(row.findElement(By.cssSelector(NAME)).getText()).orElse("No name");
+                String link = parseLink(row, label, TITLE);
+                String image = parseImage(row, label, IMAGE);
+                String dateTime = parseDateTime(row, label, DATETIME);
+                int views = parseViews(row, label, VIEWS);
                 int recommendCnt = row.findElements(By.cssSelector("span.rank-icon_vote")).stream()
                         .findFirst()
                         .map(td -> td.getText().split(" - ")[0])
                         .map(this::parseInteger)
                         .orElse(0);
-                int commentCnt = row.findElements(By.cssSelector("span.count-plus")).stream()
+                int commentCnt = row.findElements(By.cssSelector(COMMENTCNT)).stream()
                         .findFirst()
                         .map(element -> parseInteger(element.getText()))
                         .orElse(0);
-                Crawling crawling = Crawling.of(label, title, name, "https://coolenjoy.net/theme/BS4-Basic/storage/image/logo-test.svg", link, dateTime, views, recommendCnt, 0, commentCnt, open);
+                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, 0, commentCnt, open);
                 updateOrCreateCrawling(crawling, open);
             } catch (Exception e) {
                 System.err.println("쿨엔조이 데이터 추출 실패: " + e.getMessage());
@@ -292,20 +306,78 @@ public class CrawlingService {
     private List<Crawling> handleCrawlingByLabel(String label, List<WebElement> rows) {
         List<Crawling> crawlings = new ArrayList<>();
         if (label.startsWith("뽐뿌")) {
-            crawlings.addAll(extractPpomppu(rows, label));
+            crawlings.addAll(extractPpomppu(rows, label, 0, 4,
+                    "img[src*='/zboard/skin/DQ_Revolution_BBS_New1/end_icon.PNG']",
+                    "a.baseList-title", "a.baseList-name", "time.baseList-time",
+                    "a.baseList-thumb img", "td.baseList-space.baseList-views",
+                    "span.baseList-c"));
         } else if (label.startsWith("퀘사이존")) {
-            crawlings.addAll(extractQuasarzone(rows, label));
+            crawlings.addAll(extractQuasarzone(rows, label, 0, 0,
+                    "span.label.done",
+                    "a.subject-link", "div.user-nick-text", "span.date",
+                    "a.thumb img", "span.count",
+                    "span.ctn-count"));
         } else if (label.startsWith("어미새")) {
-            crawlings.addAll(extractEomisae(rows, label));
+            crawlings.addAll(extractEomisae(rows, label, 0, 0,
+                    "open",
+                    "h3 a.pjax", "div.info", "p > span:nth-child(2)",
+                    "img.tmb", "span.fr:nth-child(1)",
+                    "span.fr:nth-child(1)"));
         } else if (label.startsWith("루리웹")) {
-            crawlings.addAll(extractRuliweb(rows, label));
+            crawlings.addAll(extractRuliweb(rows, label, 4, 0,
+                    "open",
+                    "a.deco", "td.writer.text_over", "td.time",
+                    "No image", "td.hit",
+                    "a.num_reply span.num"));
         } else if (label.startsWith("쿨엔조이")) {
-            crawlings.addAll(extractCoolenjoy(rows, label));
+            crawlings.addAll(extractCoolenjoy(rows, label, 0, 0,
+                    ".fa-lock",
+                    "div.na-item", "a.sv_member", "div.float-left.float-md-none.d-md-table-cell.nw-6.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1",
+                    "No image", "div.float-left.float-md-none.d-md-table-cell.nw-4.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1",
+                    "span.count-plus"));
         }
         return crawlings;
     }
 
-    private String parseDateTime(String dateTime, String label) {
+    private boolean parseOpen(WebElement row, String OPEN) {
+        if (OPEN.equals("open")) {
+            return true;
+        } else {
+            return row.findElements(By.cssSelector(OPEN)).isEmpty();
+        }
+    }
+
+    private String parseTitle(WebElement row, String label, String TITLE) {
+        if (label.equals("쿨엔조이")) {
+            return Optional.ofNullable(row.findElement(By.cssSelector(TITLE)).getText())
+                    .map(t -> t.split("\\n")[0])
+                    .orElse("");
+        } else {
+            return row.findElement(By.cssSelector(TITLE)).getText();
+        }
+    }
+
+    private String parseLink(WebElement row, String label, String TITLE) {
+        if (label.equals("쿨엔조이")) {
+            return row.findElement(By.cssSelector("div.na-item a")).getAttribute("href");
+        } else {
+            return row.findElement(By.cssSelector(TITLE)).getAttribute("href");
+        }
+    }
+
+    private String parseImage(WebElement row, String label, String IMAGE) {
+        if (label.equals("루리웹")) {
+            return "https://img.ruliweb.com/img/2016/common/ruliweb_bi.png";
+        } else if (label.equals("쿨엔조이")) {
+            return "https://coolenjoy.net/theme/BS4-Basic/storage/image/logo-test.svg";
+        } else {
+            return Optional.of(row.findElement(By.cssSelector(IMAGE)).getAttribute("src"))
+                    .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("No image");
+        }
+    }
+
+    private String parseDateTime(WebElement row, String label, String DATETIME) {
+        String dateTime = row.findElement(By.cssSelector(DATETIME)).getText();
         LocalDate today = LocalDate.now();
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd");
@@ -351,6 +423,16 @@ public class CrawlingService {
             }
         }
         return today.format(timeFormatter);
+    }
+
+    private int parseViews(WebElement row, String label, String VIEWS) {
+        if (label.equals("퀘사이존")) {
+            return Optional.ofNullable(row.findElement(By.cssSelector(VIEWS)).getText())
+                    .map(s -> s.endsWith("k") ? (int)(Double.parseDouble(s.replace("k", "")) * 1000) : Integer.parseInt(s))
+                    .orElse(0);
+        } else {
+            return parseInteger(row.findElement(By.cssSelector(VIEWS)).getText());
+        }
     }
 
     private int parseInteger(String text) {
