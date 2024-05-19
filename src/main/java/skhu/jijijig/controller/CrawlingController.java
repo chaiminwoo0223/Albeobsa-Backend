@@ -55,9 +55,9 @@ public class CrawlingController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/hotdeal")
-    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> hotdeal(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "20") int size) {
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> hotdeal(Pageable pageable) {
         return CompletableFuture.supplyAsync(() -> {
-            List<CrawlingDTO> crawlings = crawlingService.getAllCrawlingsSortedByDateTime(page, size);
+            List<CrawlingDTO> crawlings = crawlingService.getAllCrawlingsSortedByDateTime(pageable);
             return ResponseEntity.ok(crawlings);
         }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
@@ -68,9 +68,9 @@ public class CrawlingController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/hotdeal/ppomppu")
-    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> ppomppuDomestic(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "20") int size) {
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> ppomppuDomestic(Pageable pageable) {
         return CompletableFuture.supplyAsync(() -> {
-            List<CrawlingDTO> crawlings = crawlingService.getCrawlingsSortedByLabelAndDateTime("뽐뿌(국내게시판)", page, size);
+            List<CrawlingDTO> crawlings = crawlingService.getCrawlingsSortedByLabelAndDateTime("뽐뿌(국내게시판)", pageable);
             return ResponseEntity.ok(crawlings);
         }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
@@ -81,9 +81,9 @@ public class CrawlingController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/hotdeal/ppomppu4")
-    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> ppomppuOverseas(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "20") int size) {
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> ppomppuOverseas(Pageable pageable) {
         return CompletableFuture.supplyAsync(() -> {
-            List<CrawlingDTO> crawlings = crawlingService.getCrawlingsSortedByLabelAndDateTime("뽐뿌(해외게시판)", page, size);
+            List<CrawlingDTO> crawlings = crawlingService.getCrawlingsSortedByLabelAndDateTime("뽐뿌(해외게시판)", pageable);
             return ResponseEntity.ok(crawlings);
         }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
@@ -94,9 +94,9 @@ public class CrawlingController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/hotdeal/quasarzone")
-    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> quasarzone(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "20") int size) {
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> quasarzone(Pageable pageable) {
         return CompletableFuture.supplyAsync(() -> {
-            List<CrawlingDTO> crawlings = crawlingService.getCrawlingsSortedByLabelAndDateTime("퀘사이존", page, size);
+            List<CrawlingDTO> crawlings = crawlingService.getCrawlingsSortedByLabelAndDateTime("퀘사이존", pageable);
             return ResponseEntity.ok(crawlings);
         }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
@@ -107,9 +107,9 @@ public class CrawlingController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/hotdeal/eomisae")
-    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> eomisae(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "20") int size) {
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> eomisae(Pageable pageable) {
         return CompletableFuture.supplyAsync(() -> {
-            List<CrawlingDTO> crawlings = crawlingService.getCrawlingsSortedByLabelAndDateTime("어미새", page, size);
+            List<CrawlingDTO> crawlings = crawlingService.getCrawlingsSortedByLabelAndDateTime("어미새", pageable);
             return ResponseEntity.ok(crawlings);
         }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
@@ -120,9 +120,9 @@ public class CrawlingController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/hotdeal/ruliweb")
-    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> ruliweb(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "20") int size) {
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> ruliweb(Pageable pageable) {
         return CompletableFuture.supplyAsync(() -> {
-            List<CrawlingDTO> crawlings = crawlingService.getCrawlingsSortedByLabelAndDateTime("루리웹", page, size);
+            List<CrawlingDTO> crawlings = crawlingService.getCrawlingsSortedByLabelAndDateTime("루리웹", pageable);
             return ResponseEntity.ok(crawlings);
         }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
@@ -133,9 +133,9 @@ public class CrawlingController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/hotdeal/coolenjoy")
-    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> coolenjoy(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "20") int size) {
+    public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> coolenjoy(Pageable pageable) {
         return CompletableFuture.supplyAsync(() -> {
-            List<CrawlingDTO> crawlings = crawlingService.getCrawlingsSortedByLabelAndDateTime("쿨엔조이", page, size);
+            List<CrawlingDTO> crawlings = crawlingService.getCrawlingsSortedByLabelAndDateTime("쿨엔조이", pageable);
             return ResponseEntity.ok(crawlings);
         }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }

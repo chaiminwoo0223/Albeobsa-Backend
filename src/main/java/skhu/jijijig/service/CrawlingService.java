@@ -4,7 +4,6 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -103,15 +102,14 @@ public class CrawlingService {
 
     @Transactional(readOnly = true)
     public List<CrawlingDTO> getTop10CrawlingsByRanking() {
-        List<Crawling> crawlings = crawlingRepository.findTop10ByOrderByRecommendCntDescUnrecommendCntAscCommentCntDesc();
+        List<Crawling> crawlings = crawlingRepository.findTop10ByRecommendAndComment();
         return crawlings.stream()
                 .map(CrawlingDTO::fromEntity)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<CrawlingDTO> getAllCrawlingsSortedByDateTime(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public List<CrawlingDTO> getAllCrawlingsSortedByDateTime(Pageable pageable) {
         Page<Crawling> crawlings = crawlingRepository.findAllByOrderByDateTimeDesc(pageable);
         return crawlings.stream()
                 .map(CrawlingDTO::fromEntity)
@@ -119,8 +117,7 @@ public class CrawlingService {
     }
 
     @Transactional(readOnly = true)
-    public List<CrawlingDTO> getCrawlingsSortedByLabelAndDateTime(String label, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public List<CrawlingDTO> getCrawlingsSortedByLabelAndDateTime(String label, Pageable pageable) {
         Page<Crawling> crawlings = crawlingRepository.findByLabelOrderByDateTimeDesc(label, pageable);
         return crawlings.stream()
                 .map(CrawlingDTO::fromEntity)

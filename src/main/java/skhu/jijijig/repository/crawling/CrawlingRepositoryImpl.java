@@ -37,6 +37,16 @@ public class CrawlingRepositoryImpl implements CrawlingRepositoryCustom {
         return PageableExecutionUtils.getPage(searchResult, pageable, countQuery::fetchOne);
     }
 
+    @Override
+    public List<Crawling> findTop10ByRecommendAndComment() {
+        QCrawling crawling = QCrawling.crawling;
+
+        return queryFactory.selectFrom(crawling)
+                .orderBy(crawling.recommendCnt.desc(), crawling.unrecommendCnt.asc(), crawling.commentCnt.desc())
+                .limit(10)
+                .fetch();
+    }
+
     private BooleanExpression keywordContainsInLabelOrTitle(String keyword) {
         return keyword != null ? QCrawling.crawling.label.containsIgnoreCase(keyword)
                 .or(QCrawling.crawling.title.containsIgnoreCase(keyword)) : null;
