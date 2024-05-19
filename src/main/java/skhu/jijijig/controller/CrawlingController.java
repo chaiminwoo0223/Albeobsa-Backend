@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +25,16 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("/api/crawling")
 public class CrawlingController {
     private final CrawlingService crawlingService;
+
+    @Operation(summary = "검색", description = "내용을 검색합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "검색 성공"),
+            @ApiResponse(responseCode = "500", description = "서버 에러")
+    })
+    @GetMapping("/search")
+    public Page<CrawlingDTO> search(@RequestParam(required = false) String keyword, Pageable pageable) {
+        return crawlingService.searchCrawling(keyword, pageable);
+    }
 
     @Operation(summary = "랭킹 조회", description = "랭킹의 내용을 조회합니다.")
     @ApiResponses(value = {

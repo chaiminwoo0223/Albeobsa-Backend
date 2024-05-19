@@ -29,7 +29,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.By;
 import skhu.jijijig.domain.dto.CrawlingDTO;
 import skhu.jijijig.domain.model.Crawling;
-import skhu.jijijig.repository.CrawlingRepository;
+import skhu.jijijig.repository.crawling.CrawlingRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -93,6 +93,12 @@ public class CrawlingService {
     @Async
     public void performCrawlingForCoolenjoy() {
         crawlWebsite("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom");
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CrawlingDTO> searchCrawling(String keyword, Pageable pageable) {
+        Page<Crawling> crawlings = crawlingRepository.searchCrawlingWithPagination(keyword, pageable);
+        return crawlings.map(CrawlingDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
