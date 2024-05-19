@@ -140,10 +140,9 @@ public class CrawlingService {
         }
     }
 
-    private List<Crawling> extractPpomppu(List<WebElement> rows, String label, int START, int MINUS,
-                                          String OPEN, String TITLE, String NAME, String DATETIME,
-                                          String IMAGE, String VIEWS,
-                                          String COMMENTCNT, String RECOMMENDCNT) {
+    private List<Crawling> extractCrawling(List<WebElement> rows, String label, int START, int MINUS,
+                                           String OPEN, String TITLE, String NAME, String IMAGE, String DATETIME,
+                                           String VIEWS, String RECOMMENDCNT, String COMMENTCNT) {
         List<Crawling> crawlings = new ArrayList<>();
         for (int i = START; i < rows.size() - MINUS; i++) {
             WebElement row = rows.get(i);
@@ -156,122 +155,12 @@ public class CrawlingService {
                 String dateTime = parseDateTime(row, label, DATETIME);
                 int views = parseViews(row, label, VIEWS);
                 int recommendCnt = parseRecommendCnt(row, label, RECOMMENDCNT);
-                String[] voteCnts = row.findElements(By.cssSelector(RECOMMENDCNT)).stream()
-                        .findFirst()
-                        .map(td -> td.getText().split(" - "))
-                        .orElse(new String[]{"0", "0"});
-                int unrecommendCnt = parseInteger(voteCnts.length > 1 ? voteCnts[1] : "0");
+                int unrecommendCnt = parseUnRecommendCnt(row, label, RECOMMENDCNT);
                 int commentCnt = parseCommentCnt(row, COMMENTCNT);
                 Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, unrecommendCnt, commentCnt, open);
                 updateOrCreateCrawling(crawling, open);
             } catch (Exception e) {
-                System.err.println("뽐뿌 데이터 추출 실패: " + e.getMessage());
-            }
-        }
-        return crawlings;
-    }
-
-
-    private List<Crawling> extractQuasarzone(List<WebElement> rows, String label, int START, int MINUS,
-                                             String OPEN, String TITLE, String NAME, String DATETIME,
-                                             String IMAGE, String VIEWS,
-                                             String COMMENTCNT, String RECOMMENDCNT) {
-        List<Crawling> crawlings = new ArrayList<>();
-        for (int i = START; i < rows.size() - MINUS; i++) {
-            WebElement row = rows.get(i);
-            boolean open = parseOpen(row, OPEN);
-            try {
-                String title = parseTitle(row, label, TITLE);
-                String name = parseName(row, NAME);
-                String image = parseImage(row, label, IMAGE);
-                String link = parseLink(row, label, TITLE);
-                String dateTime = parseDateTime(row, label, DATETIME);
-                int views = parseViews(row, label, VIEWS);
-                int recommendCnt = parseRecommendCnt(row, label, RECOMMENDCNT);
-                int commentCnt = parseCommentCnt(row, COMMENTCNT);
-                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, 0, commentCnt, open);
-                updateOrCreateCrawling(crawling, open);
-            } catch (Exception e) {
-                System.err.println("퀘사이존 데이터 추출 실패: " + e.getMessage());
-            }
-        }
-        return crawlings;
-    }
-
-    private List<Crawling> extractEomisae(List<WebElement> rows, String label, int START, int MINUS,
-                                          String OPEN, String TITLE, String NAME, String DATETIME,
-                                          String IMAGE, String VIEWS,
-                                          String COMMENTCNT, String RECOMMENDCNT) {
-        List<Crawling> crawlings = new ArrayList<>();
-        for (int i = START; i < rows.size() - MINUS; i++) {
-            WebElement row = rows.get(i);
-            boolean open = parseOpen(row, OPEN);
-            try {
-                String title = parseTitle(row, label, TITLE);
-                String name = parseName(row, NAME);
-                String image = parseImage(row, label, IMAGE);
-                String link = parseLink(row, label, TITLE);
-                String dateTime = parseDateTime(row, label, DATETIME);
-                int views = parseViews(row, label, VIEWS);
-                int recommendCnt = parseRecommendCnt(row, label, RECOMMENDCNT);
-                int commentCnt = parseCommentCnt(row, COMMENTCNT);
-                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, 0, commentCnt, open);
-                updateOrCreateCrawling(crawling, open);
-            } catch (Exception e) {
-                System.err.println("어미새 데이터 추출 실패: " + e.getMessage());
-            }
-        }
-        return crawlings;
-    }
-
-    private List<Crawling> extractRuliweb(List<WebElement> rows, String label, int START, int MINUS,
-                                          String OPEN, String TITLE, String NAME, String DATETIME,
-                                          String IMAGE, String VIEWS,
-                                          String COMMENTCNT, String RECOMMENDCNT) {
-        List<Crawling> crawlings = new ArrayList<>();
-        for (int i = START; i < rows.size() - MINUS; i++) {
-            WebElement row = rows.get(i);
-            boolean open = parseOpen(row, OPEN);
-            try {
-                String title = parseTitle(row, label, TITLE);
-                String name = parseName(row, NAME);
-                String link = parseLink(row, label, TITLE);
-                String image = parseImage(row, label, IMAGE);
-                String dateTime = parseDateTime(row, label, DATETIME);
-                int views = parseViews(row, label, VIEWS);
-                int recommendCnt = parseRecommendCnt(row, label, RECOMMENDCNT);
-                int commentCnt = parseCommentCnt(row, COMMENTCNT);
-                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, 0, commentCnt, open);
-                updateOrCreateCrawling(crawling, open);
-            } catch (Exception e) {
-                System.err.println("루리웹 데이터 추출 실패: " + e.getMessage());
-            }
-        }
-        return crawlings;
-    }
-
-    // parseLink
-    private List<Crawling> extractCoolenjoy(List<WebElement> rows, String label, int START, int MINUS,
-                                            String OPEN, String TITLE, String NAME, String DATETIME,
-                                            String IMAGE, String VIEWS,
-                                            String COMMENTCNT, String RECOMMENDCNT) {
-        List<Crawling> crawlings = new ArrayList<>();
-        for (int i = START; i < rows.size() -MINUS; i++) {
-            WebElement row = rows.get(i);
-            boolean open = parseOpen(row, OPEN);
-            try {
-                String title = parseTitle(row, label, TITLE);
-                String name = parseName(row, NAME);
-                String link = parseLink(row, label, TITLE);
-                String image = parseImage(row, label, IMAGE);
-                String dateTime = parseDateTime(row, label, DATETIME);
-                int views = parseViews(row, label, VIEWS);
-                int recommendCnt = parseRecommendCnt(row, label, RECOMMENDCNT);
-                int commentCnt = parseCommentCnt(row, COMMENTCNT);
-                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, 0, commentCnt, open);
-                updateOrCreateCrawling(crawling, open);
-            } catch (Exception e) {
-                System.err.println("쿨엔조이 데이터 추출 실패: " + e.getMessage());
+                System.err.println("데이터 추출 실패: " + e.getMessage());
             }
         }
         return crawlings;
@@ -280,35 +169,25 @@ public class CrawlingService {
     private List<Crawling> handleCrawlingByLabel(String label, List<WebElement> rows) {
         List<Crawling> crawlings = new ArrayList<>();
         if (label.startsWith("뽐뿌")) {
-            crawlings.addAll(extractPpomppu(rows, label, 0, 4,
-                    "img[src*='/zboard/skin/DQ_Revolution_BBS_New1/end_icon.PNG']",
-                    "a.baseList-title", "a.baseList-name", "time.baseList-time",
-                    "a.baseList-thumb img", "td.baseList-space.baseList-views",
-                    "span.baseList-c", "td.baseList-space.baseList-rec"));
+            crawlings.addAll(extractCrawling(rows, label, 0, 4,
+                    "img[src*='/zboard/skin/DQ_Revolution_BBS_New1/end_icon.PNG']", "a.baseList-title", "a.baseList-name", "a.baseList-thumb img", "time.baseList-time",
+                    "td.baseList-space.baseList-views", "td.baseList-space.baseList-rec", "span.baseList-c"));
         } else if (label.startsWith("퀘사이존")) {
-            crawlings.addAll(extractQuasarzone(rows, label, 0, 0,
-                    "span.label.done",
-                    "a.subject-link", "div.user-nick-text", "span.date",
-                    "a.thumb img", "span.count",
-                    "span.ctn-count", "No recommendCnt"));
+            crawlings.addAll(extractCrawling(rows, label, 0, 0,
+                    "span.label.done", "a.subject-link", "div.user-nick-text", "a.thumb img", "span.date",
+                    "span.count", "No recommendCnt", "span.ctn-count"));
         } else if (label.startsWith("어미새")) {
-            crawlings.addAll(extractEomisae(rows, label, 0, 0,
-                    "open",
-                    "h3 a.pjax", "div.info", "p > span:nth-child(2)",
-                    "img.tmb", "span.fr:nth-child(1)",
-                    "span.fr:nth-child(1)", "span.fr:nth-child(3)"));
+            crawlings.addAll(extractCrawling(rows, label, 0, 0,
+                    "open", "h3 a.pjax", "div.info", "img.tmb", "p > span:nth-child(2)",
+                    "span.fr:nth-child(1)", "span.fr:nth-child(3)", "span.fr:nth-child(1)"));
         } else if (label.startsWith("루리웹")) {
-            crawlings.addAll(extractRuliweb(rows, label, 4, 0,
-                    "open",
-                    "a.deco", "td.writer.text_over", "td.time",
-                    "No image", "td.hit",
-                    "a.num_reply span.num", "td.recomd"));
+            crawlings.addAll(extractCrawling(rows, label, 4, 0,
+                    "open", "a.deco", "td.writer.text_over", "No image", "td.time",
+                    "td.hit", "td.recomd", "a.num_reply span.num"));
         } else if (label.startsWith("쿨엔조이")) {
-            crawlings.addAll(extractCoolenjoy(rows, label, 0, 0,
-                    ".fa-lock",
-                    "div.na-item", "a.sv_member", "div.float-left.float-md-none.d-md-table-cell.nw-6.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1",
-                    "No image", "div.float-left.float-md-none.d-md-table-cell.nw-4.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1",
-                    "span.count-plus", "span.rank-icon_vote"));
+            crawlings.addAll(extractCrawling(rows, label, 0, 0,
+                    ".fa-lock", "div.na-item", "a.sv_member", "No image", "div.float-left.float-md-none.d-md-table-cell.nw-6.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1",
+                    "div.float-left.float-md-none.d-md-table-cell.nw-4.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1", "span.rank-icon_vote", "span.count-plus"));
         }
         return crawlings;
     }
@@ -321,10 +200,6 @@ public class CrawlingService {
         }
     }
 
-    private String parseName(WebElement row, String NAME) {
-        return Optional.of(row.findElement(By.cssSelector(NAME)).getText()).orElse("No name");
-    }
-
     private String parseTitle(WebElement row, String label, String TITLE) {
         if (label.equals("쿨엔조이")) {
             return Optional.ofNullable(row.findElement(By.cssSelector(TITLE)).getText())
@@ -333,6 +208,10 @@ public class CrawlingService {
         } else {
             return row.findElement(By.cssSelector(TITLE)).getText();
         }
+    }
+
+    private String parseName(WebElement row, String NAME) {
+        return Optional.of(row.findElement(By.cssSelector(NAME)).getText()).orElse("No name");
     }
 
     private String parseLink(WebElement row, String label, String TITLE) {
@@ -419,9 +298,21 @@ public class CrawlingService {
         } else {
             return row.findElements(By.cssSelector(RECOMMENDCNT)).stream()
                     .findFirst()
-                    .map(td -> td.getText().split("-")[0].trim())
+                    .map(td -> td.getText().split(" - ")[0])
                     .map(this::parseInteger)
                     .orElse(0);
+        }
+    }
+
+    private int parseUnRecommendCnt(WebElement row, String label, String RECOMMENDCNT) {
+        if (label.equals("뽐뿌")) {
+            return row.findElements(By.cssSelector(RECOMMENDCNT)).stream()
+                    .findFirst()
+                    .map(td -> td.getText().split(" - ")[1])
+                    .map(this::parseInteger)
+                    .orElse(0);
+        } else {
+            return 0;
         }
     }
 
