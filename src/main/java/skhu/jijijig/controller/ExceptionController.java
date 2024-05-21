@@ -8,6 +8,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import skhu.jijijig.domain.dto.ErrorResponseDTO;
+import skhu.jijijig.exception.CrawlingProcessException;
 import skhu.jijijig.exception.ResourceNotFoundException;
 
 @Slf4j
@@ -17,6 +18,12 @@ public class ExceptionController {
     public ResponseEntity<ErrorResponseDTO> handleAuthenticationException(AuthenticationException e) {
         log.error("인증 실패", e);
         return buildErrorResponse("인증 실패: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(CrawlingProcessException.class)
+    public ResponseEntity<ErrorResponseDTO> handleCrawlingProcessException(CrawlingProcessException e) {
+        log.error("크롤링 오류", e);
+        return buildErrorResponse("크롤링 오류: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

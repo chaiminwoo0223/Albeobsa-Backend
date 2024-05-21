@@ -28,6 +28,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.By;
 import skhu.jijijig.domain.dto.CrawlingDTO;
 import skhu.jijijig.domain.model.Crawling;
+import skhu.jijijig.exception.CrawlingProcessException;
 import skhu.jijijig.repository.crawling.CrawlingRepository;
 
 @Service
@@ -96,32 +97,49 @@ public class CrawlingService {
 
     @Transactional(readOnly = true)
     public Page<CrawlingDTO> searchCrawling(String keyword, Pageable pageable) {
-        Page<Crawling> crawlings = crawlingRepository.searchCrawlingWithPagination(keyword, pageable);
-        return crawlings.map(CrawlingDTO::fromEntity);
+        try {
+            Page<Crawling> crawlings = crawlingRepository.searchCrawlingWithPagination(keyword, pageable);
+            return crawlings.map(CrawlingDTO::fromEntity);
+        } catch (Exception e) {
+            throw new CrawlingProcessException("크롤링 검색 중 오류 발생" + e.getMessage());
+        }
+
     }
 
     @Transactional(readOnly = true)
     public List<CrawlingDTO> getTop10CrawlingsByRanking() {
-        List<Crawling> crawlings = crawlingRepository.findTop10ByRecommendAndComment();
-        return crawlings.stream()
-                .map(CrawlingDTO::fromEntity)
-                .collect(Collectors.toList());
+        try {
+            List<Crawling> crawlings = crawlingRepository.findTop10ByRecommendAndComment();
+            return crawlings.stream()
+                    .map(CrawlingDTO::fromEntity)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new CrawlingProcessException("크롤링 랭킹 검색 중 오류 발생" + e.getMessage());
+        }
     }
 
     @Transactional(readOnly = true)
     public List<CrawlingDTO> getAllCrawlingsSortedByDateTime(Pageable pageable) {
-        Page<Crawling> crawlings = crawlingRepository.findAllByOrderByDateTimeDesc(pageable);
-        return crawlings.stream()
-                .map(CrawlingDTO::fromEntity)
-                .collect(Collectors.toList());
+        try {
+            Page<Crawling> crawlings = crawlingRepository.findAllByOrderByDateTimeDesc(pageable);
+            return crawlings.stream()
+                    .map(CrawlingDTO::fromEntity)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new CrawlingProcessException("크롤링 날짜순 검색 중 오류 발생" + e.getMessage());
+        }
     }
 
     @Transactional(readOnly = true)
     public List<CrawlingDTO> getCrawlingsSortedByLabelAndDateTime(String label, Pageable pageable) {
-        Page<Crawling> crawlings = crawlingRepository.findByLabelOrderByDateTimeDesc(label, pageable);
-        return crawlings.stream()
-                .map(CrawlingDTO::fromEntity)
-                .collect(Collectors.toList());
+        try {
+            Page<Crawling> crawlings = crawlingRepository.findByLabelOrderByDateTimeDesc(label, pageable);
+            return crawlings.stream()
+                    .map(CrawlingDTO::fromEntity)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new CrawlingProcessException("크롤링 라벨 및 날짜순 검색 중 오류 발생" + e.getMessage());
+        }
     }
 
     private void crawlWebsite(String url, String label, String ROWS) {
@@ -134,7 +152,7 @@ public class CrawlingService {
             crawlings.addAll(handleCrawlingByLabel(label, rows));
             crawlingRepository.saveAll(crawlings);
         } catch (Exception e) {
-            System.err.println("크롤링 도중 오류 발생: " + e.getMessage());
+            throw new CrawlingProcessException("크롤링 중 오류 발생: " + e.getMessage());
         } finally {
             driver.quit();
         }
@@ -160,7 +178,7 @@ public class CrawlingService {
                 Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, unrecommendCnt, commentCnt, open);
                 updateOrCreateCrawling(crawling, open);
             } catch (Exception e) {
-                System.err.println("데이터 추출 실패: " + e.getMessage());
+                throw new CrawlingProcessException("데이터 추출 중 오류 발생: " + e.getMessage());
             }
         }
         return crawlings;
