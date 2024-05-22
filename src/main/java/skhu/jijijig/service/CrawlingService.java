@@ -1,6 +1,7 @@
 package skhu.jijijig.service;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,7 @@ import skhu.jijijig.domain.model.Crawling;
 import skhu.jijijig.exception.CrawlingProcessException;
 import skhu.jijijig.repository.crawling.CrawlingRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CrawlingService {
@@ -38,7 +40,7 @@ public class CrawlingService {
 
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(10);
 
-    @Scheduled(fixedRate = 600000) // 10분마다 실행
+    @Scheduled(fixedRate = 3600000) // 1시간마다 실행
     public void scheduleCrawlingTasks() {
         if (executor.isShutdown() || executor.isTerminated()) {
             restartExecutor();
@@ -51,7 +53,7 @@ public class CrawlingService {
         executor.schedule(this::performCrawlingForCoolenjoy, 0, TimeUnit.SECONDS);
     }
 
-    @Scheduled(fixedRate = 600000) // 10분마다 실행
+    @Scheduled(fixedRate = 3600000) // 1시간마다 실행
     public void manageThreads() {
         System.out.println("Managing threads...");
         if (executor.isShutdown() || executor.isTerminated()) {
@@ -74,7 +76,7 @@ public class CrawlingService {
     @Transactional
     @Async
     public void performCrawlingForQuasarzone() {
-        crawlWebsite("https://quasarzone.com/bbs/qb_saleinfo", "퀘사이존", "tbody > tr");
+        crawlWebsite("https://quasarzone.com/bbs/qb_saleinfo", "퀘사이존", "div.market-info-list");
     }
 
     @Transactional
@@ -151,10 +153,9 @@ public class CrawlingService {
             List<WebElement> rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector(ROWS)));
             crawlings.addAll(handleCrawlingByLabel(label, rows));
             crawlingRepository.saveAll(crawlings);
+            driver.quit();
         } catch (Exception e) {
             throw new CrawlingProcessException("크롤링 중 오류 발생: " + e.getMessage());
-        } finally {
-            driver.quit();
         }
     }
 
@@ -359,6 +360,7 @@ public class CrawlingService {
     private WebDriver setupChromeDriver() {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--disable-extensions", "--disable-popup-blocking", "--start-maximized", "--window-size=1920,1080", "user-agent=Mozilla/5.0...", "--disable-infobars", "--disable-browser-side-navigation", "--disable-setuid-sandbox");
+        options.setCapability("goog:loggingPrefs", java.util.Collections.singletonMap("browser", "OFF"));
         WebDriverManager.chromedriver().setup();
         return new ChromeDriver(options);
     }
