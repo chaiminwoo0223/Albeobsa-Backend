@@ -7,9 +7,11 @@ import skhu.jijijig.domain.model.Crawling;
 import java.util.List;
 
 public interface CrawlingRepositoryCustom {
-    Page<Crawling> searchCrawlingWithPagination(String keyword, Pageable pageable);
+    Page<Crawling> searchAllByKeyword(String keyword, Pageable pageable);
 
-    List<Crawling> findTop10ByRecommendAndComment();
+    List<Crawling> findTop10ByRanking();
 
-    void deleteByLink(String link);
+    Page<Crawling> findAllSortedByDateTime(Pageable pageable);
+
+    Page<Crawling> findAllSortedByDateTimeByLabel(String label, Pageable pageable);
 }

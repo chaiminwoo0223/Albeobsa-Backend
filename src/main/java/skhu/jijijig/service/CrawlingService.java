@@ -98,7 +98,7 @@ public class CrawlingService {
     @Transactional(readOnly = true)
     public Page<CrawlingDTO> searchCrawling(String keyword, Pageable pageable) {
         try {
-            Page<Crawling> crawlings = crawlingRepository.searchCrawlingWithPagination(keyword, pageable);
+            Page<Crawling> crawlings = crawlingRepository.searchAllByKeyword(keyword, pageable);
             return crawlings.map(CrawlingDTO::fromEntity);
         } catch (Exception e) {
             throw new CrawlingProcessException("크롤링 검색 중 오류 발생" + e.getMessage());
@@ -109,7 +109,7 @@ public class CrawlingService {
     @Transactional(readOnly = true)
     public List<CrawlingDTO> getTop10CrawlingsByRanking() {
         try {
-            List<Crawling> crawlings = crawlingRepository.findTop10ByRecommendAndComment();
+            List<Crawling> crawlings = crawlingRepository.findTop10ByRanking();
             return crawlings.stream()
                     .map(CrawlingDTO::fromEntity)
                     .collect(Collectors.toList());
@@ -121,7 +121,7 @@ public class CrawlingService {
     @Transactional(readOnly = true)
     public List<CrawlingDTO> getAllCrawlingsSortedByDateTime(Pageable pageable) {
         try {
-            Page<Crawling> crawlings = crawlingRepository.findAllByOrderByDateTimeDesc(pageable);
+            Page<Crawling> crawlings = crawlingRepository.findAllSortedByDateTime(pageable);
             return crawlings.stream()
                     .map(CrawlingDTO::fromEntity)
                     .collect(Collectors.toList());
@@ -133,7 +133,7 @@ public class CrawlingService {
     @Transactional(readOnly = true)
     public List<CrawlingDTO> getCrawlingsSortedByLabelAndDateTime(String label, Pageable pageable) {
         try {
-            Page<Crawling> crawlings = crawlingRepository.findByLabelOrderByDateTimeDesc(label, pageable);
+            Page<Crawling> crawlings = crawlingRepository.findAllSortedByDateTimeByLabel(label, pageable);
             return crawlings.stream()
                     .map(CrawlingDTO::fromEntity)
                     .collect(Collectors.toList());
@@ -174,7 +174,7 @@ public class CrawlingService {
                 int unrecommendCnt = parseUnRecommendCnt(row, label, RECOMMENDCNT);
                 int commentCnt = parseCommentCnt(row, COMMENTCNT);
                 Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, unrecommendCnt, commentCnt, open);
-                updateOrCreateCrawling(crawling);
+                createOrUpdateCrawling(crawling);
             } catch (Exception e) {
                 throw new CrawlingProcessException("데이터 추출 중 오류 발생: " + e.getMessage());
             }
@@ -343,12 +343,12 @@ public class CrawlingService {
         }
     }
 
-    private void updateOrCreateCrawling(Crawling crawling) {
+    private void createOrUpdateCrawling(Crawling crawling) {
         Optional<Crawling> existing = crawlingRepository.findByLink(crawling.getLink());
         if (existing.isPresent()) {
             Crawling existingCrawling = existing.get();
             if (existingCrawling.isDifferent(crawling)) {
-                crawlingRepository.deleteByLink(crawling.getLink());
+                crawlingRepository.deleteById(existingCrawling.getId());
                 crawlingRepository.save(crawling);
             }
         } else {
