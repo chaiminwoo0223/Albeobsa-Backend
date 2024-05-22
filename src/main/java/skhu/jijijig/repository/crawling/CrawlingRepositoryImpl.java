@@ -47,6 +47,15 @@ public class CrawlingRepositoryImpl implements CrawlingRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public void deleteByLink(String link) {
+        QCrawling crawling = QCrawling.crawling;
+
+        queryFactory.delete(crawling)
+                .where(crawling.link.eq(link))
+                .execute();
+    }
+
     private BooleanExpression keywordContainsInLabelOrTitle(String keyword) {
         return keyword != null ? QCrawling.crawling.label.containsIgnoreCase(keyword)
                 .or(QCrawling.crawling.title.containsIgnoreCase(keyword)) : null;

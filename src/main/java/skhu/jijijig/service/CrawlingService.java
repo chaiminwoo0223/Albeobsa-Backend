@@ -158,9 +158,7 @@ public class CrawlingService {
         }
     }
 
-    private List<Crawling> extractCrawling(List<WebElement> rows, String label, int START, int MINUS,
-                                           String OPEN, String TITLE, String NAME, String IMAGE, String DATETIME,
-                                           String VIEWS, String RECOMMENDCNT, String COMMENTCNT) {
+    private List<Crawling> extractCrawling(List<WebElement> rows, String label, int START, int MINUS, String OPEN, String TITLE, String NAME, String IMAGE, String DATETIME, String VIEWS, String RECOMMENDCNT, String COMMENTCNT) {
         List<Crawling> crawlings = new ArrayList<>();
         for (int i = START; i < rows.size() - MINUS; i++) {
             WebElement row = rows.get(i);
@@ -176,7 +174,7 @@ public class CrawlingService {
                 int unrecommendCnt = parseUnRecommendCnt(row, label, RECOMMENDCNT);
                 int commentCnt = parseCommentCnt(row, COMMENTCNT);
                 Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, unrecommendCnt, commentCnt, open);
-                updateOrCreateCrawling(crawling, open);
+                updateOrCreateCrawling(crawling);
             } catch (Exception e) {
                 throw new CrawlingProcessException("데이터 추출 중 오류 발생: " + e.getMessage());
             }
@@ -211,11 +209,7 @@ public class CrawlingService {
     }
 
     private boolean parseOpen(WebElement row, String OPEN) {
-        if (OPEN.equals("open")) {
-            return true;
-        } else {
-            return row.findElements(By.cssSelector(OPEN)).isEmpty();
-        }
+        return OPEN.equals("open") || row.findElements(By.cssSelector(OPEN)).isEmpty();
     }
 
     private String parseTitle(WebElement row, String label, String TITLE) {
@@ -349,13 +343,13 @@ public class CrawlingService {
         }
     }
 
-    private void updateOrCreateCrawling(Crawling crawling, boolean open) {
+    private void updateOrCreateCrawling(Crawling crawling) {
         Optional<Crawling> existing = crawlingRepository.findByLink(crawling.getLink());
         if (existing.isPresent()) {
             Crawling existingCrawling = existing.get();
-            if (existingCrawling.isOpen() != open) {
-                existingCrawling.updateOpen(open);
-                crawlingRepository.save(existingCrawling);
+            if (existingCrawling.isDifferent(crawling)) {
+                crawlingRepository.deleteByLink(crawling.getLink());
+                crawlingRepository.save(crawling);
             }
         } else {
             crawlingRepository.save(crawling);
@@ -365,21 +359,20 @@ public class CrawlingService {
     private WebDriver setupChromeDriver() {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--disable-extensions", "--disable-popup-blocking", "--start-maximized", "--window-size=1920,1080", "user-agent=Mozilla/5.0...", "--disable-infobars", "--disable-browser-side-navigation", "--disable-setuid-sandbox");
-        options.setCapability("goog:loggingPrefs", java.util.Collections.singletonMap("browser", "ALL"));
         WebDriverManager.chromedriver().setup();
         return new ChromeDriver(options);
     }
 
     private synchronized void restartExecutor() {
-        if (!executor.isShutdown() && !executor.isTerminated()) {
-            executor.shutdown(); // 기존 작업이 완료될 때까지 기다림
+        if (!executor.isShutdown()) {
+            executor.shutdown();
             try {
                 if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-                    executor.shutdownNow(); // 60초 후에도 종료되지 않으면 강제 종료
+                    executor.shutdownNow();
                 }
             } catch (InterruptedException e) {
-                executor.shutdownNow();
-                Thread.currentThread().interrupt();
+                executor.shutdownNow(); // InterruptedException 발생 시 즉시 종료
+                Thread.currentThread().interrupt(); // 현재 스레드에 대한 interrupt 상태를 설정하여 예외를 적절히 처리
             }
         }
         executor = Executors.newScheduledThreadPool(10);

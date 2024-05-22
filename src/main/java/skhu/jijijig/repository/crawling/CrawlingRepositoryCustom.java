@@ -10,4 +10,6 @@ public interface CrawlingRepositoryCustom {
     Page<Crawling> searchCrawlingWithPagination(String keyword, Pageable pageable);
 
     List<Crawling> findTop10ByRecommendAndComment();
+
+    void deleteByLink(String link);
 }

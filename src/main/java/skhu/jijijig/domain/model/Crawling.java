@@ -3,6 +3,8 @@ package skhu.jijijig.domain.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Objects;
+
 @Entity
 @Builder(toBuilder = true)
 @Getter
@@ -46,10 +48,6 @@ public class Crawling {
     @Column(nullable = false)
     private boolean open;
 
-    public void updateOpen(boolean newOpen) {
-        this.open = newOpen;
-    }
-
     public static Crawling of(String label, String title, String name, String image, String link, String dateTime, int views, int recommendCnt, int unrecommendCnt, int commentCnt, boolean open) {
         return Crawling.builder()
                 .label(label)
@@ -64,5 +62,17 @@ public class Crawling {
                 .commentCnt(commentCnt)
                 .open(open)
                 .build();
+    }
+
+    public boolean isDifferent(Crawling other) {
+        return !Objects.equals(this.label, other.label) ||
+                !Objects.equals(this.title, other.title) ||
+                !Objects.equals(this.name, other.name) ||
+                !Objects.equals(this.image, other.image) ||
+                this.views != other.views ||
+                this.recommendCnt != other.recommendCnt ||
+                this.unrecommendCnt != other.unrecommendCnt ||
+                this.commentCnt != other.commentCnt ||
+                this.open != other.open;
     }
 }
