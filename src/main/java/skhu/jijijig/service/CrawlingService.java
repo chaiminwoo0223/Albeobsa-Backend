@@ -1,7 +1,6 @@
 package skhu.jijijig.service;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
-import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.data.domain.Page;
@@ -32,7 +31,6 @@ import skhu.jijijig.domain.model.Crawling;
 import skhu.jijijig.exception.CrawlingProcessException;
 import skhu.jijijig.repository.crawling.CrawlingRepository;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CrawlingService {
@@ -47,13 +45,12 @@ public class CrawlingService {
         }
         executor.schedule(this::performCrawlingForPpomppuDomestic, 0, TimeUnit.SECONDS);
         executor.schedule(this::performCrawlingForPpomppuOverseas, 0, TimeUnit.SECONDS);
-        executor.schedule(this::performCrawlingForQuasarzone, 0, TimeUnit.SECONDS);
         executor.schedule(this::performCrawlingForEomisae, 0, TimeUnit.SECONDS);
         executor.schedule(this::performCrawlingForRuliweb, 0, TimeUnit.SECONDS);
         executor.schedule(this::performCrawlingForCoolenjoy, 0, TimeUnit.SECONDS);
     }
 
-    @Scheduled(fixedRate = 3600000) // 1시간마다 실행
+    @Scheduled(fixedRate = 600000) // 10분마다 실행
     public void manageThreads() {
         System.out.println("Managing threads...");
         if (executor.isShutdown() || executor.isTerminated()) {
@@ -71,12 +68,6 @@ public class CrawlingService {
     @Async
     public void performCrawlingForPpomppuOverseas() {
         crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1");
-    }
-
-    @Transactional
-    @Async
-    public void performCrawlingForQuasarzone() {
-        crawlWebsite("https://quasarzone.com/bbs/qb_saleinfo", "퀘사이존", "div.market-info-list");
     }
 
     @Transactional
@@ -153,9 +144,10 @@ public class CrawlingService {
             List<WebElement> rows = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector(ROWS)));
             crawlings.addAll(handleCrawlingByLabel(label, rows));
             crawlingRepository.saveAll(crawlings);
-            driver.quit();
         } catch (Exception e) {
             throw new CrawlingProcessException("크롤링 중 오류 발생: " + e.getMessage());
+        } finally {
+            driver.quit();
         }
     }
 
@@ -170,8 +162,8 @@ public class CrawlingService {
                 String image = parseImage(row, label, IMAGE);
                 String link = parseLink(row, label, TITLE);
                 String dateTime = parseDateTime(row, label, DATETIME);
-                int views = parseViews(row, label, VIEWS);
-                int recommendCnt = parseRecommendCnt(row, label, RECOMMENDCNT);
+                int views = parseViews(row, VIEWS);
+                int recommendCnt = parseRecommendCnt(row, RECOMMENDCNT);
                 int unrecommendCnt = parseUnRecommendCnt(row, label, RECOMMENDCNT);
                 int commentCnt = parseCommentCnt(row, COMMENTCNT);
                 Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, unrecommendCnt, commentCnt, open);
@@ -189,10 +181,6 @@ public class CrawlingService {
             crawlings.addAll(extractCrawling(rows, label, 0, 4,
                     "img[src*='/zboard/skin/DQ_Revolution_BBS_New1/end_icon.PNG']", "a.baseList-title", "a.baseList-name", "a.baseList-thumb img", "time.baseList-time",
                     "td.baseList-space.baseList-views", "td.baseList-space.baseList-rec", "span.baseList-c"));
-        } else if (label.startsWith("퀘사이존")) {
-            crawlings.addAll(extractCrawling(rows, label, 0, 0,
-                    "span.label.done", "a.subject-link", "div.user-nick-text", "a.thumb img", "span.date",
-                    "span.count", "No recommendCnt", "span.ctn-count"));
         } else if (label.startsWith("어미새")) {
             crawlings.addAll(extractCrawling(rows, label, 0, 0,
                     "open", "h3 a.pjax", "div.info", "img.tmb", "p > span:nth-child(2)",
@@ -260,7 +248,7 @@ public class CrawlingService {
                 LocalDate date = LocalDate.of(today.getYear(), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
                 return date.format(dateFormatter) + " 00:00:00";
             }
-        } else if (label.startsWith("퀘사이존") || label.startsWith("루리웹")) {
+        } else if (label.startsWith("루리웹")) {
             if (dateTime.contains(":")) { // 시간 포맷 (예: "11:53")
                 return today.format(dateFormatter) + " " + dateTime + ":00"; // "2024-05-12 11:53:00"
             } else if (dateTime.contains("-")) { // 날짜 포맷 (예: "05-11")
@@ -295,26 +283,16 @@ public class CrawlingService {
         return today.format(timeFormatter);
     }
 
-    private int parseViews(WebElement row, String label, String VIEWS) {
-        if (label.equals("퀘사이존")) {
-            return Optional.ofNullable(row.findElement(By.cssSelector(VIEWS)).getText())
-                    .map(s -> s.endsWith("k") ? (int)(Double.parseDouble(s.replace("k", "")) * 1000) : Integer.parseInt(s))
-                    .orElse(0);
-        } else {
-            return parseInteger(row.findElement(By.cssSelector(VIEWS)).getText());
-        }
+    private int parseViews(WebElement row, String VIEWS) {
+        return parseInteger(row.findElement(By.cssSelector(VIEWS)).getText());
     }
 
-    private int parseRecommendCnt(WebElement row, String label, String RECOMMENDCNT) {
-        if (label.equals("퀘사이존")) {
-            return 0;
-        } else {
-            return row.findElements(By.cssSelector(RECOMMENDCNT)).stream()
+    private int parseRecommendCnt(WebElement row, String RECOMMENDCNT) {
+        return row.findElements(By.cssSelector(RECOMMENDCNT)).stream()
                     .findFirst()
                     .map(td -> td.getText().split(" - ")[0])
                     .map(this::parseInteger)
                     .orElse(0);
-        }
     }
 
     private int parseUnRecommendCnt(WebElement row, String label, String RECOMMENDCNT) {
