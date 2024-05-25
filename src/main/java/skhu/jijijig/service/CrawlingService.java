@@ -151,7 +151,7 @@ public class CrawlingService {
         }
     }
 
-    private List<Crawling> extractCrawling(List<WebElement> rows, String label, int START, int MINUS, String OPEN, String TITLE, String NAME, String IMAGE, String DATETIME, String VIEWS, String RECOMMENDCNT, String COMMENTCNT) {
+    private List<Crawling> extractCrawling(List<WebElement> rows, String label, int START, int MINUS, String OPEN, String TITLE, String NAME, String IMAGE, String DATETIME, String VIEWS, String RECOMMENDCNTS, String COMMENTCNT) {
         List<Crawling> crawlings = new ArrayList<>();
         for (int i = START; i < rows.size() - MINUS; i++) {
             WebElement row = rows.get(i);
@@ -163,10 +163,9 @@ public class CrawlingService {
                 String link = parseLink(row, label, TITLE);
                 String dateTime = parseDateTime(row, label, DATETIME);
                 int views = parseViews(row, VIEWS);
-                int recommendCnt = parseRecommendCnt(row, RECOMMENDCNT);
-                int unrecommendCnt = parseUnRecommendCnt(row, label, RECOMMENDCNT);
+                int[] recommendCnts = parseRecommendCnts(row, RECOMMENDCNTS);
                 int commentCnt = parseCommentCnt(row, COMMENTCNT);
-                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnt, unrecommendCnt, commentCnt, open);
+                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnts[0], recommendCnts[1], commentCnt, open);
                 createOrUpdateCrawling(crawling);
             } catch (Exception e) {
                 throw new CrawlingProcessException("데이터 추출 중 오류 발생: " + e.getMessage());
@@ -287,24 +286,15 @@ public class CrawlingService {
         return parseInteger(row.findElement(By.cssSelector(VIEWS)).getText());
     }
 
-    private int parseRecommendCnt(WebElement row, String RECOMMENDCNT) {
-        return row.findElements(By.cssSelector(RECOMMENDCNT)).stream()
-                    .findFirst()
-                    .map(td -> td.getText().split(" - ")[0])
-                    .map(this::parseInteger)
-                    .orElse(0);
-    }
-
-    private int parseUnRecommendCnt(WebElement row, String label, String RECOMMENDCNT) {
-        if (label.equals("뽐뿌")) {
-            return row.findElements(By.cssSelector(RECOMMENDCNT)).stream()
-                    .findFirst()
-                    .map(td -> td.getText().split(" - ")[1])
-                    .map(this::parseInteger)
-                    .orElse(0);
-        } else {
-            return 0;
-        }
+    private int[] parseRecommendCnts(WebElement row, String RECOMMENDCNTS) {
+        String cnts = row.findElements(By.cssSelector(RECOMMENDCNTS)).stream()
+                .findFirst()
+                .map(td -> td.getText().replaceAll("\\D+", "-"))  // 숫자가 아닌 모든 문자를 '-'로 대체
+                .orElse("0-0");  // 값이 없다면 "0,0"을 반환
+        String[] parts = cnts.split("-");
+        int recommendCnt = parts.length > 0 ? parseInteger(parts[0]) : 0;  // 첫 번째 숫자를 추천수로 파싱, 없으면 0
+        int unrecommendCnt = parts.length > 1 ? parseInteger(parts[1]) : 0;  // 두 번째 숫자를 비추천수로 파싱, 없으면 0
+        return new int[] {recommendCnt, unrecommendCnt};
     }
 
     private int parseCommentCnt(WebElement row, String COMMENTCNT) {
@@ -338,7 +328,6 @@ public class CrawlingService {
     private WebDriver setupChromeDriver() {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--disable-extensions", "--disable-popup-blocking", "--start-maximized", "--window-size=1920,1080", "user-agent=Mozilla/5.0...", "--disable-infobars", "--disable-browser-side-navigation", "--disable-setuid-sandbox");
-        options.setCapability("goog:loggingPrefs", java.util.Collections.singletonMap("browser", "OFF"));
         WebDriverManager.chromedriver().setup();
         return new ChromeDriver(options);
     }
