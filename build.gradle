@@ -38,7 +38,7 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-java:3.16.3'
 
     // Selenium and WebDriver
-    implementation 'org.seleniumhq.selenium:selenium-java:4.19.0'
+    implementation 'org.seleniumhq.selenium:selenium-java:4.21.0'
     implementation 'io.github.bonigarcia:webdrivermanager:5.8.0'
 
     // QueryDSL
