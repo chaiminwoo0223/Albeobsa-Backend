@@ -25,7 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import skhu.jijijig.filter.JwtFilter;
+import skhu.jijijig.token.JwtFilter;
 import skhu.jijijig.token.TokenProvider;
 
 import java.util.List;

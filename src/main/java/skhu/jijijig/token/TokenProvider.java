@@ -3,7 +3,6 @@ package skhu.jijijig.token;
 import io.jsonwebtoken.io.Decoders;
 import skhu.jijijig.domain.dto.TokenDTO;
 import skhu.jijijig.domain.model.Member;
-import skhu.jijijig.service.TokenBlackListService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

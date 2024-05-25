@@ -15,6 +15,7 @@ import skhu.jijijig.domain.dto.MemberDTO;
 import skhu.jijijig.domain.dto.TokenDTO;
 import skhu.jijijig.domain.model.Member;
 import skhu.jijijig.repository.MemberRepository;
+import skhu.jijijig.token.TokenBlackListService;
 import skhu.jijijig.token.TokenProvider;
 
 import java.lang.reflect.Type;

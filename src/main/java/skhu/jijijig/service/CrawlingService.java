@@ -44,7 +44,7 @@ public class CrawlingService {
         submitCrawlingTask("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom");
     }
 
-    @Scheduled(fixedRate = 600000) // 10분마다 실행
+    @Scheduled(fixedRate = 3600000) // 1시간마다 실행
     public void manageThreads() {
         System.out.println("Managing threads...");
         if (executor.isShutdown() || executor.isTerminated()) {
@@ -182,7 +182,7 @@ public class CrawlingService {
         if (!executor.isShutdown()) {
             executor.shutdown();
             try {
-                if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                if (!executor.awaitTermination(300, TimeUnit.SECONDS)) {
                     executor.shutdownNow();
                 }
             } catch (InterruptedException e) {
@@ -190,7 +190,7 @@ public class CrawlingService {
                 Thread.currentThread().interrupt(); // 현재 스레드에 대한 interrupt 상태를 설정하여 예외를 적절히 처리
             }
         }
-        executor = Executors.newScheduledThreadPool(10);
+        executor = Executors.newScheduledThreadPool(60);
     }
 
     private WebDriver setupChromeDriver() {
