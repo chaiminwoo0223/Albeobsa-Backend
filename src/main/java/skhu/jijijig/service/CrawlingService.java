@@ -102,7 +102,7 @@ public class CrawlingService {
 
     private void crawlWebsite(String url, String label, String ROWS) {
         WebDriver driver = setupChromeDriver();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         List<Crawling> crawlings = new ArrayList<>();
         try {
             driver.get(url);
@@ -122,10 +122,10 @@ public class CrawlingService {
             WebElement row = rows.get(i);
             boolean open = parsingService.parseOpen(row, OPEN);
             try {
-                String title = parsingService.parseTitle(row, label, TITLE);
+                String title = parsingService.parseTitle(row, TITLE);
                 String name = parsingService.parseName(row, NAME);
                 String image = parsingService.parseImage(row, label, IMAGE);
-                String link = parsingService.parseLink(row, label, TITLE);
+                String link = parsingService.parseLink(row, TITLE);
                 String dateTime = parsingService.parseDateTime(row, label, DATETIME);
                 int views = parsingService.parseViews(row, VIEWS);
                 int[] recommendCnts = parsingService.parseRecommendCnts(row, RECOMMENDCNTS);
@@ -155,7 +155,7 @@ public class CrawlingService {
                     "td.hit", "td.recomd", "a.num_reply span.num"));
         } else if (label.startsWith("쿨엔조이")) {
             crawlings.addAll(extractCrawling(rows, label, 0, 0,
-                    ".fa-lock", "div.na-item", "a.sv_member", "No image", "div.float-left.float-md-none.d-md-table-cell.nw-6.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1",
+                    ".fa-lock", "a.na-subject", "a.sv_member", "No image", "div.float-left.float-md-none.d-md-table-cell.nw-6.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1",
                     "div.float-left.float-md-none.d-md-table-cell.nw-4.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1", "span.rank-icon_vote", "span.count-plus"));
         }
         return crawlings;
@@ -195,7 +195,7 @@ public class CrawlingService {
 
     private WebDriver setupChromeDriver() {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--disable-extensions", "--disable-popup-blocking", "--start-maximized", "--window-size=1920,1080", "user-agent=Mozilla/5.0...", "--disable-infobars", "--disable-browser-side-navigation", "--disable-setuid-sandbox");
+        options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--disable-extensions", "--disable-popup-blocking", "--start-maximized", "--window-size=1920,1080", "user-agent=Mozilla/5.0...");
         WebDriverManager.chromedriver().setup();
         return new ChromeDriver(options);
     }

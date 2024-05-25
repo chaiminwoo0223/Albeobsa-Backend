@@ -15,20 +15,16 @@ public class ParsingService {
         return OPEN.equals("open") || row.findElements(By.cssSelector(OPEN)).isEmpty();
     }
 
-    public String parseTitle(WebElement row, String label, String TITLE) {
-        return Optional.ofNullable(row.findElement(By.cssSelector(TITLE)).getText())
-                .map(t -> label.equals("쿨엔조이") ? t.split("\\n")[0] : t)
-                .orElse("");
+    public String parseTitle(WebElement row, String TITLE) {
+        return row.findElement(By.cssSelector(TITLE)).getText();
     }
 
     public String parseName(WebElement row, String NAME) {
         return Optional.of(row.findElement(By.cssSelector(NAME)).getText()).orElse("No name");
     }
 
-    public String parseLink(WebElement row, String label, String TITLE) {
-        return label.equals("쿨엔조이") ?
-                row.findElement(By.cssSelector("div.na-item a")).getAttribute("href") :
-                row.findElement(By.cssSelector(TITLE)).getAttribute("href");
+    public String parseLink(WebElement row, String TITLE) {
+        return row.findElement(By.cssSelector(TITLE)).getAttribute("href");
     }
 
     public String parseImage(WebElement row, String label, String IMAGE) {
