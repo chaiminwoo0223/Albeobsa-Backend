@@ -5,7 +5,6 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,9 +39,6 @@ public class CrawlingService {
 
     @Scheduled(fixedRate = 3600000) // 1시간마다 실행
     public void scheduleCrawlingTasks() {
-        if (executor.isShutdown() || executor.isTerminated()) {
-            restartExecutor();
-        }
         executor.schedule(this::performCrawlingForPpomppuDomestic, 0, TimeUnit.SECONDS);
         executor.schedule(this::performCrawlingForPpomppuOverseas, 0, TimeUnit.SECONDS);
         executor.schedule(this::performCrawlingForEomisae, 0, TimeUnit.SECONDS);
@@ -56,36 +52,32 @@ public class CrawlingService {
         if (executor.isShutdown() || executor.isTerminated()) {
             restartExecutor();
         }
+        System.gc(); // 가비지 컬렉션 강제 실행
     }
 
     @Transactional
-    @Async
     public void performCrawlingForPpomppuDomestic() {
-        crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1");
+        executor.submit(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1"));
     }
 
     @Transactional
-    @Async
     public void performCrawlingForPpomppuOverseas() {
-        crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1");
+        executor.submit(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1"));
     }
 
     @Transactional
-    @Async
     public void performCrawlingForEomisae() {
-        crawlWebsite("https://eomisae.co.kr/rt", "어미새", "div.card_el.n_ntc.clear");
+        executor.submit(() -> crawlWebsite("https://eomisae.co.kr/rt", "어미새", "div.card_el.n_ntc.clear"));
     }
 
     @Transactional
-    @Async
     public void performCrawlingForRuliweb() {
-        crawlWebsite("https://bbs.ruliweb.com/news/board/1020", "루리웹", "tr.table_body.blocktarget");
+        executor.submit(() -> crawlWebsite("https://bbs.ruliweb.com/news/board/1020", "루리웹", "tr.table_body.blocktarget"));
     }
 
     @Transactional
-    @Async
     public void performCrawlingForCoolenjoy() {
-        crawlWebsite("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom");
+        executor.submit(() -> crawlWebsite("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom"));
     }
 
     @Transactional(readOnly = true)
