@@ -1,6 +1,5 @@
 package skhu.jijijig.service;
 
-import lombok.RequiredArgsConstructor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Service;
@@ -11,20 +10,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class ParsingService {
     public boolean parseOpen(WebElement row, String OPEN) {
         return OPEN.equals("open") || row.findElements(By.cssSelector(OPEN)).isEmpty();
     }
 
     public String parseTitle(WebElement row, String label, String TITLE) {
-        if (label.equals("쿨엔조이")) {
-            return Optional.ofNullable(row.findElement(By.cssSelector(TITLE)).getText())
-                    .map(t -> t.split("\\n")[0])
-                    .orElse("");
-        } else {
-            return row.findElement(By.cssSelector(TITLE)).getText();
-        }
+        return Optional.ofNullable(row.findElement(By.cssSelector(TITLE)).getText())
+                .map(t -> label.equals("쿨엔조이") ? t.split("\\n")[0] : t)
+                .orElse("");
     }
 
     public String parseName(WebElement row, String NAME) {
@@ -32,22 +26,19 @@ public class ParsingService {
     }
 
     public String parseLink(WebElement row, String label, String TITLE) {
-        if (label.equals("쿨엔조이")) {
-            return row.findElement(By.cssSelector("div.na-item a")).getAttribute("href");
-        } else {
-            return row.findElement(By.cssSelector(TITLE)).getAttribute("href");
-        }
+        return label.equals("쿨엔조이") ?
+                row.findElement(By.cssSelector("div.na-item a")).getAttribute("href") :
+                row.findElement(By.cssSelector(TITLE)).getAttribute("href");
     }
 
     public String parseImage(WebElement row, String label, String IMAGE) {
-        if (label.equals("루리웹")) {
-            return "https://img.ruliweb.com/img/2016/common/ruliweb_bi.png";
-        } else if (label.equals("쿨엔조이")) {
-            return "https://coolenjoy.net/theme/BS4-Basic/storage/image/logo-test.svg";
-        } else {
-            return Optional.of(row.findElement(By.cssSelector(IMAGE)).getAttribute("src"))
-                    .map(src -> src.startsWith("//") ? "https:" + src : src).orElse("No image");
-        }
+        return switch (label) {
+            case "루리웹" -> "https://img.ruliweb.com/img/2016/common/ruliweb_bi.png";
+            case "쿨엔조이" -> "https://coolenjoy.net/theme/BS4-Basic/storage/image/logo-test.svg";
+            default -> Optional.ofNullable(row.findElement(By.cssSelector(IMAGE)).getAttribute("src"))
+                    .map(src -> src.startsWith("//") ? "https:" + src : src)
+                    .orElse("No image");
+        };
     }
 
     public String parseDateTime(WebElement row, String label, String DATETIME) {
