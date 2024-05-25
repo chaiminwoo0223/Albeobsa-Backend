@@ -37,11 +37,11 @@ public class CrawlingService {
 
     @Scheduled(fixedRate = 3600000) // 1시간마다 실행
     public void scheduleCrawlingTasks() {
-        executor.schedule(this::performCrawlingForPpomppuDomestic, 0, TimeUnit.SECONDS);
-        executor.schedule(this::performCrawlingForPpomppuOverseas, 0, TimeUnit.SECONDS);
-        executor.schedule(this::performCrawlingForEomisae, 0, TimeUnit.SECONDS);
-        executor.schedule(this::performCrawlingForRuliweb, 0, TimeUnit.SECONDS);
-        executor.schedule(this::performCrawlingForCoolenjoy, 0, TimeUnit.SECONDS);
+        submitCrawlingTask("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1");
+        submitCrawlingTask("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1");
+        submitCrawlingTask("https://eomisae.co.kr/rt", "어미새", "div.card_el.n_ntc.clear");
+        submitCrawlingTask("https://bbs.ruliweb.com/news/board/1020", "루리웹", "tr.table_body.blocktarget");
+        submitCrawlingTask("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom");
     }
 
     @Scheduled(fixedRate = 600000) // 10분마다 실행
@@ -51,31 +51,6 @@ public class CrawlingService {
             restartExecutor();
         }
         System.gc(); // 가비지 컬렉션 강제 실행
-    }
-
-    @Transactional
-    public void performCrawlingForPpomppuDomestic() {
-        executor.submit(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1"));
-    }
-
-    @Transactional
-    public void performCrawlingForPpomppuOverseas() {
-        executor.submit(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1"));
-    }
-
-    @Transactional
-    public void performCrawlingForEomisae() {
-        executor.submit(() -> crawlWebsite("https://eomisae.co.kr/rt", "어미새", "div.card_el.n_ntc.clear"));
-    }
-
-    @Transactional
-    public void performCrawlingForRuliweb() {
-        executor.submit(() -> crawlWebsite("https://bbs.ruliweb.com/news/board/1020", "루리웹", "tr.table_body.blocktarget"));
-    }
-
-    @Transactional
-    public void performCrawlingForCoolenjoy() {
-        executor.submit(() -> crawlWebsite("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom"));
     }
 
     @Transactional(readOnly = true)
@@ -199,11 +174,8 @@ public class CrawlingService {
         }
     }
 
-    private WebDriver setupChromeDriver() {
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--disable-extensions", "--disable-popup-blocking", "--start-maximized", "--window-size=1920,1080", "user-agent=Mozilla/5.0...", "--disable-infobars", "--disable-browser-side-navigation", "--disable-setuid-sandbox");
-        WebDriverManager.chromedriver().setup();
-        return new ChromeDriver(options);
+    private void submitCrawlingTask(String url, String label, String rows) {
+        executor.submit(() -> crawlWebsite(url, label, rows));
     }
 
     private synchronized void restartExecutor() {
@@ -219,5 +191,12 @@ public class CrawlingService {
             }
         }
         executor = Executors.newScheduledThreadPool(10);
+    }
+
+    private WebDriver setupChromeDriver() {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--disable-extensions", "--disable-popup-blocking", "--start-maximized", "--window-size=1920,1080", "user-agent=Mozilla/5.0...", "--disable-infobars", "--disable-browser-side-navigation", "--disable-setuid-sandbox");
+        WebDriverManager.chromedriver().setup();
+        return new ChromeDriver(options);
     }
 }
