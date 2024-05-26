@@ -15,8 +15,8 @@ import skhu.jijijig.domain.dto.MemberDTO;
 import skhu.jijijig.domain.dto.TokenDTO;
 import skhu.jijijig.domain.model.Member;
 import skhu.jijijig.repository.MemberRepository;
-import skhu.jijijig.token.TokenBlackListService;
 import skhu.jijijig.token.TokenProvider;
+import skhu.jijijig.token.TokenRevoker;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -27,7 +27,7 @@ import java.util.Map;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final TokenProvider tokenProvider;
-    private final TokenBlackListService tokenBlackListService;
+    private final TokenRevoker tokenRevoker;
 
     @Value("${spring.security.oauth2.google-client-id}")
     private String googleClientId;
@@ -95,14 +95,11 @@ public class MemberService {
     }
 
     public TokenDTO refreshAccessToken(String refreshToken) {
-        if (tokenBlackListService.isBlackListed(refreshToken)) {
-            throw new RuntimeException("블랙리스트에 포함된 새로고침 토큰입니다.");
-        }
         return tokenProvider.renewToken(refreshToken);
     }
 
     public void deactivateTokens(String accessToken, String refreshToken) {
-        tokenBlackListService.addToBlackList(accessToken);
-        tokenBlackListService.addToBlackList(refreshToken);
+        tokenRevoker.addToBlackList(accessToken);
+        tokenRevoker.addToBlackList(refreshToken);
     }
 }

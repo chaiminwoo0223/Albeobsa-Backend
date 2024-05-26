@@ -23,19 +23,19 @@ import java.util.stream.Collectors;
 @Component
 public class TokenProvider {
     private final Key key;
+    private final TokenRevoker tokenRevoker;
     private final long accessTokenValidityTime;
     private final long refreshTokenValidityTime;
-    private final TokenBlackListService tokenBlackListService;
 
     public TokenProvider(@Value("${jwt.secret}") String secretKey,
                          @Value("${jwt.access-token-validity-in-milliseconds}") long accessTokenValidityTime,
                          @Value("${jwt.refresh-token-validity-in-milliseconds}") long refreshTokenValidityTime,
-                         TokenBlackListService tokenBlackListService) {
+                         TokenRevoker tokenRevoker) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.accessTokenValidityTime = accessTokenValidityTime;
         this.refreshTokenValidityTime = refreshTokenValidityTime;
-        this.tokenBlackListService = tokenBlackListService;
+        this.tokenRevoker = tokenRevoker;
     }
 
     // 사용자 정보를 기반으로 토큰을 생성하고, TokenDTO를 반환합니다.
@@ -68,7 +68,7 @@ public class TokenProvider {
     // 토큰의 유효성을 검증합니다.
     public boolean validateToken(String token) {
         try {
-            if (tokenBlackListService.isBlackListed(token)) {
+            if (tokenRevoker.isBlackListed(token)) {
                 throw new SecurityException("토큰이 블랙리스트에 포함되었습니다.");
             }
             parseJwtToken(token);
