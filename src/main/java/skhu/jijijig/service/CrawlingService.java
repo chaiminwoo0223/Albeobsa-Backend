@@ -116,20 +116,20 @@ public class CrawlingService {
         }
     }
 
-    private List<Crawling> extractCrawling(List<WebElement> rows, String label, int START, int MINUS, String OPEN, String TITLE, String NAME, String IMAGE, String DATETIME, String VIEWS, String RECOMMENDCNTS, String COMMENTCNT) {
+    private List<Crawling> extractCrawling(List<WebElement> rows, String label, int start, int minus, String[] selectors) {
         List<Crawling> crawlings = new ArrayList<>();
-        for (int i = START; i < rows.size() - MINUS; i++) {
+        for (int i = start; i < rows.size() - minus; i++) {
             WebElement row = rows.get(i);
-            boolean open = parsingService.parseOpen(row, OPEN);
+            boolean open = parsingService.parseOpen(row, selectors[0]);
             try {
-                String title = parsingService.parseTitle(row, TITLE);
-                String name = parsingService.parseName(row, NAME);
-                String image = parsingService.parseImage(row, label, IMAGE);
-                String link = parsingService.parseLink(row, TITLE);
-                String dateTime = parsingService.parseDateTime(row, label, DATETIME);
-                int views = parsingService.parseViews(row, VIEWS);
-                int[] recommendCnts = parsingService.parseRecommendCnts(row, RECOMMENDCNTS);
-                int commentCnt = parsingService.parseCommentCnt(row, COMMENTCNT);
+                String title = parsingService.parseTitle(row, selectors[1]);
+                String name = parsingService.parseName(row, selectors[2]);
+                String image = parsingService.parseImage(row, label, selectors[3]);
+                String link = parsingService.parseLink(row, selectors[1]);
+                String dateTime = parsingService.parseDateTime(row, label, selectors[4]);
+                int views = parsingService.parseViews(row, selectors[5]);
+                int[] recommendCnts = parsingService.parseRecommendCnts(row, selectors[6]);
+                int commentCnt = parsingService.parseCommentCnt(row, selectors[7]);
                 Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnts[0], recommendCnts[1], commentCnt, open);
                 createOrUpdateCrawling(crawling);
             } catch (Exception e) {
@@ -142,21 +142,13 @@ public class CrawlingService {
     private List<Crawling> handleCrawlingByLabel(String label, List<WebElement> rows) {
         List<Crawling> crawlings = new ArrayList<>();
         if (label.startsWith("뽐뿌")) {
-            crawlings.addAll(extractCrawling(rows, label, 0, 4,
-                    "img[src*='/zboard/skin/DQ_Revolution_BBS_New1/end_icon.PNG']", "a.baseList-title", "a.baseList-name", "a.baseList-thumb img", "time.baseList-time",
-                    "td.baseList-space.baseList-views", "td.baseList-space.baseList-rec", "span.baseList-c"));
+            crawlings.addAll(extractCrawling(rows, label, 0, 4, parsingService.getPpomppuSelectors()));
         } else if (label.startsWith("어미새")) {
-            crawlings.addAll(extractCrawling(rows, label, 0, 0,
-                    "open", "h3 a.pjax", "div.info", "img.tmb", "p > span:nth-child(2)",
-                    "span.fr:nth-child(1)", "span.fr:nth-child(3)", "span.fr:nth-child(1)"));
+            crawlings.addAll(extractCrawling(rows, label, 0, 0, parsingService.getEomisaeSelectors()));
         } else if (label.startsWith("루리웹")) {
-            crawlings.addAll(extractCrawling(rows, label, 4, 0,
-                    "open", "a.deco", "td.writer.text_over", "No image", "td.time",
-                    "td.hit", "td.recomd", "a.num_reply span.num"));
+            crawlings.addAll(extractCrawling(rows, label, 4, 0, parsingService.getRuliwebSelectors()));
         } else if (label.startsWith("쿨엔조이")) {
-            crawlings.addAll(extractCrawling(rows, label, 0, 0,
-                    ".fa-lock", "a.na-subject", "a.sv_member", "No image", "div.float-left.float-md-none.d-md-table-cell.nw-6.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1",
-                    "div.float-left.float-md-none.d-md-table-cell.nw-4.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1", "span.rank-icon_vote", "span.count-plus"));
+            crawlings.addAll(extractCrawling(rows, label, 0, 0, parsingService.getCoolenjoySelectors()));
         }
         return crawlings;
     }

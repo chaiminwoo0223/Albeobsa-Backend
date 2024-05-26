@@ -115,4 +115,52 @@ public class ParsingService {
             return 0;
         }
     }
+
+    public String[] getPpomppuSelectors() {
+        String OPEN = "img[src*='/zboard/skin/DQ_Revolution_BBS_New1/end_icon.PNG']";
+        String TITLE = "a.baseList-title";
+        String NAME = "a.baseList-name";
+        String IMAGE = "a.baseList-thumb img";
+        String DATETIME = "time.baseList-time";
+        String VIEWS = "td.baseList-space.baseList-views";
+        String RECOMMENDCNTS = "td.baseList-space.baseList-rec";
+        String COMMENTCNT = "span.baseList-c";
+        return new String[] {OPEN, TITLE, NAME, IMAGE, DATETIME, VIEWS, RECOMMENDCNTS, COMMENTCNT};
+    }
+
+    public String[] getEomisaeSelectors() {
+        String OPEN = "No selector";
+        String TITLE = "h3 a.pjax";
+        String NAME = "div.info";
+        String IMAGE = "img.tmb";
+        String DATETIME = "p > span:nth-child(2)";
+        String VIEWS = "span.fr:nth-child(1)";
+        String RECOMMENDCNTS = "span.fr:nth-child(3)";
+        String COMMENTCNT = "span.fr:nth-child(1)";
+        return new String[] {OPEN, TITLE, NAME, IMAGE, DATETIME, VIEWS, RECOMMENDCNTS, COMMENTCNT};
+    }
+
+    public String[] getRuliwebSelectors() {
+        String OPEN = "No selector";
+        String TITLE = "a.deco";
+        String NAME = "td.writer.text_over";
+        String IMAGE = "No selector";
+        String DATETIME = "td.time";
+        String VIEWS = "td.hit";
+        String RECOMMENDCNTS = "td.recomd";
+        String COMMENTCNT = "a.num_reply span.num";
+        return new String[] {OPEN, TITLE, NAME, IMAGE, DATETIME, VIEWS, RECOMMENDCNTS, COMMENTCNT};
+    }
+
+    public String[] getCoolenjoySelectors() {
+        String OPEN = ".fa-lock";
+        String TITLE = "a.na-subject";
+        String NAME = "a.sv_member";
+        String IMAGE = "No selector";
+        String DATETIME = "div.float-left.float-md-none.d-md-table-cell.nw-6.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1";
+        String VIEWS = "div.float-left.float-md-none.d-md-table-cell.nw-4.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1";
+        String RECOMMENDCNTS = "span.rank-icon_vote";
+        String COMMENTCNT = "span.count-plus";
+        return new String[] {OPEN, TITLE, NAME, IMAGE, DATETIME, VIEWS, RECOMMENDCNTS, COMMENTCNT};
+    }
 }
