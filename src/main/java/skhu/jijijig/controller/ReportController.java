@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import skhu.jijijig.domain.dto.ReportDTO;
-import skhu.jijijig.domain.model.Reason;
+import skhu.jijijig.domain.Reason;
 import skhu.jijijig.service.ReportService;
 
 import java.security.Principal;

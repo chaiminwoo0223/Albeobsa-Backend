@@ -8,8 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
-import skhu.jijijig.domain.model.Crawling;
-import skhu.jijijig.domain.model.QCrawling;
+import skhu.jijijig.domain.Crawling;
+import skhu.jijijig.domain.QCrawling;
 
 import java.util.List;
 

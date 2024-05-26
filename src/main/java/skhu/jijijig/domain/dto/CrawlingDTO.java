@@ -2,7 +2,7 @@ package skhu.jijijig.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import skhu.jijijig.domain.model.Crawling;
+import skhu.jijijig.domain.Crawling;
 
 @Builder
 @Getter

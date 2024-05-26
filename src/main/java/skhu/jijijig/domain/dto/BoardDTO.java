@@ -2,7 +2,7 @@ package skhu.jijijig.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import skhu.jijijig.domain.model.Board;
+import skhu.jijijig.domain.Board;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;

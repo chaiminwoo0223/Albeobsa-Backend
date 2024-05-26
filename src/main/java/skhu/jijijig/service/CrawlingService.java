@@ -23,7 +23,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.By;
 import skhu.jijijig.domain.dto.CrawlingDTO;
-import skhu.jijijig.domain.model.Crawling;
+import skhu.jijijig.domain.Crawling;
 import skhu.jijijig.exception.CrawlingProcessException;
 import skhu.jijijig.repository.crawling.CrawlingRepository;
 

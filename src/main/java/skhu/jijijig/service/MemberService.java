@@ -13,7 +13,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import skhu.jijijig.domain.dto.MemberDTO;
 import skhu.jijijig.domain.dto.TokenDTO;
-import skhu.jijijig.domain.model.Member;
+import skhu.jijijig.domain.Member;
 import skhu.jijijig.repository.MemberRepository;
 import skhu.jijijig.token.TokenProvider;
 import skhu.jijijig.token.TokenRevoker;

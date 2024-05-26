@@ -2,8 +2,8 @@ package skhu.jijijig.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import skhu.jijijig.domain.model.Reason;
-import skhu.jijijig.domain.model.Report;
+import skhu.jijijig.domain.Reason;
+import skhu.jijijig.domain.Report;
 
 @Builder
 @Getter
