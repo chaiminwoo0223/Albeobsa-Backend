@@ -102,7 +102,7 @@ public class CrawlingService {
 
     private void crawlWebsite(String url, String label, String ROWS) {
         WebDriver driver = setupChromeDriver();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
         List<Crawling> crawlings = new ArrayList<>();
         try {
             driver.get(url);
