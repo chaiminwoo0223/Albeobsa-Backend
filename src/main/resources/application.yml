@@ -10,9 +10,15 @@ springdoc:
 spring:
   datasource:
     url: ${DB_JDBC_URL}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
+    username: ${DB_JDBC_USERNAME}
+    password: ${DB_JDBC_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: {DB_JDBC_MAX_POOL}
+      connection-timeout: {DB_JDBC_CONNECTION_TIMEOUT}
+      idle-timeout: {DB_JDBC_IDLE_TIMEOUT}
+      max-lifetime: {DB_JDBC_MAX_LIFETIME}
+      keepalive-time: {DB_JDBC_KEEP_LIVETIME}
   jpa:
     database: mysql
     hibernate:
@@ -25,13 +31,13 @@ spring:
         use_sql_comments: true
   security:
     oauth2:
-        google-client-id: ${GOOGLE_CLIENT_ID}
-        google-client-secret: ${GOOGLE_CLIENT_SECRET}
-        google-redirect-uri: ${GOOGLE_REDIRECT_URI}
-        google-token-url: ${GOOGLE_TOKEN_URL}
-        google-userInfo-uri: ${GOOGLE_USERINFO_URI}
-        google-authentication-url: ${GOOGLE_AUTHENTICATION_URL}
-        google-callback-url: ${GOOGLE_CALLBACK_URL}
+      google-client-id: ${GOOGLE_CLIENT_ID}
+      google-client-secret: ${GOOGLE_CLIENT_SECRET}
+      google-redirect-uri: ${GOOGLE_REDIRECT_URI}
+      google-token-url: ${GOOGLE_TOKEN_URL}
+      google-userInfo-uri: ${GOOGLE_USERINFO_URI}
+      google-authentication-url: ${GOOGLE_AUTHENTICATION_URL}
+      google-callback-url: ${GOOGLE_CALLBACK_URL}
 
 server:
   port: 8080
