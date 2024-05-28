@@ -3,8 +3,10 @@ package skhu.jijijig.service;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,9 +14,9 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.WebDriver;
@@ -32,25 +34,45 @@ import skhu.jijijig.repository.crawling.CrawlingRepository;
 public class CrawlingService {
     private final ParsingService parsingService;
     private final CrawlingRepository crawlingRepository;
-
-    private ScheduledExecutorService executor = Executors.newScheduledThreadPool(10);
+    private final ApplicationContext applicationContext;
 
     @Scheduled(fixedRate = 3600000) // 1시간마다 실행
     public void scheduleCrawlingTasks() {
-        submitCrawlingTask("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1");
-        submitCrawlingTask("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1");
-        submitCrawlingTask("https://eomisae.co.kr/rt", "어미새", "div.card_el.n_ntc.clear");
-        submitCrawlingTask("https://bbs.ruliweb.com/news/board/1020", "루리웹", "tr.table_body.blocktarget");
-        submitCrawlingTask("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom");
+        applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuDomestic();
+        applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuOverseas();
+        applicationContext.getBean(CrawlingService.class).performCrawlingForEomisae();
+        applicationContext.getBean(CrawlingService.class).performCrawlingForRuliweb();
+        applicationContext.getBean(CrawlingService.class).performCrawlingForCoolenjoy();
     }
 
-    @Scheduled(fixedRate = 3600000) // 1시간마다 실행
-    public void manageThreads() {
-        System.out.println("Managing threads...");
-        if (executor.isShutdown() || executor.isTerminated()) {
-            restartExecutor();
-        }
-        System.gc(); // 가비지 컬렉션 강제 실행
+    @Transactional
+    @Async
+    public void performCrawlingForPpomppuDomestic() {
+        CompletableFuture.runAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1"));
+    }
+
+    @Transactional
+    @Async
+    public void performCrawlingForPpomppuOverseas() {
+        CompletableFuture.runAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1"));
+    }
+
+    @Transactional
+    @Async
+    public void performCrawlingForEomisae() {
+        CompletableFuture.runAsync(() -> crawlWebsite("https://eomisae.co.kr/rt", "어미새", "div.card_el.n_ntc.clear"));
+    }
+
+    @Transactional
+    @Async
+    public void performCrawlingForRuliweb() {
+        CompletableFuture.runAsync(() -> crawlWebsite("https://bbs.ruliweb.com/news/board/1020", "루리웹", "tr.table_body.blocktarget"));
+    }
+
+    @Transactional
+    @Async
+    public void performCrawlingForCoolenjoy() {
+        CompletableFuture.runAsync(() -> crawlWebsite("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom"));
     }
 
     @Transactional(readOnly = true)
@@ -61,7 +83,6 @@ public class CrawlingService {
         } catch (Exception e) {
             throw new CrawlingProcessException("크롤링 검색 중 오류 발생" + e.getMessage());
         }
-
     }
 
     @Transactional(readOnly = true)
@@ -184,25 +205,6 @@ public class CrawlingService {
             return 4;
         }
         return 0; // 기본값
-    }
-
-    private void submitCrawlingTask(String url, String label, String rows) {
-        executor.submit(() -> crawlWebsite(url, label, rows));
-    }
-
-    private synchronized void restartExecutor() {
-        if (!executor.isShutdown()) {
-            executor.shutdown();
-            try {
-                if (!executor.awaitTermination(300, TimeUnit.SECONDS)) {
-                    executor.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                executor.shutdownNow(); // InterruptedException 발생 시 즉시 종료
-                Thread.currentThread().interrupt(); // 현재 스레드에 대한 interrupt 상태를 설정하여 예외를 적절히 처리
-            }
-        }
-        executor = Executors.newScheduledThreadPool(60);
     }
 
     private WebDriver setupChromeDriver() {
