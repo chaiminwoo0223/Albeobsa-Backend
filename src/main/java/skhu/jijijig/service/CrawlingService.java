@@ -140,17 +140,10 @@ public class CrawlingService {
     }
 
     private List<Crawling> handleCrawlingByLabel(String label, List<WebElement> rows) {
-        List<Crawling> crawlings = new ArrayList<>();
-        if (label.startsWith("뽐뿌")) {
-            crawlings.addAll(extractCrawling(rows, label, 0, 4, parsingService.getPpomppuSelectors()));
-        } else if (label.startsWith("어미새")) {
-            crawlings.addAll(extractCrawling(rows, label, 0, 0, parsingService.getEomisaeSelectors()));
-        } else if (label.startsWith("루리웹")) {
-            crawlings.addAll(extractCrawling(rows, label, 4, 0, parsingService.getRuliwebSelectors()));
-        } else if (label.startsWith("쿨엔조이")) {
-            crawlings.addAll(extractCrawling(rows, label, 0, 0, parsingService.getCoolenjoySelectors()));
-        }
-        return crawlings;
+        String[] selectors = getSelectorsByLabel(label);
+        int start = getStartByLabel(label);
+        int minus = getMinusByLabel(label);
+        return new ArrayList<>(extractCrawling(rows, label, start, minus, selectors));
     }
 
     private void createOrUpdateCrawling(Crawling crawling) {
@@ -164,6 +157,33 @@ public class CrawlingService {
         } else {
             crawlingRepository.save(crawling);
         }
+    }
+
+    private String[] getSelectorsByLabel(String label) {
+        if (label.startsWith("뽐뿌")) {
+            return parsingService.getPpomppuSelectors();
+        } else if (label.startsWith("어미새")) {
+            return parsingService.getEomisaeSelectors();
+        } else if (label.startsWith("루리웹")) {
+            return parsingService.getRuliwebSelectors();
+        } else if (label.startsWith("쿨엔조이")) {
+            return parsingService.getCoolenjoySelectors();
+        }
+        return new String[0]; // 기본값으로 빈 배열 반환
+    }
+
+    private int getStartByLabel(String label) {
+        if (label.startsWith("루리웹")) {
+            return 4;
+        }
+        return 0; // 기본값
+    }
+
+    private int getMinusByLabel(String label) {
+        if (label.startsWith("뽐뿌")) {
+            return 4;
+        }
+        return 0; // 기본값
     }
 
     private void submitCrawlingTask(String url, String label, String rows) {
