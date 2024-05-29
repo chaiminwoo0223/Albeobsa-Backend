@@ -16,7 +16,6 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.WebDriver;
@@ -43,36 +42,49 @@ public class CrawlingService {
         applicationContext.getBean(CrawlingService.class).performCrawlingForEomisae();
         applicationContext.getBean(CrawlingService.class).performCrawlingForRuliweb();
         applicationContext.getBean(CrawlingService.class).performCrawlingForCoolenjoy();
+        applicationContext.getBean(CrawlingService.class).performCrawlingForQuasarzone();
     }
 
     @Transactional
     @Async
     public void performCrawlingForPpomppuDomestic() {
-        CompletableFuture.runAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1"));
+        System.out.println("뽐뿌");
+        crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1");
     }
 
     @Transactional
     @Async
     public void performCrawlingForPpomppuOverseas() {
-        CompletableFuture.runAsync(() -> crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1"));
+        System.out.println("뽐뿌");
+        crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1");
     }
 
     @Transactional
     @Async
     public void performCrawlingForEomisae() {
-        CompletableFuture.runAsync(() -> crawlWebsite("https://eomisae.co.kr/rt", "어미새", "div.card_el.n_ntc.clear"));
+        System.out.println("어미새");
+        crawlWebsite("https://eomisae.co.kr/rt", "어미새", "div.card_el.n_ntc.clear");
     }
 
     @Transactional
     @Async
     public void performCrawlingForRuliweb() {
-        CompletableFuture.runAsync(() -> crawlWebsite("https://bbs.ruliweb.com/news/board/1020", "루리웹", "tr.table_body.blocktarget"));
+        System.out.println("루리웹");
+        crawlWebsite("https://bbs.ruliweb.com/news/board/1020", "루리웹", "tr.table_body.blocktarget");
     }
 
     @Transactional
     @Async
     public void performCrawlingForCoolenjoy() {
-        CompletableFuture.runAsync(() -> crawlWebsite("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom"));
+        System.out.println("쿨엔조이");
+        crawlWebsite("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom");
+    }
+
+    @Transactional
+    @Async
+    public void performCrawlingForQuasarzone() {
+        System.out.println("퀘사이존");
+        crawlWebsite("https://quasarzone.com/bbs/qb_saleinfo", "퀘사이존", "div.market-info-list");
     }
 
     @Transactional(readOnly = true)
@@ -148,7 +160,7 @@ public class CrawlingService {
                 String image = parsingService.parseImage(row, label, selectors[3]);
                 String link = parsingService.parseLink(row, selectors[1]);
                 String dateTime = parsingService.parseDateTime(row, label, selectors[4]);
-                int views = parsingService.parseViews(row, selectors[5]);
+                int views = parsingService.parseViews(row, label, selectors[5]);
                 int[] recommendCnts = parsingService.parseRecommendCnts(row, selectors[6]);
                 int commentCnt = parsingService.parseCommentCnt(row, selectors[7]);
                 Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnts[0], recommendCnts[1], commentCnt, open);
@@ -189,6 +201,8 @@ public class CrawlingService {
             return parsingService.getRuliwebSelectors();
         } else if (label.startsWith("쿨엔조이")) {
             return parsingService.getCoolenjoySelectors();
+        } else if (label.startsWith("퀘사이존")) {
+            return parsingService.getQuasarzoneSelectors();
         }
         return new String[0]; // 기본값으로 빈 배열 반환
     }

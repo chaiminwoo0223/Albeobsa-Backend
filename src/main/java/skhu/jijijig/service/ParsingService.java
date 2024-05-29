@@ -12,7 +12,7 @@ import java.util.Optional;
 @Service
 public class ParsingService {
     public boolean parseOpen(WebElement row, String OPEN) {
-        return OPEN.equals("open") || row.findElements(By.cssSelector(OPEN)).isEmpty();
+        return row.findElements(By.cssSelector(OPEN)).isEmpty();
     }
 
     public String parseTitle(WebElement row, String TITLE) {
@@ -31,7 +31,7 @@ public class ParsingService {
         return switch (label) {
             case "루리웹" -> "https://img.ruliweb.com/img/2016/common/ruliweb_bi.png";
             case "쿨엔조이" -> "https://coolenjoy.net/theme/BS4-Basic/storage/image/logo-test.svg";
-            default -> Optional.ofNullable(row.findElement(By.cssSelector(IMAGE)).getAttribute("src"))
+            default -> Optional.of(row.findElement(By.cssSelector(IMAGE)).getAttribute("src"))
                     .map(src -> src.startsWith("//") ? "https:" + src : src)
                     .orElse("No image");
         };
@@ -45,7 +45,7 @@ public class ParsingService {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss");
         if (label.startsWith("뽐뿌")) {
             return parsePpomppuDateTime(dateTime, today, dateFormatter);
-        } else if (label.startsWith("루리웹")) {
+        } else if (label.startsWith("루리웹") || label.startsWith("퀘사이존")) {
             return parseRuliwebDateTime(dateTime, today, dateFormatter);
         } else if (label.startsWith("어미새")) {
             return parseEomisaeDateTime(dateTime, today, now, dateFormatter, timeFormatter);
@@ -55,7 +55,12 @@ public class ParsingService {
         return today.format(timeFormatter);
     }
 
-    public int parseViews(WebElement row, String VIEWS) {
+    public int parseViews(WebElement row, String label, String VIEWS) {
+        if (label.startsWith("퀘사이존")) {
+            return Optional.ofNullable(row.findElement(By.cssSelector(VIEWS)).getText())
+                    .map(v -> v.endsWith("k") ? (int)(Double.parseDouble(v.replace("k", "")) * 1000) : Integer.parseInt(v))
+                    .orElse(0);
+        }
         return parseInteger(row.findElement(By.cssSelector(VIEWS)).getText());
     }
 
@@ -122,6 +127,18 @@ public class ParsingService {
         String VIEWS = "div.float-left.float-md-none.d-md-table-cell.nw-4.nw-md-auto.f-sm.font-weight-normal.py-md-2.pr-md-1";
         String RECOMMENDCNTS = "span.rank-icon_vote";
         String COMMENTCNT = "span.count-plus";
+        return new String[] {OPEN, TITLE, NAME, IMAGE, DATETIME, VIEWS, RECOMMENDCNTS, COMMENTCNT};
+    }
+
+    public String[] getQuasarzoneSelectors() {
+        String OPEN = "span.label.done";
+        String TITLE = "a.subject-link";
+        String NAME = "div.user-nick-text";
+        String IMAGE = "a.thumb img";
+        String DATETIME = "span.date";
+        String VIEWS = "span.count";
+        String RECOMMENDCNTS = "No selector";
+        String COMMENTCNT = "span.ctn-count";
         return new String[] {OPEN, TITLE, NAME, IMAGE, DATETIME, VIEWS, RECOMMENDCNTS, COMMENTCNT};
     }
 
