@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class ParsingService {
@@ -17,6 +19,13 @@ public class ParsingService {
 
     public String parseTitle(WebElement row, String TITLE) {
         return row.findElement(By.cssSelector(TITLE)).getText();
+    }
+
+    public String parseSubLabel(String TITLE) {
+        return Optional.of(Pattern.compile("\\[(.*?)]").matcher(TITLE))
+                .filter(Matcher::find)
+                .map(matcher -> matcher.group(1))
+                .orElse("No subLabel");
     }
 
     public String parseName(WebElement row, String NAME) {

@@ -19,6 +19,9 @@ public class Crawling {
     private String label;
 
     @Column(nullable = false)
+    private String subLabel;
+
+    @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
@@ -48,9 +51,10 @@ public class Crawling {
     @Column(nullable = false)
     private boolean open;
 
-    public static Crawling of(String label, String title, String name, String image, String link, String dateTime, int views, int recommendCnt, int unrecommendCnt, int commentCnt, boolean open) {
+    public static Crawling of(String label, String subLabel, String title, String name, String image, String link, String dateTime, int views, int recommendCnt, int unrecommendCnt, int commentCnt, boolean open) {
         return Crawling.builder()
                 .label(label)
+                .subLabel(subLabel)
                 .title(title)
                 .name(name)
                 .image(image)

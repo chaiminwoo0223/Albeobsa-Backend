@@ -156,6 +156,7 @@ public class CrawlingService {
             boolean open = parsingService.parseOpen(row, selectors[0]);
             try {
                 String title = parsingService.parseTitle(row, selectors[1]);
+                String subLabel = parsingService.parseSubLabel(title);
                 String name = parsingService.parseName(row, selectors[2]);
                 String image = parsingService.parseImage(row, label, selectors[3]);
                 String link = parsingService.parseLink(row, selectors[1]);
@@ -163,7 +164,7 @@ public class CrawlingService {
                 int views = parsingService.parseViews(row, label, selectors[5]);
                 int[] recommendCnts = parsingService.parseRecommendCnts(row, selectors[6]);
                 int commentCnt = parsingService.parseCommentCnt(row, selectors[7]);
-                Crawling crawling = Crawling.of(label, title, name, image, link, dateTime, views, recommendCnts[0], recommendCnts[1], commentCnt, open);
+                Crawling crawling = Crawling.of(label, subLabel, title, name, image, link, dateTime, views, recommendCnts[0], recommendCnts[1], commentCnt, open);
                 createOrUpdateCrawling(crawling);
             } catch (Exception e) {
                 throw new CrawlingProcessException("데이터 추출 중 오류 발생: " + e.getMessage());
