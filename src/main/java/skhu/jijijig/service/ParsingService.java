@@ -141,7 +141,7 @@ public class ParsingService {
     public String[] getQuasarzoneSelectors() {
         String OPEN = "span.label.done";
         String TITLE = "a.subject-link";
-        String NAME = "div.user-nick-text";
+        String NAME = "span.user-nick-wrap.nick.d-inline-block";
         String IMAGE = "a.thumb img";
         String DATETIME = "span.date";
         String VIEWS = "span.count";
