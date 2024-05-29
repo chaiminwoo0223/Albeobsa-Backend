@@ -53,6 +53,7 @@ public class MemberService {
         params.add("client_id", googleClientId);
         params.add("client_secret", googleClientSecret);
         params.add("redirect_uri", googleRedirectUri);
+        System.out.println(googleRedirectUri);
         params.add("grant_type", "authorization_code");
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
         ResponseEntity<String> response = restTemplate.postForEntity(googleTokenUri, request, String.class);

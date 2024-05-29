@@ -17,15 +17,14 @@ public class ParsingService {
         return row.findElements(By.cssSelector(OPEN)).isEmpty();
     }
 
-    public String parseTitle(WebElement row, String TITLE) {
-        return row.findElement(By.cssSelector(TITLE)).getText();
-    }
-
-    public String parseSubLabel(String TITLE) {
-        return Optional.of(Pattern.compile("\\[(.*?)]").matcher(TITLE))
+    public String[] parseTitle(WebElement row, String TITLE) {
+        String fullTitle = row.findElement(By.cssSelector(TITLE)).getText();
+        String subLabel = Optional.of(Pattern.compile("\\[(.*?)]").matcher(fullTitle))
                 .filter(Matcher::find)
                 .map(matcher -> matcher.group(1))
-                .orElse("No subLabel");
+                .orElse(" ");
+        String title = fullTitle.replaceAll("\\[.*?]", "").trim();
+        return new String[] { subLabel, title }; // 대괄호 및 그 안의 내용을 제거한 제목을 저장
     }
 
     public String parseName(WebElement row, String NAME) {
