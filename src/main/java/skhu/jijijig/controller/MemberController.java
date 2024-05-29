@@ -30,9 +30,9 @@ public class MemberController {
     @Value("${spring.security.oauth2.google-callback-url}")
     private String callbackUrl;
 
-    @Operation(summary = "인증", description = "Google OAuth 인증 URL을 전달합니다.")
+    @Operation(summary = "인증 URL 전송", description = "Google OAuth 인증 URL을 전송합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "인증 성공"),
+            @ApiResponse(responseCode = "200", description = "인증 URL 전송 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))

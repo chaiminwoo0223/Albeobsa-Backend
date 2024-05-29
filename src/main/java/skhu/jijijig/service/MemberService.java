@@ -29,19 +29,19 @@ public class MemberService {
     private final TokenProvider tokenProvider;
     private final TokenRevoker tokenRevoker;
 
-    @Value("${spring.security.oauth2.google-client-id}")
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String googleClientId;
 
-    @Value("${spring.security.oauth2.google-client-secret}")
+    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String googleClientSecret;
 
-    @Value("${spring.security.oauth2.google-redirect-uri}")
+    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
     private String googleRedirectUri;
 
-    @Value("${spring.security.oauth2.google-token-url}")
-    private String googleTokenUrl;
+    @Value("${spring.security.oauth2.client.provider.google.token-uri}")
+    private String googleTokenUri;
 
-    @Value("${spring.security.oauth2.google-userInfo-uri}")
+    @Value("${spring.security.oauth2.client.provider.google.user-info-uri}")
     private String googleUserInfoUri;
 
     public String getGoogleTokens(String code) throws RestClientException {
@@ -55,7 +55,7 @@ public class MemberService {
         params.add("redirect_uri", googleRedirectUri);
         params.add("grant_type", "authorization_code");
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(googleTokenUrl, request, String.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(googleTokenUri, request, String.class);
         if (response.getStatusCode().is2xxSuccessful()) {
             String json = response.getBody();
             Gson gson = new Gson();

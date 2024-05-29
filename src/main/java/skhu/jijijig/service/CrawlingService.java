@@ -48,14 +48,14 @@ public class CrawlingService {
     @Transactional
     @Async
     public void performCrawlingForPpomppuDomestic() {
-        System.out.println("뽐뿌");
+        System.out.println("뽐뿌(국내게시판)");
         crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1");
     }
 
     @Transactional
     @Async
     public void performCrawlingForPpomppuOverseas() {
-        System.out.println("뽐뿌");
+        System.out.println("뽐뿌(해외게시판)");
         crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1");
     }
 
