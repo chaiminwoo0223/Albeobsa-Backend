@@ -49,7 +49,7 @@ public class CrawlingController {
         }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
-    @Operation(summary = "핫딜 조회", description = "핫딜의 내용을 조회합니다.")
+    @Operation(summary = "핫딜 조회", description = "핫딜의 내용을 페이지별로 조회합니다. (page=0,1,2 ···)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "핫딜 조회 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
@@ -62,7 +62,7 @@ public class CrawlingController {
         }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
-    @Operation(summary = "핫딜 상세 조회", description = "핫딜의 상세 내용을 조회합니다.")
+    @Operation(summary = "핫딜 상세 조회", description = "핫딜의 상세 내용을 페이지별로 조회합니다. (page=0,1,2 ···)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "핫딜 상세 조회 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
