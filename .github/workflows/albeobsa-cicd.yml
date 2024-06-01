@@ -54,4 +54,7 @@ jobs:
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             cd ${{secrets.REMOTE_DOCKER_PATH}}
-            
+            docker compose down
+            docker rmi ${{secrets.DOCKER_USERNAME}}/${{secrets.DOCKER_REPOSITORY}}
+            docker pull ${{secrets.DOCKER_USERNAME}}/${{secrets.DOCKER_REPOSITORY}}
+            docker compose up -d
