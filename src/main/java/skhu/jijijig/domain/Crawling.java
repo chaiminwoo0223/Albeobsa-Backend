@@ -70,6 +70,7 @@ public class Crawling {
 
     public boolean isDifferent(Crawling other) {
         return !Objects.equals(this.label, other.label) ||
+                !Objects.equals(this.subLabel, other.subLabel) ||
                 !Objects.equals(this.title, other.title) ||
                 !Objects.equals(this.name, other.name) ||
                 !Objects.equals(this.image, other.image) ||

@@ -53,12 +53,14 @@ public class ParsingService {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss");
         if (label.startsWith("뽐뿌")) {
             return parsePpomppuDateTime(dateTime, today, dateFormatter);
-        } else if (label.startsWith("루리웹") || label.startsWith("퀘사이존")) {
+        } else if (label.startsWith("루리웹")) {
             return parseRuliwebDateTime(dateTime, today, dateFormatter);
         } else if (label.startsWith("어미새")) {
             return parseEomisaeDateTime(dateTime, today, now, dateFormatter, timeFormatter);
         } else if (label.startsWith("쿨엔조이")) {
             return parseCoolenjoyDateTime(dateTime, today, dateFormatter);
+        } else if (label.startsWith("퀘사이존")) {
+            return parseQuasarzoneDateTime(dateTime, today, dateFormatter);
         }
         return today.format(timeFormatter);
     }
@@ -159,23 +161,19 @@ public class ParsingService {
     }
 
     private String parsePpomppuDateTime(String dateTime, LocalDate today, DateTimeFormatter dateFormatter) {
-        if (dateTime.contains(":")) { // 시간 포맷이 들어오면 (예: "20:18:16")
+        if (dateTime.contains(":")) {
             return today.format(dateFormatter) + " " + dateTime;
-        } else if (dateTime.contains("/")) { // 날짜 포맷이 들어오면 (예: "24/05/11")
+        } else if (dateTime.contains("/")) {
             String[] parts = dateTime.split("/");
-            LocalDate date = LocalDate.of(today.getYear(), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+            LocalDate date = LocalDate.of(2000 + Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
             return date.format(dateFormatter) + " 00:00:00";
         }
         return today.format(dateFormatter) + " 00:00:00";
     }
 
     private String parseRuliwebDateTime(String dateTime, LocalDate today, DateTimeFormatter dateFormatter) {
-        if (dateTime.contains(":")) { // 시간 포맷 (예: "11:53")
-            return today.format(dateFormatter) + " " + dateTime + ":00"; // "2024-05-12 11:53:00"
-        } else if (dateTime.contains("-")) { // 날짜 포맷 (예: "05-11")
-            String[] parts = dateTime.split("-");
-            LocalDate date = LocalDate.of(today.getYear(), Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
-            return date.format(dateFormatter) + " 00:00:00"; // "2024-05-11 00:00:00"
+        if (dateTime.contains(":")) {
+            return today.format(dateFormatter) + " " + dateTime + ":00";
         } else if (dateTime.contains(".")) {
             String[] parts = dateTime.split("\\.");
             LocalDate date = LocalDate.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
@@ -187,10 +185,10 @@ public class ParsingService {
     private String parseEomisaeDateTime(String dateTime, LocalDate today, LocalDateTime now, DateTimeFormatter dateFormatter, DateTimeFormatter timeFormatter) {
         if (dateTime.contains(".")) {
             String[] parts = dateTime.split("\\.");
-            LocalDate date = LocalDate.of(today.getYear(), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
-            if (date.isEqual(today)) { // 날짜가 오늘 날짜인 경우
+            LocalDate date = LocalDate.of(2000 + Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+            if (date.isEqual(today)) {
                 return now.format(timeFormatter);
-            } else { // 어제 날짜 또는 그 이전 날짜인 경우
+            } else {
                 return date.format(dateFormatter) + " 00:00:00";
             }
         }
@@ -198,13 +196,40 @@ public class ParsingService {
     }
 
     private String parseCoolenjoyDateTime(String dateTime, LocalDate today, DateTimeFormatter dateFormatter) {
-        dateTime = dateTime.replaceAll("등록일\\s+", ""); // "등록일"과 모든 공백(공백, 탭, 개행 포함) 제거
-        if (dateTime.contains(":")) { // 시간 포맷 (예: "11:00")
-            return today.format(dateFormatter) + " " + dateTime + ":00"; // "2024-05-12 11:00:00"
-        } else if (dateTime.contains(".")) { // 날짜 포맷 (예: "05.11")
+        dateTime = dateTime.replaceAll("등록일\\s+", "");
+        if (dateTime.contains(":")) {
+            return today.format(dateFormatter) + " " + dateTime + ":00";
+        }
+        if (dateTime.contains(".")) {
             String[] parts = dateTime.split("\\.");
-            LocalDate date = LocalDate.of(today.getYear(), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
-            return date.format(dateFormatter) + " 00:00:00"; // "2024-05-11 00:00:00"
+            int year = today.getYear();
+            int month = Integer.parseInt(parts[0]);
+            int day = Integer.parseInt(parts[1]);
+            if (month > 12) {
+                year = 2000 + month;
+                month = Integer.parseInt(parts[1]);
+                day = Integer.parseInt(parts[2]);
+            }
+            LocalDate date = LocalDate.of(year, month, day);
+            return date.format(dateFormatter) + " 00:00:00";
+        }
+        return today.format(dateFormatter) + " 00:00:00";
+    }
+
+    private String parseQuasarzoneDateTime(String dateTime, LocalDate today, DateTimeFormatter dateFormatter) {
+        if (dateTime.contains(":")) {
+            return today.format(dateFormatter) + " " + dateTime + ":00";
+        }
+        if (dateTime.contains("-")) {
+            String[] parts = dateTime.split("-");
+            int year = today.getYear();
+            int month = Integer.parseInt(parts[0]);
+            int day = Integer.parseInt(parts[1]);
+            if (month == 12 && today.getMonthValue() == 1) {
+                year -= 1; // 전년도
+            }
+            LocalDate date = LocalDate.of(year, month, day);
+            return date.format(dateFormatter) + " 00:00:00";
         }
         return today.format(dateFormatter) + " 00:00:00";
     }
