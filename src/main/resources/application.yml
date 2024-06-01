@@ -13,12 +13,6 @@ spring:
     username: ${DB_JDBC_USERNAME}
     password: ${DB_JDBC_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      maximum-pool-size: {DB_JDBC_MAX_POOL}
-      connection-timeout: {DB_JDBC_CONNECTION_TIMEOUT}
-      idle-timeout: {DB_JDBC_IDLE_TIMEOUT}
-      max-lifetime: {DB_JDBC_MAX_LIFETIME}
-      keepalive-time: {DB_JDBC_KEEP_LIVETIME}
   jpa:
     database: mysql
     hibernate:

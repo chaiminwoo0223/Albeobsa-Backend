@@ -84,7 +84,7 @@ public class CrawlingService {
     @Async
     public void performCrawlingForQuasarzone() {
         System.out.println("퀘사이존");
-        crawlWebsite("https://quasarzone.com/bbs/qb_saleinfo", "퀘사이존", "div.market-info-list"); // ROWS 수정
+        crawlWebsite("https://quasarzone.com/bbs/qb_saleinfo", "퀘사이존", "div.market-info-list");
     }
 
     @Transactional(readOnly = true)

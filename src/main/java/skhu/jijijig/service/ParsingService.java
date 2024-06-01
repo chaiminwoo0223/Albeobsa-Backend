@@ -203,7 +203,7 @@ public class ParsingService {
             return today.format(dateFormatter) + " " + dateTime + ":00"; // "2024-05-12 11:00:00"
         } else if (dateTime.contains(".")) { // 날짜 포맷 (예: "05.11")
             String[] parts = dateTime.split("\\.");
-            LocalDate date = LocalDate.of(today.getYear(), Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+            LocalDate date = LocalDate.of(today.getYear(), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
             return date.format(dateFormatter) + " 00:00:00"; // "2024-05-11 00:00:00"
         }
         return today.format(dateFormatter) + " 00:00:00";
