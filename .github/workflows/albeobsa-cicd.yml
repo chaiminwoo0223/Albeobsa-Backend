@@ -52,7 +52,6 @@ jobs:
           key: ${{ secrets.REMOTE_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
-            whoami
             cd ${{secrets.REMOTE_DOCKER_PATH}}
             docker compose down
             docker rmi ${{secrets.DOCKER_USERNAME}}/${{secrets.DOCKER_REPOSITORY}}
