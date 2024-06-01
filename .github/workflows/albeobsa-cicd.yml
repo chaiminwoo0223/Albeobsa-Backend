@@ -40,7 +40,7 @@ jobs:
         run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}
 
   Deploy:
-    name: Deploy application with SSH Debug
+    name: Deploy application
     needs: Build
     runs-on: ubuntu-latest
     steps:
