@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import skhu.jijijig.domain.dto.ErrorResponseDTO;
+import skhu.jijijig.domain.dto.LoginResponseDTO;
 import skhu.jijijig.domain.dto.TokenDTO;
 import skhu.jijijig.service.MemberService;
 
@@ -54,7 +55,7 @@ public class MemberController {
         response.sendRedirect(callbackUrl + code);
     }
 
-    @Operation(summary = "로그인", description = "Google OAuth 인증 코드를 사용하여, 사용자 로그인을 처리하고 토큰을 반환합니다.")
+    @Operation(summary = "로그인", description = "Google OAuth 인증 코드를 사용하여, 사용자 로그인을 처리하고 토큰과 사용자 정보를 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "로그인 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
@@ -62,9 +63,9 @@ public class MemberController {
             @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PostMapping("/login")
-    public ResponseEntity<TokenDTO> login(@RequestParam("code") String code) {
-        TokenDTO tokens = memberService.googleLoginSignup(code);
-        return ResponseEntity.ok(tokens);
+    public ResponseEntity<LoginResponseDTO> login(@RequestParam("code") String code) {
+        LoginResponseDTO response = memberService.googleLoginSignup(code);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "리프레시", description = "리프레시 토큰을 사용하여, 액세스 토큰을 갱신합니다.")

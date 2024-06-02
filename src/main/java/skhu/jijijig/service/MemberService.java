@@ -11,6 +11,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import skhu.jijijig.domain.dto.LoginResponseDTO;
 import skhu.jijijig.domain.dto.MemberDTO;
 import skhu.jijijig.domain.dto.TokenDTO;
 import skhu.jijijig.domain.Member;
@@ -53,7 +54,6 @@ public class MemberService {
         params.add("client_id", googleClientId);
         params.add("client_secret", googleClientSecret);
         params.add("redirect_uri", googleRedirectUri);
-//        System.out.println(googleRedirectUri);
         params.add("grant_type", "authorization_code");
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
         ResponseEntity<String> response = restTemplate.postForEntity(googleTokenUri, request, String.class);
@@ -87,12 +87,13 @@ public class MemberService {
         }
     }
 
-    public TokenDTO googleLoginSignup(String code) {
+    public LoginResponseDTO googleLoginSignup(String code) {
         String accessToken = getGoogleTokens(code);
         MemberDTO memberDTO = getMemberDTO(accessToken);
         Member member = memberRepository.findByEmail(memberDTO.getEmail())
                 .orElseGet(() -> memberRepository.save(Member.fromDTO(memberDTO)));
-        return tokenProvider.createTokens(member);
+        TokenDTO tokens =  tokenProvider.createTokens(member);
+        return new LoginResponseDTO(tokens, memberDTO);
     }
 
     public TokenDTO refreshAccessToken(String refreshToken) {
