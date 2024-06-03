@@ -35,56 +35,21 @@ public class CrawlingService {
     private final CrawlingRepository crawlingRepository;
     private final ApplicationContext applicationContext;
 
-    @Scheduled(fixedRate = 3600000) // 1시간마다 실행
+    @Scheduled(fixedRate = 600000) // 10분
     public void scheduleCrawlingTasks() {
-        applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuDomestic();
-        applicationContext.getBean(CrawlingService.class).performCrawlingForPpomppuOverseas();
-        applicationContext.getBean(CrawlingService.class).performCrawlingForEomisae();
-        applicationContext.getBean(CrawlingService.class).performCrawlingForRuliweb();
-        applicationContext.getBean(CrawlingService.class).performCrawlingForCoolenjoy();
-        applicationContext.getBean(CrawlingService.class).performCrawlingForQuasarzone();
+        CrawlingService crawlingService = applicationContext.getBean(CrawlingService.class);
+        crawlingService.performCrawling("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1");
+        crawlingService.performCrawling("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1");
+        crawlingService.performCrawling("https://eomisae.co.kr/rt", "어미새", "div.card_el.n_ntc.clear");
+        crawlingService.performCrawling("https://bbs.ruliweb.com/news/board/1020", "루리웹", "tr.table_body.blocktarget");
+        crawlingService.performCrawling("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom");
+        crawlingService.performCrawling("https://quasarzone.com/bbs/qb_saleinfo", "퀘사이존", "div.market-info-list");
     }
 
-    @Transactional
     @Async
-    public void performCrawlingForPpomppuDomestic() {
-        System.out.println("뽐뿌(국내게시판)");
-        crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1");
-    }
-
-    @Transactional
-    @Async
-    public void performCrawlingForPpomppuOverseas() {
-        System.out.println("뽐뿌(해외게시판)");
-        crawlWebsite("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4", "뽐뿌(해외게시판)", "tbody > tr.baseList.bbs_new1");
-    }
-
-    @Transactional
-    @Async
-    public void performCrawlingForEomisae() {
-        System.out.println("어미새");
-        crawlWebsite("https://eomisae.co.kr/rt", "어미새", "div.card_el.n_ntc.clear");
-    }
-
-    @Transactional
-    @Async
-    public void performCrawlingForRuliweb() {
-        System.out.println("루리웹");
-        crawlWebsite("https://bbs.ruliweb.com/news/board/1020", "루리웹", "tr.table_body.blocktarget");
-    }
-
-    @Transactional
-    @Async
-    public void performCrawlingForCoolenjoy() {
-        System.out.println("쿨엔조이");
-        crawlWebsite("https://coolenjoy.net/bbs/jirum", "쿨엔조이", "li.d-md-table-row.px-3.py-2.p-md-0.text-md-center.text-muted.border-bottom");
-    }
-
-    @Transactional
-    @Async
-    public void performCrawlingForQuasarzone() {
-        System.out.println("퀘사이존");
-        crawlWebsite("https://quasarzone.com/bbs/qb_saleinfo", "퀘사이존", "div.market-info-list");
+    public void performCrawling(String url, String label, String rowsCssSelector) {
+        System.out.println(label);
+        crawlWebsite(url, label, rowsCssSelector);
     }
 
     @Transactional(readOnly = true)
