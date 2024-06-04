@@ -18,7 +18,7 @@ import java.util.List;
 @Tag(name = "Report API", description = "신고 관련 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/reports/boards")
+@RequestMapping("/api/reports")
 public class ReportController {
     private final ReportService reportService;
 
