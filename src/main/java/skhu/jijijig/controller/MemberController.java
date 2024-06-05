@@ -33,8 +33,7 @@ public class MemberController {
 
     @Operation(summary = "인증 URL 전송", description = "Google OAuth 인증 URL을 전송합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "인증 URL 전송 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "200", description = "인증 URL 전송 성공", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
@@ -44,9 +43,8 @@ public class MemberController {
     }
 
     @Operation(summary = "콜백", description = "Google OAuth 인증 코드를 받아서, 리다이렉트 URL을 처리합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "콜백 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "콜백 성공", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
@@ -57,8 +55,7 @@ public class MemberController {
 
     @Operation(summary = "로그인", description = "Google OAuth 인증 코드를 사용하여, 사용자 로그인을 처리하고 토큰과 사용자 정보를 반환합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "로그인 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(schema = @Schema(implementation = LoginResponseDTO.class))),
             @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
@@ -69,8 +66,8 @@ public class MemberController {
     }
 
     @Operation(summary = "리프레시", description = "리프레시 토큰을 사용하여, 액세스 토큰을 갱신합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "리프레시 성공"),
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "리프레시 성공", content = @Content(schema = @Schema(implementation = TokenDTO.class))),
             @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
@@ -81,8 +78,8 @@ public class MemberController {
     }
 
     @Operation(summary = "로그아웃", description = "토큰을 비활성화하여, 로그아웃을 처리합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "로그아웃 성공", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })

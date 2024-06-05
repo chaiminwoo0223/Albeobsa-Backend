@@ -1,6 +1,8 @@
 package skhu.jijijig.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import skhu.jijijig.domain.dto.CrawlingDTO;
+import skhu.jijijig.domain.dto.ErrorResponseDTO;
 import skhu.jijijig.service.CrawlingService;
 
 import java.util.List;
@@ -27,9 +30,9 @@ public class CrawlingController {
     private final CrawlingService crawlingService;
 
     @Operation(summary = "검색", description = "내용을 검색합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "검색 성공"),
-            @ApiResponse(responseCode = "500", description = "서버 에러")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "검색 성공", content = @Content(schema = @Schema(implementation = CrawlingDTO.class))),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping("/search")
     public Page<CrawlingDTO> search(@RequestParam(required = false) String keyword, Pageable pageable) {
@@ -37,9 +40,9 @@ public class CrawlingController {
     }
 
     @Operation(summary = "랭킹 조회", description = "랭킹의 내용을 조회합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "랭킹 조회 성공"),
-            @ApiResponse(responseCode = "500", description = "서버 에러")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "랭킹 조회 성공", content = @Content(schema = @Schema(implementation = CrawlingDTO.class))),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping("/ranking")
     public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> ranking() {
@@ -50,9 +53,9 @@ public class CrawlingController {
     }
 
     @Operation(summary = "핫딜 조회", description = "핫딜의 내용을 페이지별로 조회합니다. (page=0,1,2 ···)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "핫딜 조회 성공"),
-            @ApiResponse(responseCode = "500", description = "서버 에러")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "핫딜 조회 성공", content = @Content(schema = @Schema(implementation = CrawlingDTO.class))),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping("/hotdeal")
     public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> hotdeal(Pageable pageable) {
@@ -63,9 +66,9 @@ public class CrawlingController {
     }
 
     @Operation(summary = "핫딜 상세 조회", description = "핫딜의 상세 내용을 페이지별로 조회합니다. (page=0,1,2 ···)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "핫딜 상세 조회 성공"),
-            @ApiResponse(responseCode = "500", description = "서버 에러")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "핫딜 상세 조회 성공", content = @Content(schema = @Schema(implementation = CrawlingDTO.class))),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping("/hotdeal/detail")
     public CompletableFuture<ResponseEntity<List<CrawlingDTO>>> detail(@RequestParam("label") String label, Pageable pageable) {

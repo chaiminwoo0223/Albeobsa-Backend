@@ -24,8 +24,7 @@ public class CounterController {
 
     @Operation(summary = "히트 증가", description = "히트를 증가시킵니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "히트 증가 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "200", description = "히트 증가 성공", content = @Content(schema = @Schema(implementation = CounterDTO.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PostMapping
