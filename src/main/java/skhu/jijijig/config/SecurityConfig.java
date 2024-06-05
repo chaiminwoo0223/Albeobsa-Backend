@@ -31,6 +31,7 @@ public class SecurityConfig {
     private final TokenProvider tokenProvider;
 
     private static final String[] PERMITTED_URLS = {
+            "/api/counter/**",
             "/api/member/**",
             "/api/boards/**",
             "/api/reports/**",
