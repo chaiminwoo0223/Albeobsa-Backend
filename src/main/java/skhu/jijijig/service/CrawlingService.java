@@ -35,7 +35,7 @@ public class CrawlingService {
     private final CrawlingRepository crawlingRepository;
     private final ApplicationContext applicationContext;
 
-    @Scheduled(fixedRate = 1200000) // 20분
+    @Scheduled(fixedRate = 600000) // 10분
     public void scheduleCrawlingTasks() {
         CrawlingService crawlingService = applicationContext.getBean(CrawlingService.class);
         crawlingService.performCrawling("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1");
@@ -47,7 +47,6 @@ public class CrawlingService {
     }
 
     @Async
-    @Transactional
     public void performCrawling(String url, String label, String rowsCssSelector) {
         System.out.println(label);
         crawlWebsite(url, label, rowsCssSelector);
