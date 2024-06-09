@@ -1,8 +1,10 @@
 package skhu.jijijig.service;
 
+import lombok.RequiredArgsConstructor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Service;
+import skhu.jijijig.repository.crawling.CrawlingRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,7 +14,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
+@RequiredArgsConstructor
 public class ParsingService {
+    private final CrawlingRepository crawlingRepository;
+
     public boolean parseOpen(WebElement row, String OPEN) {
         return row.findElements(By.cssSelector(OPEN)).isEmpty();
     }
@@ -52,15 +57,15 @@ public class ParsingService {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss");
         if (label.startsWith("뽐뿌")) {
-            return parsePpomppuDateTime(dateTime, today, dateFormatter);
+            return parsePpomppuDateTime(label, dateTime, today, dateFormatter);
         } else if (label.startsWith("루리웹")) {
-            return parseRuliwebDateTime(dateTime, today, dateFormatter);
+            return parseRuliwebDateTime(label, dateTime, today, dateFormatter);
         } else if (label.startsWith("어미새")) {
-            return parseEomisaeDateTime(dateTime, today, now, dateFormatter, timeFormatter);
+            return parseEomisaeDateTime(label, dateTime, today, now, dateFormatter, timeFormatter);
         } else if (label.startsWith("쿨엔조이")) {
-            return parseCoolenjoyDateTime(dateTime, today, dateFormatter);
+            return parseCoolenjoyDateTime(label, dateTime, today, dateFormatter);
         } else if (label.startsWith("퀘사이존")) {
-            return parseQuasarzoneDateTime(dateTime, today, dateFormatter);
+            return parseQuasarzoneDateTime(label, dateTime, today, dateFormatter);
         }
         return today.format(timeFormatter);
     }
@@ -160,42 +165,42 @@ public class ParsingService {
         }
     }
 
-    private String parsePpomppuDateTime(String dateTime, LocalDate today, DateTimeFormatter dateFormatter) {
+    private String parsePpomppuDateTime(String label, String dateTime, LocalDate today, DateTimeFormatter dateFormatter) {
         if (dateTime.contains(":")) {
             return today.format(dateFormatter) + " " + dateTime;
         } else if (dateTime.contains("/")) {
             String[] parts = dateTime.split("/");
             LocalDate date = LocalDate.of(2000 + Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
-            return date.format(dateFormatter) + " 00:00:00";
+            return crawlingRepository.findDateTimeByLabel(label).orElse(date.format(dateFormatter) + " 00:00:00");
         }
         return today.format(dateFormatter) + " 00:00:00";
     }
 
-    private String parseRuliwebDateTime(String dateTime, LocalDate today, DateTimeFormatter dateFormatter) {
+    private String parseRuliwebDateTime(String label, String dateTime, LocalDate today, DateTimeFormatter dateFormatter) {
         if (dateTime.contains(":")) {
             return today.format(dateFormatter) + " " + dateTime + ":00";
         } else if (dateTime.contains(".")) {
             String[] parts = dateTime.split("\\.");
             LocalDate date = LocalDate.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
-            return date.format(dateFormatter) + " 00:00:00";
+            return crawlingRepository.findDateTimeByLabel(label).orElse(date.format(dateFormatter) + " 00:00:00");
         }
         return today.format(dateFormatter) + " 00:00:00";
     }
 
-    private String parseEomisaeDateTime(String dateTime, LocalDate today, LocalDateTime now, DateTimeFormatter dateFormatter, DateTimeFormatter timeFormatter) {
+    private String parseEomisaeDateTime(String label, String dateTime, LocalDate today, LocalDateTime now, DateTimeFormatter dateFormatter, DateTimeFormatter timeFormatter) {
         if (dateTime.contains(".")) {
             String[] parts = dateTime.split("\\.");
             LocalDate date = LocalDate.of(2000 + Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
             if (date.isEqual(today)) {
                 return now.format(timeFormatter);
             } else {
-                return date.format(dateFormatter) + " 00:00:00";
+                return crawlingRepository.findDateTimeByLabel(label).orElse(date.format(dateFormatter) + " 00:00:00");
             }
         }
         return today.format(dateFormatter) + " 00:00:00";
     }
 
-    private String parseCoolenjoyDateTime(String dateTime, LocalDate today, DateTimeFormatter dateFormatter) {
+    private String parseCoolenjoyDateTime(String label, String dateTime, LocalDate today, DateTimeFormatter dateFormatter) {
         dateTime = dateTime.replaceAll("등록일\\s+", "");
         if (dateTime.contains(":")) {
             return today.format(dateFormatter) + " " + dateTime + ":00";
@@ -211,12 +216,12 @@ public class ParsingService {
                 day = Integer.parseInt(parts[2]);
             }
             LocalDate date = LocalDate.of(year, month, day);
-            return date.format(dateFormatter) + " 00:00:00";
+            return crawlingRepository.findDateTimeByLabel(label).orElse(date.format(dateFormatter) + " 00:00:00");
         }
         return today.format(dateFormatter) + " 00:00:00";
     }
 
-    private String parseQuasarzoneDateTime(String dateTime, LocalDate today, DateTimeFormatter dateFormatter) {
+    private String parseQuasarzoneDateTime(String label, String dateTime, LocalDate today, DateTimeFormatter dateFormatter) {
         if (dateTime.contains(":")) {
             return today.format(dateFormatter) + " " + dateTime + ":00";
         }
@@ -226,10 +231,10 @@ public class ParsingService {
             int month = Integer.parseInt(parts[0]);
             int day = Integer.parseInt(parts[1]);
             if (month == 12 && today.getMonthValue() == 1) {
-                year -= 1; // 전년도
+                year -= 1;
             }
             LocalDate date = LocalDate.of(year, month, day);
-            return date.format(dateFormatter) + " 00:00:00";
+            return crawlingRepository.findDateTimeByLabel(label).orElse(date.format(dateFormatter) + " 00:00:00");
         }
         return today.format(dateFormatter) + " 00:00:00";
     }
