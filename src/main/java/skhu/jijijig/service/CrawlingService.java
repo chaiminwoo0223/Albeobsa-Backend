@@ -47,6 +47,7 @@ public class CrawlingService {
     }
 
     @Async
+    @Transactional
     public void performCrawling(String url, String label, String rowsCssSelector) {
         System.out.println(label);
         crawlWebsite(url, label, rowsCssSelector);
