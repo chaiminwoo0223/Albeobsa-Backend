@@ -1,6 +1,12 @@
 # 기본 이미지 설정
 FROM --platform=linux/amd64 openjdk:21-jdk-slim
 
+# 한국 시간대 설정
+RUN apt-get -y update \
+    && apt-get -y install tzdata \
+    && ln -fs /usr/share/zoneinfo/Asia/Seoul /etc/localtime \
+    && dpkg-reconfigure --frontend noninteractive tzdata
+
 # Google Chrome 설치
 RUN apt-get -y update \
     && apt -y install wget \
