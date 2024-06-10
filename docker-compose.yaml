@@ -30,11 +30,11 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8192M  # 컨테이너에 할당된 최대 메모리
-          cpus: '2.0'
-        reservations:
-          memory: 4096M  # 컨테이너에 예약된 메모리
+          memory: 8192M
           cpus: '1.0'
+        reservations:
+          memory: 4096M
+          cpus: '0.5'
 
   nginx:
     image: nginx:latest
