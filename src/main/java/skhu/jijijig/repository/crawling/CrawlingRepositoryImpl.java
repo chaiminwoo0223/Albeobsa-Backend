@@ -12,7 +12,6 @@ import skhu.jijijig.domain.Crawling;
 import skhu.jijijig.domain.QCrawling;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -82,18 +81,6 @@ public class CrawlingRepositoryImpl implements CrawlingRepositoryCustom {
                 .where(crawling.label.eq(label));
 
         return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
-    }
-
-    @Override
-    public Optional<String> findDateTimeByLabel(String label) {
-        QCrawling crawling = QCrawling.crawling;
-
-        String dateTime = queryFactory.select(crawling.dateTime)
-                .from(crawling)
-                .where(crawling.label.eq(label))
-                .fetchFirst();
-
-        return Optional.ofNullable(dateTime);
     }
 
     private BooleanExpression keywordContainsInLabelOrTitle(String keyword) {

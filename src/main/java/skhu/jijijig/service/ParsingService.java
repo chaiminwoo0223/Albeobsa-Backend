@@ -1,8 +1,11 @@
 package skhu.jijijig.service;
 
+import lombok.RequiredArgsConstructor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Service;
+import skhu.jijijig.domain.Crawling;
+import skhu.jijijig.repository.crawling.CrawlingRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,7 +15,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
+@RequiredArgsConstructor
 public class ParsingService {
+    private final CrawlingRepository crawlingRepository;
+
     public boolean parseOpen(WebElement row, String OPEN) {
         return row.findElements(By.cssSelector(OPEN)).isEmpty();
     }
@@ -24,7 +30,7 @@ public class ParsingService {
                 .map(matcher -> matcher.group(1))
                 .orElse(" ");
         String title = fullTitle.replaceAll("\\[.*?]", "").trim();
-        return new String[] { subLabel, title }; // 대괄호 및 그 안의 내용을 제거한 제목을 저장
+        return new String[] { subLabel, title };
     }
 
     public String parseName(WebElement row, String NAME) {
@@ -45,7 +51,7 @@ public class ParsingService {
         };
     }
 
-    public String parseDateTime(WebElement row, String label, String DATETIME) {
+    public String parseDateTime(WebElement row, String label, String link, String DATETIME) {
         String dateTime = row.findElement(By.cssSelector(DATETIME)).getText();
         LocalDate today = LocalDate.now();
         LocalDateTime now = LocalDateTime.now();
@@ -56,7 +62,7 @@ public class ParsingService {
         } else if (label.startsWith("루리웹")) {
             return parseRuliwebDateTime(dateTime, today, dateFormatter);
         } else if (label.startsWith("어미새")) {
-            return parseEomisaeDateTime(dateTime, today, now, dateFormatter, timeFormatter);
+            return parseEomisaeDateTime(dateTime, link, today, now, dateFormatter, timeFormatter);
         } else if (label.startsWith("쿨엔조이")) {
             return parseCoolenjoyDateTime(dateTime, today, dateFormatter);
         } else if (label.startsWith("퀘사이존")) {
@@ -182,15 +188,16 @@ public class ParsingService {
         return today.format(dateFormatter) + " 00:00:00";
     }
 
-    private String parseEomisaeDateTime(String dateTime, LocalDate today, LocalDateTime now, DateTimeFormatter dateFormatter, DateTimeFormatter timeFormatter) {
+    private String parseEomisaeDateTime(String dateTime, String link, LocalDate today, LocalDateTime now, DateTimeFormatter dateFormatter, DateTimeFormatter timeFormatter) {
         if (dateTime.contains(".")) {
             String[] parts = dateTime.split("\\.");
             LocalDate date = LocalDate.of(2000 + Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
             if (date.isEqual(today)) {
-                return now.format(timeFormatter);
-            } else {
-                return date.format(dateFormatter) + " 00:00:00";
+                return crawlingRepository.findByLink(link)
+                        .map(Crawling::getDateTime)
+                        .orElse(now.format(timeFormatter));
             }
+            return date.format(dateFormatter) + " 00:00:00";
         }
         return today.format(dateFormatter) + " 00:00:00";
     }

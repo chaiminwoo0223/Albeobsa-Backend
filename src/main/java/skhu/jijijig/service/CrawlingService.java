@@ -35,7 +35,7 @@ public class CrawlingService {
     private final CrawlingRepository crawlingRepository;
     private final ApplicationContext applicationContext;
 
-    @Scheduled(fixedRate = 600000) // 10분
+    @Scheduled(fixedRate = 1200000) // 20분
     public void scheduleCrawlingTasks() {
         CrawlingService crawlingService = applicationContext.getBean(CrawlingService.class);
         crawlingService.performCrawling("https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu", "뽐뿌(국내게시판)", "tbody > tr.baseList.bbs_new1");
@@ -124,7 +124,7 @@ public class CrawlingService {
                 String name = parsingService.parseName(row, selectors[2]);
                 String image = parsingService.parseImage(row, label, selectors[3]);
                 String link = parsingService.parseLink(row, selectors[1]);
-                String dateTime = parsingService.parseDateTime(row, label, selectors[4]);
+                String dateTime = parsingService.parseDateTime(row, label, link, selectors[4]);
                 int views = parsingService.parseViews(row, label, selectors[5]);
                 int[] recommendCnts = parsingService.parseRecommendCnts(row, selectors[6]);
                 int commentCnt = parsingService.parseCommentCnt(row, selectors[7]);
@@ -169,21 +169,21 @@ public class CrawlingService {
         } else if (label.startsWith("퀘사이존")) {
             return parsingService.getQuasarzoneSelectors();
         }
-        return new String[0]; // 기본값으로 빈 배열 반환
+        return new String[0];
     }
 
     private int getStartByLabel(String label) {
         if (label.startsWith("루리웹")) {
             return 4;
         }
-        return 0; // 기본값
+        return 0;
     }
 
     private int getMinusByLabel(String label) {
         if (label.startsWith("뽐뿌")) {
             return 4;
         }
-        return 0; // 기본값
+        return 0;
     }
 
     private WebDriver setupChromeDriver() {
