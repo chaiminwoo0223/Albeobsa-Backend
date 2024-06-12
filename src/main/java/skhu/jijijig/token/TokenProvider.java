@@ -38,14 +38,12 @@ public class TokenProvider {
         this.tokenRevoker = tokenRevoker;
     }
 
-    // 사용자 정보를 기반으로 토큰을 생성하고, TokenDTO를 반환합니다.
     public TokenDTO createTokens(Member member) {
         String accessToken = createToken(member.getId().toString(), member.getRole().name(), accessTokenValidityTime);
         String refreshToken = createToken(member.getId().toString(), member.getRole().name(), refreshTokenValidityTime);
         return TokenDTO.of(accessToken, refreshToken);
     }
 
-    // refresh 토큰을 갱신합니다.
     public TokenDTO renewToken(String refreshToken) {
         if (!validateToken(refreshToken)) {
             throw new SecurityException("리프레시 토큰이 유효하지 않습니다.");
@@ -56,7 +54,6 @@ public class TokenProvider {
         return TokenDTO.of(newAccessToken, newRefreshToken);
     }
 
-    // HttpServletRequest에서 토큰을 해석합니다.
     public String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
@@ -65,7 +62,6 @@ public class TokenProvider {
         return null;
     }
 
-    // 토큰의 유효성을 검증합니다.
     public boolean validateToken(String token) {
         try {
             if (tokenRevoker.isBlackListed(token)) {
@@ -78,7 +74,6 @@ public class TokenProvider {
         }
     }
 
-    // 토큰에서 인증 정보를 추출하여, Authentication 객체를 생성합니다.
     public Authentication getAuthentication(String accessToken) {
         Claims claims = parseJwtToken(accessToken);
         Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("auth").toString().split(","))
@@ -87,7 +82,6 @@ public class TokenProvider {
         return new UsernamePasswordAuthenticationToken(claims.getSubject(), "", authorities);
     }
 
-    // JWT 토큰을 생성합니다.
     private String createToken(String subject, String authClaim, long validityTime) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + validityTime);
@@ -99,7 +93,6 @@ public class TokenProvider {
                 .compact();
     }
 
-    // JWT 토큰을 파싱하여, Claims 객체를 반환합니다.
     private Claims parseJwtToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)

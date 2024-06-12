@@ -43,14 +43,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults()) // CORS를 기본 설정으로 활성화합니다.
-                .csrf(CsrfConfigurer::disable) // CSRF 보호를 비활성화합니다.
+                .cors(Customizer.withDefaults())
+                .csrf(CsrfConfigurer::disable)
                 .sessionManagement(sessionManagement ->
-                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션을 사용하지 않습니다.
+                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(PERMITTED_URLS).permitAll() // 특정 경로에 대한 접근을 모두 허용합니다.
-                        .anyRequest().authenticated()) // 그 외 요청은 인증이 필요합니다.
-                .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class); // JWT 필터를 추가합니다.
+                        .requestMatchers(PERMITTED_URLS).permitAll()
+                        .anyRequest().authenticated())
+                .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
