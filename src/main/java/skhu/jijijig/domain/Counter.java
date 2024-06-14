@@ -15,11 +15,4 @@ public class Counter {
 
     @Column(nullable = false)
     private int hit;
-
-    public Counter increaseHit() {
-        return Counter.builder()
-                .id(this.id)
-                .hit(this.hit + 1)
-                .build();
-    }
 }

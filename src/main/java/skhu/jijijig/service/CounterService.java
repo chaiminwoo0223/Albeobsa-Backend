@@ -15,7 +15,10 @@ public class CounterService {
     @Transactional
     public CounterDTO increaseHit() {
         Counter counter = counterRepository.findById(1L).orElse(Counter.builder().hit(0).build());
-        Counter increasedCounter = counter.increaseHit();
+        Counter increasedCounter = Counter.builder()
+                .id(counter.getId())
+                .hit(counter.getHit() + 1)
+                .build();
         counterRepository.save(increasedCounter);
         return CounterDTO.fromEntity(increasedCounter);
     }
