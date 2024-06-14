@@ -188,7 +188,7 @@ public class CrawlingService {
 
     private WebDriver setupChromeDriver() {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--disable-extensions", "--disable-popup-blocking", "--start-maximized", "--window-size=1920,1080", "user-agent=Mozilla/5.0...");
+        options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--disk-cache-size=0", "--disable-dev-shm-usage", "--disable-extensions", "--disable-popup-blocking", "--start-maximized", "--window-size=1920,1080", "user-agent=Mozilla/5.0...");
         WebDriverManager.chromedriver().setup();
         return new ChromeDriver(options);
     }
